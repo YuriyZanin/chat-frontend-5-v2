@@ -115,14 +115,16 @@ export const HeaderTop = ({
     <>
       <div className={styles.wrapper}>
         <div className={styles.contactWrapper}>
-          <ImageUI
-            src={avatarUrl ? avatarUrl : URL_DEFAULT_Avatar}
-            alt={firstName}
-            width={40}
-            height={40}
-            className={styles.image}
-            onClick={() => toggleInfoOpen()}
-          />
+          <div className={styles.image}>
+            <ImageUI
+              src={avatarUrl ? avatarUrl : URL_DEFAULT_Avatar}
+              alt={firstName}
+              width={40}
+              height={40}
+              className={styles.image}
+              onClick={() => toggleInfoOpen()}
+            />
+          </div>
           {searchMessagesVisible ? (
             <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
           ) : (

@@ -4,7 +4,9 @@ const serializerFileMessageApiSchema = z.object({
   filename: z.string().default('document.pdf'),
   data: z.string().default('UERGLTEuNCBmaWxlIGNvbnRlbnQ='),
 });
+
 export type FileMessageApi = z.infer<typeof serializerFileMessageApiSchema>;
+
 const serializerRequestObjectCreateMessageApiSchema = z.object({
   to_user_uid: z.string().nullable().optional(),
   chat_key: z.string().nullable().optional(),

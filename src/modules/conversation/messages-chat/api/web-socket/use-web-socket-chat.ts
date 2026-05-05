@@ -46,11 +46,13 @@ type UseWebSocketChat = {
     repliedMessage,
     forwardMessage,
     file,
+    images,
   }: {
     content: string;
     repliedMessage?: RestMessageApi | null | undefined;
     forwardMessage?: RestMessageApi | null | undefined;
     file?: Attachment | null | undefined;
+    images?: Attachment[] | null | undefined;
   }) => void;
   sendProfile: (payload: CreateTextMessageAPI) => void;
   sendMembers: (payload: AddOrRemoveMembersRequestAPI) => void;
@@ -166,7 +168,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     socket.onmessage = (event: MessageEvent): void => {
       if (socketInstanceIdRef.current !== myId) return;
       const data = JSON.parse(event.data);
-      //console.log(data);
+      console.log(data);
       //Cобытия:
       // 1.Подтверждает отправленние созданного исходящего сообщения в обычный чат по request_uid
       if (
@@ -408,13 +410,15 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       repliedMessage,
       forwardMessage,
       file,
+      images,
     }: {
       content: string;
       repliedMessage?: RestMessageApi | null | undefined;
       forwardMessage?: RestMessageApi | null | undefined;
       file?: Attachment | null | undefined;
+      images?: Attachment[] | null | undefined;
     }): void => {
-      if (!content.trim()) return;
+      if (!content?.trim() && !images?.length) return;
       const requestUid = crypto.randomUUID();
       // выясняем это простой чат либо группа (если true то группа)
       const has = userIdRef.current.includes('group_');
@@ -496,11 +500,27 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
             file_protected_url: '',
             file_webp_url: '',
             file_small_url: '',
-            file_type: file.type === 'audio' ? 'video/webm' : '',
+            file_type: file.type,
             created_at: '',
             updated_at: '',
           },
         ];
+      }
+
+      if (images?.length) {
+        tempMessage.files_list = images.map((image) => ({
+          id: 0,
+          uid: image.id,
+          download_name: image.fileData.filename,
+          media_kind: '',
+          file_url: image.preview,
+          file_protected_url: '',
+          file_webp_url: '',
+          file_small_url: '',
+          file_type: image.type,
+          created_at: '',
+          updated_at: '',
+        }));
       }
 
       // записываем в store и показываем локально сразу в DOM созданное клиентом сообщение (tempMessage)
@@ -532,6 +552,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       }
       if (file) {
         payloadMessage.object.files = [file.fileData];
+      }
+      if (images?.length) {
+        payloadMessage.object.files = images.map((image) => image.fileData).reverse();
       }
       //валидация c помощью zod
       const resultZod = serializerRequestCreatingMessageApiSchema.safeParse(payloadMessage);

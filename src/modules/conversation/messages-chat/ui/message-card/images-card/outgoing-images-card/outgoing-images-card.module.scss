@@ -1,0 +1,197 @@
+@use 'shared/styles/03_mixins' as mixins;
+.block {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.2rem;
+}
+.blockSelected {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  background-color: var(--surface-disabled);
+  margin-bottom: 1.2rem;
+}
+.blockSelected:hover {
+  background-color: var(--surface-disabled);
+}
+.block:hover {
+  background-color: var(--surface-disabled);
+}
+.wrapperBlock {
+  @include mixins.flex-box($justify: end);
+  width: 100%;
+  height: auto;
+  padding-left: 4.8rem;
+  padding-right: 1.6rem;
+  overflow: hidden;
+  container-type: inline-size;
+}
+.wrapper {
+  @include mixins.flex-box($direction: column);
+  width: 50rem;
+  height: auto;
+  border-top-left-radius: 1.6rem;
+  border-top-right-radius: 1.6rem;
+  overflow: hidden;
+  position: relative;
+  @container (max-width: 360px) {
+    .wrapper {
+      max-width: 26rem;
+    }
+  }
+}
+
+.previewImages {
+  width: 100%;
+  display: grid;
+  gap: 0.4rem;
+  background-color: var(--surfase-message-card);
+}
+
+/* === 1 картинка === */
+.previewImages--1 {
+  grid-template-columns: 1fr;
+  height: 37.6rem;
+}
+.previewImages--1 .image {
+  height: 37.6rem;
+}
+
+/* === 2 картинки === */
+.previewImages--2 {
+  grid-template-columns: repeat(2, 1fr);
+  height: 18.6rem;
+}
+.previewImages--2 .image {
+  height: 18.6rem;
+}
+
+/* === 3 картинки === */
+.previewImages--3 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 18.6rem 18.6rem;
+}
+.previewImages--3 .image:nth-child(3) {
+  grid-column: span 2;
+}
+
+/* === 4 картинки === */
+.previewImages--4 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 18.6rem);
+}
+
+/* === Общий стиль картинки === */
+.image {
+  position: relative;
+  overflow: hidden;
+}
+
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item {
+  @include mixins.flex-box($direction: column, $gap: 0.6rem);
+  width: 100%;
+  height: auto;
+  padding: 1rem 1.2rem;
+  border-bottom-right-radius: 0.4rem;
+  border-bottom-left-radius: 1.6rem;
+  background-color: var(--surfase-message-card);
+  overflow: hidden;
+}
+
+.message {
+  @include mixins.flex-box($align: end, $justify: space-between);
+  width: 100%;
+  height: auto;
+}
+.messageText {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  max-width: 41.4rem;
+  height: auto;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.messageSentTime {
+  @include mixins.flex-box($gap: 0.2rem);
+  width: 5.6rem;
+  height: 1.8rem;
+}
+.messageTime {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 1.7rem;
+  line-height: 1.2;
+  font-size: 1.4rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  justify-content: right;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.messageChatIcons {
+  @include mixins.flex-box();
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.messageSentTimeImg {
+  @include mixins.flex-box($gap: 0.2rem);
+  width: 6.8rem;
+  height: 2rem;
+  border-radius: 4.8rem;
+  padding: 0rem 0.6rem;
+  background: #00000066;
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  z-index: 2;
+}
+.messageTimeImg {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 1.7rem;
+  line-height: 1.2;
+  font-size: 1.4rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  justify-content: right;
+  color: var(--text-inverse);
+  overflow: hidden;
+}
+.messageChatIconsImg {
+  @include mixins.flex-box();
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.deleteButton {
+  @include mixins.flex-box();
+  width: 4.8rem;
+  height: 4.8rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  z-index: 4;
+  cursor: pointer;
+}
+.deleteFileIcon :global([class$='__white-segment']) {
+  display: block;
+  transform-origin: 24px 24px;
+  animation: rotateSegment 2s linear infinite;
+}
+
+@keyframes rotateSegment {
+  100% {
+    transform: rotate(360deg);
+  }
+}

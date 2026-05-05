@@ -3,7 +3,7 @@ export type Attachment = {
   id: string;
   file: File;
   preview: string;
-  type: 'image' | 'file' | 'audio';
+  type: 'image' | 'file' | 'video/webm';
   // формат для отправки
   fileData: FileMessageApi;
 };
