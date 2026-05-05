@@ -108,6 +108,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   // нужно отследить через какое время на отправленное клиентом сообщение, ws пришлет ответ-подтверждение,
   // либо его вообще не пришлет
   const pendingTimeouts = useRef<Map<string, number | NodeJS.Timeout>>(new Map()); //
+  // массив не отправленных сообщений на изменение read-status сообщения из-за закрытия (сбоя) ws-соедитнения
+  const messageQueueReadStatusRef = useRef<ChangeStatusReadMessageAPI[]>([]);
+
   // Функция для подключаемся к ws-соединению и регистрации ws-обработчиков
 
   const clearReconnectTimer = (): void => {
@@ -150,6 +153,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socketInstanceIdRef.current !== myId) return; // устаревший
       console.log('WebSocket open');
       reconnectAttemptRef.current = 0; // сброс backoff
+      // при открытии отправляем не отправленные сообщения на изменения read-status
+      messageQueueReadStatusRef.current.forEach((msg) => {
+        socket.send(JSON.stringify(msg));
+      });
+      messageQueueReadStatusRef.current = [];
     };
 
     socket.onclose = (e): void => {
@@ -723,10 +731,10 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       }
       //валидация c помощью zod
       const resultZod = serializerRequestChangeStatusReadMessageApiSchema.safeParse(payloadMessage);
-      updateMessageByUidForUser(has ? message.chat_key : message.from_user.uid, message.uid, {
-        status: 'read',
-        new: false,
-      });
+      // updateMessageByUidForUser(has ? message.chat_key : message.from_user.uid, message.uid, {
+      //   status: 'read',
+      //   new: false,
+      // });
       const socket = wsRef.current;
       if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
         //отправляем запрос
@@ -739,6 +747,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
           pendingTimeouts.current.delete(requestUid);
         }, 5000);
         pendingTimeouts.current.set(requestUid, to);
+      } else {
+        messageQueueReadStatusRef.current.push(payloadMessage);
       }
     },
     [wsRef, updateMessageByUidForUser],
