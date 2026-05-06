@@ -131,8 +131,10 @@ export const OutgoingImagesCard = ({
           message={message}
         />
         <div className={styles.wrapper}>
-          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
-          {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
+          <div className={styles.replyAndForward}>
+            {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
+            {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
+          </div>
 
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
