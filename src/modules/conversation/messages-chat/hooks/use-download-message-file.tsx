@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import type { RestMessageApi } from '../model/messages-list';
+import { useToastVisibleStore } from '../zustand-store/zustand-store';
 
 type UseDownloadMessageFileReturn = {
   handleDownloadMessageFileClick: () => Promise<void>;
@@ -13,6 +14,8 @@ export const useDownloadMessageFile = (
 ): UseDownloadMessageFileReturn => {
   const downloadControllerRef = useRef<AbortController | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  //управлят состояние показать карточку, что сообщение скопировано, либо нет
+  const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);
 
   const handleDownloadMessageFileClick = async (): Promise<void> => {
     // Если уже идёт загрузка — отменяем предыдущую
@@ -26,29 +29,32 @@ export const useDownloadMessageFile = (
 
     try {
       // Получаем объект файла
-      const file = message.files_list[0] ?? message.forwarded_messages[0]?.files_list[0];
-      if (!file) throw new Error('Файл не найден');
-
-      // Очищаем URL от лишнего слеша
-      const cleanUrl = file.file_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
-      const urlObj = new URL(cleanUrl);
-      const pathAfterFirstSlash = urlObj.pathname.slice(1);
-      const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;
-
-      const response = await fetch(proxyUrl, {
-        method: 'GET',
-        signal: controller.signal,
+      const files = message.files_list.length ? message.files_list : message.forwarded_messages[0]?.files_list;
+      if (!files.length) throw new Error('Файл не найден');
+      files.forEach(async (file) => {
+        // Очищаем URL от лишнего слеша
+        const cleanUrl = file.file_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
+        const urlObj = new URL(cleanUrl);
+        const pathAfterFirstSlash = urlObj.pathname.slice(1);
+        const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;
+        const response = await fetch(proxyUrl, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+        const blob = await response.blob();
+        // Сохранение файла
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.download_name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
-      const blob = await response.blob();
-      // Сохранение файла
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.download_name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // показываем карточку в DOM, что файл уже сохранен и через 2 сек. закрываем
+      setToastVisibleStore(true);
+      setTimeout(() => setToastVisibleStore(false), 2000);
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Ошибка скачивания:', error);
