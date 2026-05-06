@@ -39,7 +39,9 @@ export const ReplyCard = ({ message, isIncomingMessage }: ReplyCardProps): JSX.E
         <div className={styles.text2}>
           {message?.replied_messages[0].content?.includes('voice_')
             ? `Голосовое сообщение`
-            : message?.replied_messages[0].content}
+            : message?.replied_messages[0].files_list?.length && message.replied_messages[0].content === ' '
+              ? 'Фото'
+              : message?.replied_messages[0].content}
         </div>
       </div>
     </div>

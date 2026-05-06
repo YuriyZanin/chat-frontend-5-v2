@@ -41,8 +41,7 @@
 }
 .wrapper {
   @include mixins.flex-box($direction: column, $align: start);
-  max-width: 50rem;
-  width: auto;
+  width: 50rem;
   height: auto;
   border-top-left-radius: 1.6rem;
   border-top-right-radius: 1.6rem;

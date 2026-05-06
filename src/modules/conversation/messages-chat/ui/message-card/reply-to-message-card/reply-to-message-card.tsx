@@ -79,7 +79,13 @@ export const ReplyToMessageCard = ({
               </span>
             </div>
             <div className={styles.text2}>
-              {repliedMessageStore?.content?.includes('voice_') ? `Голосовое сообщение` : repliedMessageStore?.content}
+              {repliedMessageStore?.content?.includes('voice_')
+                ? `Голосовое сообщение`
+                : (repliedMessageStore?.files_list?.length ||
+                      repliedMessageStore?.forwarded_messages[0]?.files_list?.length) &&
+                    repliedMessageStore.content === ' '
+                  ? 'Фото'
+                  : repliedMessageStore?.content}
             </div>
           </div>
         </div>
