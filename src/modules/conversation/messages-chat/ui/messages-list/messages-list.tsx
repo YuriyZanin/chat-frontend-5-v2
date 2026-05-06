@@ -246,9 +246,12 @@ export const MessagesList = ({
                       if (isLast) lastItemRef.current = el;
                     }}
                   >
-                    {!!targetIndex && globalIndex === targetIndex + 1 && lastIndex - targetIndex > 14 && (
-                      <div className={styles.text}>непрочитанные сообщения</div>
-                    )}
+                    {!!targetIndex &&
+                      globalIndex === targetIndex &&
+                      lastIndex - targetIndex > 14 &&
+                      (message.from_user.uid !== currentUserId || message.from_user.uid !== '') && (
+                        <div className={styles.text}>непрочитанные сообщения</div>
+                      )}
                     {message.from_user.uid === currentUserId || message.from_user.uid === '' ? (
                       message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
                         message.files_list[0]?.file_type === 'video/webm' ||
