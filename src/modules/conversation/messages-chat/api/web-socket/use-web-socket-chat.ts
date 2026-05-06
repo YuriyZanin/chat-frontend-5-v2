@@ -442,7 +442,16 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       file?: Attachment | null | undefined;
       images?: Attachment[] | null | undefined;
     }): void => {
-      if (!content?.trim() && !images?.length) return;
+      if (
+        !content?.trim() &&
+        !(
+          images?.length ||
+          forwardMessage?.files_list.length ||
+          forwardMessage?.forwarded_messages[0].files_list.length ||
+          file
+        )
+      )
+        return;
       const requestUid = crypto.randomUUID();
       // выясняем это простой чат либо группа (если true то группа)
       const has = userIdRef.current.includes('group_');

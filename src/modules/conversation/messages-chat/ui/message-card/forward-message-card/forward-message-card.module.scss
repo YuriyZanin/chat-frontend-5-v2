@@ -17,6 +17,18 @@
   border-left: 0.4rem solid var(--brand-secondary);
   padding-left: 0.8rem;
 }
+.fileIcon {
+  @include mixins.flex-box($gap: 1.2rem);
+  width: 3.7rem;
+  height: 3.7rem;
+  flex-shrink: 0;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.4rem;
+  }
+}
 .textBlock {
   @include mixins.flex-box($direction: column, $gap: 0.2rem);
   width: 100%;
