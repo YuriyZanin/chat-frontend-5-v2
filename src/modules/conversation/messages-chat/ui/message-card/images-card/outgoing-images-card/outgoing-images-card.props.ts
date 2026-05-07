@@ -16,3 +16,7 @@ export type PreviewImageCardProps = {
   image: RestMessageFileApi;
   message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' };
 };
+
+export type PlugCardProps = {
+  message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' };
+};

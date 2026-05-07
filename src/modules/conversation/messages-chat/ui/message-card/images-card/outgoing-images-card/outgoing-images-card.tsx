@@ -22,9 +22,10 @@ import CheckTwoIcon from '../../icons/check-two.svg';
 import WatchIcon from '../../icons/watch.svg';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
 import { ReplyCard } from '../../reply-card/reply-card';
+import PlugBig from '../icons/plug-big.svg';
+import PlugLittle from '../icons/plug-little.svg';
 import styles from './outgoing-images-card.module.scss';
-import type { OutgoingImagesCardProps, PreviewImageCardProps } from './outgoing-images-card.props';
-
+import type { OutgoingImagesCardProps, PlugCardProps, PreviewImageCardProps } from './outgoing-images-card.props';
 export const OutgoingImagesCard = ({
   message,
   sendDeleteMessage,
@@ -174,11 +175,28 @@ export const OutgoingImagesCard = ({
 };
 
 const PreviewImageCard = ({ image, message }: PreviewImageCardProps): JSX.Element => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+  const handleError = (): void => {
+    setIsLoading(false);
+    setIsError(true);
+  };
   return (
     <div className={styles.image}>
-      <Image src={image.file_url} alt={image.download_name} width={500} height={376} />
+      {isError ? (
+        <PlugCard message={message} />
+      ) : (
+        <Image
+          src={image.file_url}
+          alt={image.download_name}
+          width={500}
+          height={376}
+          onLoad={() => setIsLoading(false)}
+          onError={handleError}
+        />
+      )}
       <div className={styles.deleteButton}>
-        {(message.status === 'pending' || message.status === 'failed') && (
+        {(isLoading || message.status === 'pending' || message.status === 'failed') && (
           <button className={styles.deleteFileIcon}>
             <DeleteFileIcon />
           </button>
@@ -186,4 +204,11 @@ const PreviewImageCard = ({ image, message }: PreviewImageCardProps): JSX.Elemen
       </div>
     </div>
   );
+};
+
+const PlugCard = ({ message }: PlugCardProps): JSX.Element => {
+  const quantityPictures = message.files_list.length
+    ? message.files_list.length
+    : message.forwarded_messages[0].files_list.length;
+  return <div className={styles.plug}>{quantityPictures === 1 ? <PlugBig /> : <PlugLittle />}</div>;
 };

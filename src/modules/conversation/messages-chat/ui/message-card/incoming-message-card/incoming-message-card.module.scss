@@ -62,7 +62,7 @@
   height: auto;
 }
 .box {
-  @include mixins.flex-box($direction: column);
+  @include mixins.flex-box($direction: column, $align: start);
   width: 100%;
   height: auto;
 }
