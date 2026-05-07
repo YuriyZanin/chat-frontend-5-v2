@@ -181,8 +181,20 @@ const PreviewImageCard = ({ image, message }: PreviewImageCardProps): JSX.Elemen
     setIsLoading(false);
     setIsError(true);
   };
+  // xyk для открытия модального окна с алертом
+  const { confirm } = useAlert();
+  // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
+  const handleOpenImages = async (): Promise<void> => {
+    const ok = await confirm({
+      openImages: { isOpenImages: true, message },
+    });
+    if (ok) {
+    } else {
+      // отмена — ничего не делаем
+    }
+  };
   return (
-    <div className={styles.image}>
+    <div className={styles.image} onClick={handleOpenImages}>
       {isError ? (
         <PlugCard message={message} />
       ) : (

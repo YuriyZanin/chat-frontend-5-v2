@@ -1,0 +1,142 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $justify: space-between, $gap: 22.4rem);
+  width: 100%;
+  height: 100%;
+  padding-bottom: 3rem;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(0.4rem);
+  overflow: hidden;
+}
+
+.headerTop {
+  @include mixins.flex-box($align: start, $justify: space-between);
+  width: 100%;
+  height: 8.4rem;
+  padding-top: 2.4rem;
+  padding-right: 3.2rem;
+  padding-left: 3.2rem;
+}
+.headerTopContact {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 29.6rem;
+  height: 6rem;
+}
+.headerTopContactAvatar {
+  @include mixins.flex-box();
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.headerTopContactText {
+  @include mixins.flex-box($direction: column, $align: start, $gap: 0.4rem);
+  width: auto;
+  height: 4.9rem;
+  color: var(--text-secondary);
+}
+.headerTopContactTextName {
+  @include mixins.flex-box();
+  width: auto;
+  height: 2.4rem;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.8rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+}
+.headerTopContactTextTime {
+  @include mixins.flex-box();
+  width: auto;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+}
+.headerTopContactMenu {
+  @include mixins.flex-box($gap: 2.4rem);
+  width: auto;
+  height: 3.2rem;
+}
+.icon {
+  @include mixins.flex-box();
+  width: 3.2rem;
+  height: 3.2rem;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.icon:hover {
+  color: var(--text-inverse);
+}
+.arrowsContainer {
+  @include mixins.flex-box($justify: space-between);
+  width: 100%;
+  height: 5.6rem;
+  padding: 0rem 10rem;
+  position: relative;
+}
+.arrowsContainerIcon {
+  @include mixins.flex-box();
+  width: 5.6rem;
+  height: 5.6rem;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.arrowsContainerIcon:hover {
+  color: var(--text-inverse);
+}
+.arrowsContainerIconDisabled {
+  @include mixins.flex-box();
+  width: 5.6rem;
+  height: 5.6rem;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0);
+  cursor: auto;
+}
+.image {
+  @include mixins.flex-box();
+  top: 33%;
+  width: 62.6rem;
+  height: 41.7rem;
+  overflow: hidden;
+  position: absolute;
+}
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.headerBottom {
+  @include mixins.flex-box($gap: 1rem);
+  width: auto;
+  max-width: 74.4rem;
+  height: auto;
+  max-height: 7.1rem;
+  padding: 0.4rem 1.6rem;
+  border-radius: 1.6rem;
+  background: #0000004d;
+  background-color: black;
+  color: var(--text-inverse);
+  overflow-y: auto;
+}
+.headerBottom::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 21rem;
+}
+.headerBottom::-webkit-scrollbar-thumb {
+  background-color: var(--text-secondary);
+  border-radius: 0.4rem;
+}
+.headerBottomText {
+  @include mixins.flex-box();
+  width: auto;
+  height: auto;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+}

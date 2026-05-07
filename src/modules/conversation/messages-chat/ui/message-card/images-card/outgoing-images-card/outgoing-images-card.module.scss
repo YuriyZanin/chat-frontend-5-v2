@@ -90,6 +90,7 @@
 .image {
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .image img {
@@ -192,7 +193,6 @@
   transform: translate(-50%, -50%);
   position: absolute;
   z-index: 4;
-  cursor: pointer;
 }
 .deleteFileIcon :global([class$='__white-segment']) {
   display: block;

@@ -114,6 +114,16 @@ export const IncomingImagesCard = ({
   const hasGroup = userId.includes('group_');
   const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;
 
+  // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
+  const handleOpenImages = async (): Promise<void> => {
+    const ok = await confirm({
+      openImages: { isOpenImages: true, message },
+    });
+    if (ok) {
+    } else {
+      // отмена — ничего не делаем
+    }
+  };
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
@@ -160,7 +170,7 @@ export const IncomingImagesCard = ({
           </div>
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
-              <div key={image.uid} className={styles.image}>
+              <div key={image.uid} className={styles.image} onClick={handleOpenImages}>
                 <Image src={image.file_url} alt={image.download_name} width={500} height={376} />
               </div>
             ))}
