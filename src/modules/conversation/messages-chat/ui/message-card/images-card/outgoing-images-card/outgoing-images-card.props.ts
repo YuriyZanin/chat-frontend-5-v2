@@ -15,6 +15,10 @@ export type OutgoingImagesCardProps = {
 export type PreviewImageCardProps = {
   image: RestMessageFileApi;
   message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' };
+  sendDeleteMessage: (
+    message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' },
+    selected?: boolean,
+  ) => void;
 };
 
 export type PlugCardProps = {

@@ -27,6 +27,10 @@ export type AlertOptions = {
   openImages?: {
     isOpenImages: boolean;
     message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' };
+    sendDeleteMessage: (
+      message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' },
+      selected?: boolean,
+    ) => void;
   };
 };
 
@@ -194,6 +198,7 @@ export const AlertProvider = ({
                     onOk={() => handleOk(a.id)}
                     onCancel={() => handleCancel(a.id)}
                     message={a.openImages?.message}
+                    sendDeleteMessage={a.openImages?.sendDeleteMessage}
                   />
                 ) : (
                   <AlertDelete

@@ -1,5 +1,5 @@
 export type AlertDeleteProps = {
-  id: string | number;
+  id?: string | number;
   title?: string;
   message?: string;
   okText?: string;

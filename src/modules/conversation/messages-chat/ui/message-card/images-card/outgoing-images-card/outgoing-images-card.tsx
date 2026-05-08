@@ -139,7 +139,7 @@ export const OutgoingImagesCard = ({
 
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
-              <PreviewImageCard key={image.uid} image={image} message={message} />
+              <PreviewImageCard key={image.uid} image={image} message={message} sendDeleteMessage={sendDeleteMessage} />
             ))}
           </div>
           {message.content && message.content !== ' ' ? (
@@ -174,7 +174,7 @@ export const OutgoingImagesCard = ({
   );
 };
 
-const PreviewImageCard = ({ image, message }: PreviewImageCardProps): JSX.Element => {
+const PreviewImageCard = ({ image, message, sendDeleteMessage }: PreviewImageCardProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const handleError = (): void => {
@@ -186,12 +186,8 @@ const PreviewImageCard = ({ image, message }: PreviewImageCardProps): JSX.Elemen
   // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
   const handleOpenImages = async (): Promise<void> => {
     const ok = await confirm({
-      openImages: { isOpenImages: true, message },
+      openImages: { isOpenImages: true, message, sendDeleteMessage },
     });
-    if (ok) {
-    } else {
-      // отмена — ничего не делаем
-    }
   };
   return (
     <div className={styles.image} onClick={handleOpenImages}>
