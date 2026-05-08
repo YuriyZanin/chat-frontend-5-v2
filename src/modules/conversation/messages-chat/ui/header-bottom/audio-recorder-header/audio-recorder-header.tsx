@@ -84,7 +84,7 @@ export const AudioRecorderHeader = ({ setIsRecordingMessage, sendMessage }: Audi
           id: crypto.randomUUID(),
           file: file,
           preview: URL.createObjectURL(file),
-          type: 'audio',
+          type: 'video/webm',
           fileData,
         });
         // Сохраняем в store

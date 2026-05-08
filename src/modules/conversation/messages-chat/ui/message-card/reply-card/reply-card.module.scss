@@ -5,9 +5,11 @@
   width: 100%;
   max-width: 47.6rem;
   height: 4.5rem;
+  margin: 1rem 0rem;
   border-radius: 0.4rem;
   border-left: 0.4rem solid var(--brand-secondary);
   padding: 0.4rem 1rem;
+  overflow: hidden;
 }
 .incomingWrapper {
   background-color: var(--barnd-violet-super-light);

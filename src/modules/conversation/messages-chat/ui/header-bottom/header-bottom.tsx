@@ -66,8 +66,8 @@ export const HeaderBottom = ({ wsUrl, currentUserId }: HeaderBottomProps): JSX.E
   useEffect(() => {
     textForAttachmentFilesRef.current = textForAttachmentFilesStore;
     textForAttachmentImagesRef.current = textForAttachmentImagesStore;
-    attachmentFilesRef.current = attachmentFilesStore;
-    attachmentImagesRef.current = attachmentImagesStore;
+    attachmentFilesRef.current = attachmentFilesStore.slice(-10); // берем только поледних 10 файлов из массива
+    attachmentImagesRef.current = attachmentImagesStore.slice(-4); // берем только последних 4 файла из массива
   }, [textForAttachmentFilesStore, attachmentFilesStore, textForAttachmentImagesStore, attachmentImagesStore]);
 
   useEffect(() => {
@@ -170,18 +170,12 @@ export const HeaderBottom = ({ wsUrl, currentUserId }: HeaderBottomProps): JSX.E
       isAttachmentImages: true,
     });
     if (ok) {
-      sendMessage({
-        content: textForAttachmentImagesRef.current,
-      });
-      if (attachmentImagesRef.current && attachmentImagesRef.current.length) {
-        attachmentImagesRef.current.forEach((attachmentImage) => {
-          sendMessage({
-            content: attachmentImage.fileData.filename,
-            repliedMessage: repliedMessageStore,
-            file: attachmentImage,
-          });
+      if (!!textForAttachmentImagesRef.current || !!attachmentImagesRef.current)
+        sendMessage({
+          content: textForAttachmentImagesRef.current,
+          repliedMessage: repliedMessageStore,
+          images: attachmentImagesRef.current,
         });
-      }
       if (forwardMessageStore) {
         sendMessage({ content: forwardMessageStore?.content ?? '', forwardMessage: forwardMessageStore });
       }

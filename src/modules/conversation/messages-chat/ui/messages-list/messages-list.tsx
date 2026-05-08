@@ -11,6 +11,8 @@ import { IncomingAudioCard } from '../message-card/audio-card/incoming-audio-car
 import { OutgoingAudioCard } from '../message-card/audio-card/outgoing-audio-card/outgoing-audio-card';
 import { IncomingFileCard } from '../message-card/file-card/incoming-file-card/incoming-file-card';
 import { OutgoingFileCard } from '../message-card/file-card/outgoing-file-card/outgoing-file-card';
+import { IncomingImagesCard } from '../message-card/images-card/incoming-images-card/incoming-images-card';
+import { OutgoingImagesCard } from '../message-card/images-card/outgoing-images-card/outgoing-images-card';
 import { IncomingMessagesCard } from '../message-card/incoming-message-card/incoming-message-card';
 import { NotificationCopyCard } from '../message-card/notification-copy-card/notification-copy-card';
 import { OutgoingMessagesCard } from '../message-card/outgoing-message-card/outgoing-message-card';
@@ -244,14 +246,26 @@ export const MessagesList = ({
                       if (isLast) lastItemRef.current = el;
                     }}
                   >
-                    {!!targetIndex && globalIndex === targetIndex + 1 && lastIndex - targetIndex > 14 && (
-                      <div className={styles.text}>непрочитанные сообщения</div>
-                    )}
+                    {!!targetIndex &&
+                      globalIndex === targetIndex &&
+                      lastIndex - targetIndex > 14 &&
+                      (message.from_user.uid !== currentUserId || message.from_user.uid !== '') && (
+                        <div className={styles.text}>непрочитанные сообщения</div>
+                      )}
                     {message.from_user.uid === currentUserId || message.from_user.uid === '' ? (
                       message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
                         message.files_list[0]?.file_type === 'video/webm' ||
                         message.forwarded_messages[0]?.files_list[0].file_type === 'video/webm' ? (
                           <OutgoingAudioCard
+                            message={message}
+                            sendDeleteMessage={sendDeleteMessage}
+                            search={searchMessagesStore}
+                            isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                            currentUserId={currentUserId}
+                          />
+                        ) : message.files_list[0]?.file_type?.includes('image') ||
+                          message.forwarded_messages[0]?.files_list[0].file_type?.includes('image') ? (
+                          <OutgoingImagesCard
                             message={message}
                             sendDeleteMessage={sendDeleteMessage}
                             search={searchMessagesStore}
@@ -280,6 +294,16 @@ export const MessagesList = ({
                       message.files_list[0]?.file_type === 'video/webm' ||
                       message.forwarded_messages[0]?.files_list[0].file_type === 'video/webm' ? (
                         <IncomingAudioCard
+                          message={message}
+                          register={register}
+                          sendDeleteMessage={sendDeleteMessage}
+                          search={searchMessagesStore}
+                          isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                          currentUserId={currentUserId}
+                        />
+                      ) : message.files_list[0]?.file_type?.includes('image') ||
+                        message.forwarded_messages[0]?.files_list[0].file_type?.includes('image') ? (
+                        <IncomingImagesCard
                           message={message}
                           register={register}
                           sendDeleteMessage={sendDeleteMessage}

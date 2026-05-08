@@ -1,9 +1,7 @@
 'use client';
-
+import clsx from 'clsx';
 import { useAlert } from 'modules/conversation/messages-chat/hooks/use-alert';
-import { useAudioPlayer } from 'modules/conversation/messages-chat/hooks/use-audio-player';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
-import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
 import {
   useForwardMessageStore,
   useRepliedMessageStore,
@@ -15,26 +13,24 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { JSX, MouseEvent, useEffect, useRef, useState } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
-import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
-import DeleteFileIcon from '../../file-card/icons/delete-file-icon.svg';
+import { HighlightedMessage } from '../../../search-messages/highlighted-message/highlighted-message';
 import { ForvardCard } from '../../forward-card/forward-card';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
 import { ReplyCard } from '../../reply-card/reply-card';
-import AudioPlayIcon from '../icon/audio-play.svg';
-import AudioStopIcon from '../icon/audio-stop.svg';
-import styles from './incoming-audio-card.module.scss';
-import { IncomingAudioCardProps } from './incoming-audio-card.props';
+import styles from './incoming-images-card.module.scss';
+import type { IncomingImagesCardProps } from './incoming-images-card.props';
 
-export const IncomingAudioCard = ({
+export const IncomingImagesCard = ({
   message,
   sendDeleteMessage,
   search,
   register,
   isHighlighted,
   currentUserId,
-}: IncomingAudioCardProps): JSX.Element => {
+}: IncomingImagesCardProps): JSX.Element => {
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [contextMenuVisible, setContextMenuVisible] = useState<boolean>(false);
+
   const handleContextMenu = (event: MouseEvent<HTMLDivElement>): void => {
     event.preventDefault();
     const menuWidth = 250;
@@ -78,7 +74,6 @@ export const IncomingAudioCard = ({
       // отмена — ничего не делаем
     }
   };
-
   const setForwardMessageStore = useForwardMessageStore((s) => s.setForwardMessage);
   const clearRepliedMessageStore = useRepliedMessageStore((s) => s.clearRepliedMessage);
   const router = useRouter();
@@ -94,12 +89,12 @@ export const IncomingAudioCard = ({
       router.push(`/chats/${selectedUidUserForForwardMessageRef.current}`);
     }
   };
-  // выясняем имеется ли "message" в массиве выбранных сообщений ("selectedMessagesStore")
+  // выясняем является ли "message" в массиве выбранных сообщений ("selectedMessagesStore")
   const selectedMessagesStore = useSelectedMessagesStore((s) => s.selectedMessages);
   const addSelectedMessagesStore = useSelectedMessagesStore((s) => s.addSelectedMessages);
   const deleteSelectedMessagesStore = useSelectedMessagesStore((s) => s.deleteSelectedMessages);
-
   const [selected, setSelected] = useState<boolean>(true);
+
   const has = selectedMessagesStore?.some((selectedMessage) => selectedMessage.uid === message.uid);
 
   const handleCheckBoxClick = (): void => {
@@ -112,20 +107,26 @@ export const IncomingAudioCard = ({
   };
   // показывать компоненты <MessageCheckBox/> в DOM либо нет
   const checkBoxsVisibleStore = useSelectedMessagesStore((s) => s.checkBoxsVisible);
+
   // прописываем в компоненте актуальный user_uid открытого чата из store
   const userId = useUserIdStore((s) => s.userId);
   // выясняем это простой чат либо группа (если true то группа)
   const hasGroup = userId.includes('group_');
-  // хук для прослушивания аудиосообщения
-  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(message);
+  const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;
 
+  // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
+  const handleOpenImages = async (): Promise<void> => {
+    const ok = await confirm({
+      openImages: { isOpenImages: true, message, isIncomingCard: true, sendDeleteMessage },
+    });
+  };
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
         <MessageCheckBox message={message} selected={has} handleCheckBoxClick={handleCheckBoxClick} />
       )}
       <div
-        className={styles.wrapper}
+        className={styles.wrapperBlock}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
         ref={(el) => {
@@ -155,42 +156,37 @@ export const IncomingAudioCard = ({
             )}
           </div>
         )}
-        <div className={styles.item}>
+        <div className={styles.wrapper}>
           {hasGroup && (
             <div className={styles.name}> {`${message.from_user.first_name} ${message.from_user.last_name}`}</div>
           )}
-          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
-          {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
-          <div className={styles.contentBlock}>
-            <div className={styles.fileIcon}>
-              {isLoading ? (
-                <DeleteFileIcon />
-              ) : (
-                <button onClick={handlePlayPause} className={styles.fileIcon}>
-                  {isPlaying ? <AudioStopIcon /> : <AudioPlayIcon />}
-                </button>
-              )}
-            </div>
-            <div className={styles.fileInfo}>
-              <div className={styles.fileName}>
-                <HighlightedFileName
-                  fileName={
-                    message.files_list.length
-                      ? message.files_list[0].download_name
-                      : message.forwarded_messages[0].files_list[0].download_name
-                  }
-                  search={search}
-                />
-              </div>
-              <div className={styles.voiceLine} ref={waveformRef} />
-              <div className={styles.fileSizeAndMessageTimeBlock}>
-                <div className={styles.fileSize}>
-                  {currentTime ? formatTime(currentTime) : formatTime(totalDuration)}
-                </div>
-                <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
-              </div>
-            </div>
+          <div className={styles.replyAndForward}>
+            {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
+            {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
           </div>
+          <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
+            {fileList.map((image) => (
+              <div key={image.uid} className={styles.image} onClick={handleOpenImages}>
+                <Image src={image.file_url} alt={image.download_name} width={500} height={376} />
+              </div>
+            ))}
+          </div>
+          {message.content && message.content !== ' ' ? (
+            <div className={styles.item}>
+              <div className={styles.message}>
+                <div className={styles.messageText}>
+                  <HighlightedMessage text={message.content ?? ''} search={search} />
+                </div>
+                <div className={styles.messageSentTime}>
+                  <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.messageSentTimeImg}>
+              <div className={styles.messageTimeImg}>{getMessageTime(message.created_at)}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -46,19 +46,53 @@ export const ChooseMessagesCard = ({
       router.push(`/chats/${selectedUidUserForForwardMessageRef.current}`);
     }
   };
+  //управлят состояние показать карточку, что сообщение скопировано, либо нет
   const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);
   //обработчик для меню 'копировать'
   const handleCopyClick = (): void => {
     if (!selectedMessagesStore?.length) return;
-    const messagesText =
-      selectedMessagesStore?.reduce((acc, m) => {
-        acc = acc + `${m.content} `;
-        return acc;
-      }, '') ?? '';
-    copyMessageToClipboard(messagesText, setToastVisibleStore);
+    let acc = '';
+    selectedMessagesStore.forEach((message) => {
+      if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
+        try {
+          // Получаем объект файла
+          const files = message.files_list.length ? message.files_list : message.forwarded_messages[0]?.files_list;
+          if (!files.length) throw new Error('Файл не найден');
+          files.forEach(async (file) => {
+            // Очищаем URL от лишнего слеша
+            const cleanUrl = file.file_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
+            const urlObj = new URL(cleanUrl);
+            const pathAfterFirstSlash = urlObj.pathname.slice(1);
+            const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;
+            const response = await fetch(proxyUrl, {
+              method: 'GET',
+            });
+            const blob = await response.blob();
+            // Сохранение файла
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.download_name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          });
+        } catch (error) {
+          console.error('Ошибка скачивания:', error);
+        }
+      } else {
+        acc = acc + `${message.content} `;
+      }
+    });
+    copyMessageToClipboard(acc ?? '', setToastVisibleStore);
+    // показываем карточку в DOM, что файл уже сохранен и через 2 сек. закрываем
+    setToastVisibleStore(true);
+    setTimeout(() => setToastVisibleStore(false), 2000);
     setCheckBoxsVisibleStore(false);
     clearSelectedMessagesStore();
   };
+
   //обработчик для меню 'удалить'
   const handleDeleteClick = async (): Promise<void> => {
     if (!selectedMessagesStore?.length) return;

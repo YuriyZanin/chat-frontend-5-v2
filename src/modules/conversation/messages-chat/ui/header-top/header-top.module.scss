@@ -25,9 +25,11 @@
   background-color: var(--surface-hover-card);
 }
 .image {
+  @include mixins.flex-box();
   border-radius: 50%;
-  min-height: 4rem;
-  min-width: 4rem;
+  height: 4rem;
+  width: 4rem;
+  flex-shrink: 0;
 }
 
 .info {

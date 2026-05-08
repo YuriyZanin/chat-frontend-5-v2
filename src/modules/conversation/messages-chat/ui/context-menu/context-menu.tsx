@@ -1,6 +1,8 @@
 'use client';
 import clsx from 'clsx';
 import { JSX } from 'react';
+import { useDownloadMessageFile } from '../../hooks/use-download-message-file';
+import type { RestMessageApi } from '../../model/messages-list';
 import { copyMessageToClipboard } from '../../utils/copy-message-to-clipboard';
 import {
   useForwardMessageStore,
@@ -36,11 +38,19 @@ export const ContextMenu = ({
     clearSelectedMessagesStore();
     onClose();
   };
+  // хук для скачивания файла(картинки) с сервера, который находится в сообщении
+  const { handleDownloadMessageFileClick } = useDownloadMessageFile(message);
+  //управлят состояние показать карточку, что сообщение скопировано, либо нет
   const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);
   //обработчика для контекстного меню 'Cкопировать'
-  const handleCopyClick = (msgText: string): void => {
-    copyMessageToClipboard(msgText, setToastVisibleStore);
-    onClose();
+  const handleCopyClick = (message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' }): void => {
+    if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
+      handleDownloadMessageFileClick();
+      onClose();
+    } else {
+      copyMessageToClipboard(message.content ?? '', setToastVisibleStore);
+      onClose();
+    }
   };
   // показывать компоненты <MessageCheckBox/> в DOM либо нет
   const setCheckBoxsVisibleStore = useSelectedMessagesStore((s) => s.setCheckBoxsVisible);
@@ -69,7 +79,7 @@ export const ContextMenu = ({
           <Forward />
         </div>
       </button>
-      <button className={styles.cell} onClick={() => handleCopyClick(message.content ?? '')}>
+      <button className={styles.cell} onClick={() => handleCopyClick(message)}>
         <div className={styles.text}>Скопировать</div>
         <div className={styles.icon}>
           <Copy />

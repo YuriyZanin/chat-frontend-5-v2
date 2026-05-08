@@ -4,7 +4,6 @@ import { useAlert } from 'modules/conversation/messages-chat/hooks/use-alert';
 import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
 import {
-  useForAllDeleteStore,
   useForwardMessageStore,
   useRepliedMessageStore,
   useSelectedMessagesStore,
@@ -54,27 +53,27 @@ export const IncomingFileCard = ({
   };
 
   const { confirm } = useAlert();
-  const forAllDeleteStore = useForAllDeleteStore((s) => s.forAllDelete);
-  const forAllDeleteRef = useRef<boolean>(forAllDeleteStore);
   const selectedUidUserForForwardMessageStore = useSelectedUidUserForForwardMessageStore(
     (s) => s.selectedUidUserForForwardMessage,
   );
   const selectedUidUserForForwardMessageRef = useRef<string>(selectedUidUserForForwardMessageStore);
   const clearSelectedMessagesStore = useSelectedMessagesStore((s) => s.clearSelectedMessages);
   useEffect(() => {
-    forAllDeleteRef.current = forAllDeleteStore;
     selectedUidUserForForwardMessageRef.current = selectedUidUserForForwardMessageStore;
-  }, [forAllDeleteRef, forAllDeleteStore, selectedUidUserForForwardMessageStore, selectedUidUserForForwardMessageRef]);
+  }, [selectedUidUserForForwardMessageStore, selectedUidUserForForwardMessageRef]);
 
   const handleDeleteClick = async (): Promise<void> => {
     const ok = await confirm({
       title: 'Удалить сообщение',
       message: 'Вы действительно хотите удалить сообщение?',
-      showCheckBox: true,
-      labelCheckBox: `Удалить у меня и у ${message.to_user?.first_name !== '' ? message.to_user?.first_name : message.to_user?.nickname}`,
+      showCheckBox: false,
     });
-    if (ok && forAllDeleteRef.current !== null) {
-      sendDeleteMessage(message, forAllDeleteRef.current);
+
+    if (ok) {
+      // вызываем переданный обработчик удаления
+      sendDeleteMessage(message);
+    } else {
+      // отмена — ничего не делаем
     }
   };
   const setForwardMessageStore = useForwardMessageStore((s) => s.setForwardMessage);
