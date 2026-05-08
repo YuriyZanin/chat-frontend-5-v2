@@ -42,19 +42,34 @@ export const useDownloadMessageFile = (
           signal: controller.signal,
         });
         const blob = await response.blob();
-        // Сохранение файла
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.download_name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const fileToSave = new File([blob], file.download_name, { type: blob.type });
+        const isImage = blob.type.startsWith('image/');
+        try {
+          // Только изображения шарим
+          if (isImage && navigator.canShare && navigator.canShare({ files: [fileToSave] })) {
+            // если телефон сохраняем скаченный файл(изображение) в галереи
+            await navigator.share({
+              files: [fileToSave],
+              title: file.download_name,
+            });
+          } else {
+            throw new Error('Share not supported');
+          }
+        } catch {
+          // если браузер то открываем диалог "сохранить как" и сохраняем скаченный файл(изображение)
+          const objectUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = objectUrl;
+          a.download = file.download_name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(objectUrl);
+        }
       });
-      // показываем карточку в DOM, что файл уже сохранен и через 2 сек. закрываем
       setToastVisibleStore(true);
       setTimeout(() => setToastVisibleStore(false), 2000);
+      // показываем карточку в DOM, что файл уже сохранен и через 2 сек. закрываем
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Ошибка скачивания:', error);

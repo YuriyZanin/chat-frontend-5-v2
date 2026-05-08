@@ -1,4 +1,5 @@
 'use client';
+import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
 import { getMessageTimeOrDate } from 'modules/conversation/messages-chat/lib/get-message-time';
 import {
   useForAllDeleteStore,
@@ -31,6 +32,7 @@ export const AlertOpenImages = ({
   const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;
   const [indexImage, setIndexImage] = useState<number>(0);
   const [isForward, setIsForward] = useState<boolean>(false);
+  const [isCopy, setIsCopy] = useState<boolean>(false);
   const [isDelete, setIsDelete] = useState<boolean>(false);
   const forAllDeleteStore = useForAllDeleteStore((s) => s.forAllDelete);
   const forAllDeleteRef = useRef<boolean>(forAllDeleteStore);
@@ -78,6 +80,13 @@ export const AlertOpenImages = ({
       onCancel();
     }
   };
+  // хук для скачивания файла(картинки) с сервера, который находится в сообщении
+  const { handleDownloadMessageFileClick } = useDownloadMessageFile(message);
+  const handleCopyClick = (): void => {
+    setIsCopy(true);
+    setTimeout(() => setIsCopy(false), 2000);
+    handleDownloadMessageFileClick();
+  };
   return (
     <div className={styles.wrapper}>
       <div className={styles.headerTop}>
@@ -110,7 +119,7 @@ export const AlertOpenImages = ({
         </div>
         <div className={styles.headerTopContactMenu}>
           <div className={styles.icon}>
-            <button className={styles.icon}>
+            <button className={styles.icon} onClick={handleCopyClick}>
               <Copy />
             </button>
           </div>
@@ -183,6 +192,22 @@ export const AlertOpenImages = ({
           />
         </div>
       )}
+      {isCopy && (
+        <div className={styles.alert}>
+          <NotificationCopyCard />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const NotificationCopyCard = (): JSX.Element => {
+  return (
+    <div className={styles.wrapperNotification}>
+      <div className={styles.iconNotification}>
+        <Copy />
+      </div>
+      <div className={styles.textNotification}>Скопировано в буфер обмена</div>
     </div>
   );
 };
