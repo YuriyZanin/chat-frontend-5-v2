@@ -21,7 +21,13 @@ import LeftArrow from './icon/left-arrow.svg';
 import Forward from './icon/reply.svg';
 import RightArrow from './icon/right-arrow.svg';
 
-export const AlertOpenImages = ({ onOk, onCancel, message, sendDeleteMessage }: AlertOpenImagesProps): JSX.Element => {
+export const AlertOpenImages = ({
+  onOk,
+  onCancel,
+  message,
+  sendDeleteMessage,
+  isIncomingCard,
+}: AlertOpenImagesProps): JSX.Element => {
   const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;
   const [indexImage, setIndexImage] = useState<number>(0);
   const [isForward, setIsForward] = useState<boolean>(false);
@@ -166,10 +172,12 @@ export const AlertOpenImages = ({ onOk, onCancel, message, sendDeleteMessage }: 
             id={message.uid}
             title="Удалить сообщение"
             message="Вы действительно хотите удалить сообщение?"
-            okText="Удалить"
-            cancelText="Отмена"
-            showCheckBox={true}
-            labelCheckBox={`Удалить у меня и у ${message.to_user?.first_name !== '' ? message.to_user?.first_name : message.to_user?.nickname}`}
+            showCheckBox={isIncomingCard ? false : true}
+            labelCheckBox={
+              isIncomingCard
+                ? undefined
+                : `Удалить у меня и у ${message.to_user?.first_name !== '' ? message.to_user?.first_name : message.to_user?.nickname}`
+            }
             onOk={onOkDelete}
             onCancel={onCancelDelete}
           />

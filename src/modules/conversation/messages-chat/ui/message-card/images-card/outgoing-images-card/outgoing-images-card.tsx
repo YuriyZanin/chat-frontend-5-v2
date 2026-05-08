@@ -186,7 +186,7 @@ const PreviewImageCard = ({ image, message, sendDeleteMessage }: PreviewImageCar
   // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
   const handleOpenImages = async (): Promise<void> => {
     const ok = await confirm({
-      openImages: { isOpenImages: true, message, sendDeleteMessage },
+      openImages: { isOpenImages: true, message, sendDeleteMessage, isIncomingCard: false },
     });
   };
   return (

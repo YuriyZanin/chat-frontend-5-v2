@@ -117,12 +117,8 @@ export const IncomingImagesCard = ({
   // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
   const handleOpenImages = async (): Promise<void> => {
     const ok = await confirm({
-      openImages: { isOpenImages: true, message },
+      openImages: { isOpenImages: true, message, isIncomingCard: true, sendDeleteMessage },
     });
-    if (ok) {
-    } else {
-      // отмена — ничего не делаем
-    }
   };
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>

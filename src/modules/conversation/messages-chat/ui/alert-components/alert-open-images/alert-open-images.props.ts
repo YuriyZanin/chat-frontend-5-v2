@@ -8,6 +8,7 @@ export type AlertOpenImagesProps = {
     message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' },
     selected?: boolean,
   ) => void;
+  isIncomingCard: boolean;
 };
 
 export type AlertForwardProps = {
