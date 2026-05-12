@@ -17,6 +17,7 @@ import CheckOneIcon from '../../icons/check-one.svg';
 import CheckTwoIcon from '../../icons/check-two.svg';
 import WatchIcon from '../../icons/watch.svg';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
+import { ReplyCard } from '../../reply-card/reply-card';
 import CanceledPhoneCallIcon from '../icons/canceled-phone-call.svg';
 import OutgoingPhoneCallIcon from '../icons/outgoing-phone-call.svg';
 import styles from './outgoing-phone-call-card.module.scss';
@@ -35,7 +36,7 @@ export const OutgoingPhoneCallCard = ({
   const handleContextMenu = (event: MouseEvent<HTMLDivElement>): void => {
     event.preventDefault();
     const menuWidth = 250;
-    const menuHeight = 220;
+    const menuHeight = 132;
     const x = event.pageX;
     const y = event.pageY;
     const adjustedX = x + 5;
@@ -128,6 +129,7 @@ export const OutgoingPhoneCallCard = ({
           message={message}
         />
         <div className={styles.item}>
+          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
           <div className={styles.contentBlock}>
             <div className={styles.phoneIcon}>
               {status === `Исходящий звонок` ? <OutgoingPhoneCallIcon /> : <CanceledPhoneCallIcon />}

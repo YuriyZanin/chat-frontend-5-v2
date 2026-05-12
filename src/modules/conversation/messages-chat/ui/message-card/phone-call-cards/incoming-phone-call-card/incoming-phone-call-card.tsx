@@ -16,6 +16,7 @@ import { JSX, MouseEvent, useEffect, useRef, useState } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
+import { ReplyCard } from '../../reply-card/reply-card';
 import IncomingPhoneIcon from '../icons/inconing-phone-call.svg';
 import MissedPhoneIcon from '../icons/missed-phone-call.svg';
 import styles from './incoming-phone-call-card.module.scss';
@@ -35,7 +36,7 @@ export const IncomingPhoneCallCard = ({
   const handleContextMenu = (event: MouseEvent<HTMLDivElement>): void => {
     event.preventDefault();
     const menuWidth = 250;
-    const menuHeight = 220;
+    const menuHeight = 132;
     const x = event.pageX;
     const y = event.pageY;
     const adjustedX = x + 5;
@@ -154,6 +155,7 @@ export const IncomingPhoneCallCard = ({
           {hasGroup && (
             <div className={styles.name}> {`${message.from_user.first_name} ${message.from_user.last_name}`}</div>
           )}
+          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
           <div className={styles.contentBlock}>
             <div className={styles.phoneIcon}>
               {status === 'Входящий звонок' ? <IncomingPhoneIcon /> : <MissedPhoneIcon />}

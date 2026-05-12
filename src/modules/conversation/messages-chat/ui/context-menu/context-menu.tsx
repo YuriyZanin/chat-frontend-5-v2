@@ -73,18 +73,22 @@ export const ContextMenu = ({
           <Answer />
         </div>
       </button>
-      <button className={styles.cell} onClick={handleForwardClick}>
-        <div className={styles.text}>Переслать</div>
-        <div className={styles.icon}>
-          <Forward />
-        </div>
-      </button>
-      <button className={styles.cell} onClick={() => handleCopyClick(message)}>
-        <div className={styles.text}>Скопировать</div>
-        <div className={styles.icon}>
-          <Copy />
-        </div>
-      </button>
+      {message.message_rtc === null && (
+        <button className={styles.cell} onClick={handleForwardClick}>
+          <div className={styles.text}>Переслать</div>
+          <div className={styles.icon}>
+            <Forward />
+          </div>
+        </button>
+      )}
+      {message.message_rtc === null && (
+        <button className={styles.cell} onClick={() => handleCopyClick(message)}>
+          <div className={styles.text}>Скопировать</div>
+          <div className={styles.icon}>
+            <Copy />
+          </div>
+        </button>
+      )}
       <button className={styles.cell} onClick={handleSelectedClick}>
         <div className={styles.text}>Выбрать</div>
         <div className={styles.icon}>

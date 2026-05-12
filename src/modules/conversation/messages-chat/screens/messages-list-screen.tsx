@@ -19,8 +19,6 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
     userIdStore.replace('group_', ''),
   );
 
-  console.log(messagesList);
-
   const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
   if ((status === 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
     return (

@@ -331,6 +331,37 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         pendingTimeouts.current.delete(data.request_uid);
       }
 
+      //  7. Поступило сообщение принявшему телефонный звонок абоненту о состоявшемся телефонном звонке ('new_call_message')
+      if (
+        data.action === 'new_call_message' &&
+        data.status === 'OK' &&
+        data.object.chat_type === 'chat' &&
+        data.object.to_user?.uid === currentUserIdRef.current
+      ) {
+        console.log('Поступило сообщение вызываемому абоненту о состоявшемся телефонном звонке:', data);
+        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
+        // (это id позвонившего лица)
+        const fromUserUid = data.object.from_user.uid;
+        const serverMessage = { ...data.object, status: 'sent' };
+        upsertMessageForUser(fromUserUid, serverMessage);
+        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+      }
+      //Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке ('new_call_message')
+      if (
+        data.action === 'new_call_message' &&
+        data.status === 'OK' &&
+        data.object.chat_type === 'chat' &&
+        data.object.from_user?.uid === currentUserIdRef.current
+      ) {
+        console.log('Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке:', data);
+        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.to_user.uid
+        // (это id получателя звонка)
+        const fromUserUid = data.object.to_user.uid;
+        const serverMessage = { ...data.object, status: 'sent' };
+        upsertMessageForUser(fromUserUid, serverMessage);
+        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+      }
+
       if (data.action === 'offer_call' && data.status === 'OK') {
         console.log('Входящий звонок от ' + data.object.from_user);
         if (currentUserId !== data.object.from_user) {
