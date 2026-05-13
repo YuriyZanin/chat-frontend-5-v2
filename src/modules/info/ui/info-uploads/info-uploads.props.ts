@@ -3,6 +3,7 @@ export type InfoUploadsProps = {
   currentUid: string;
   chatKey?: string;
   messagesByUser: Msg[];
+  wsUrl: string;
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

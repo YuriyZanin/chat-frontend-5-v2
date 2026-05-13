@@ -77,7 +77,7 @@ export const ContactPanel = ({
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} />
+          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />
