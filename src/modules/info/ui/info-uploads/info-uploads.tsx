@@ -17,22 +17,24 @@ export const InfoUploads = ({ messagesByUser, chatKey, currentUid }: InfoUploads
   const FILES: RestMessageFileApi[] = [];
   const VOICES: RestMessageFileApi[] = [];
   const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
-  messagesByUser.forEach((message) => {
-    if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
-      const filesList = message?.files_list?.length ? message.files_list : message.forwarded_messages[0].files_list;
-      filesList.forEach((file) => {
-        if (file.media_kind === 'image' && file.file_type === 'image/jpeg') {
-          PHOTOS.push(file);
-        }
-        if (file.media_kind === 'file' && file.file_type?.includes('application/')) {
-          FILES.push(file);
-        }
-        if (file.media_kind === 'file' && file.file_type === 'video/webm') {
-          VOICES.push(file);
-        }
-      });
-    }
-  });
+  if (messagesByUser && messagesByUser.length) {
+    messagesByUser.forEach((message) => {
+      if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
+        const filesList = message?.files_list?.length ? message.files_list : message.forwarded_messages[0].files_list;
+        filesList.forEach((file) => {
+          if (file.media_kind === 'image' && file.file_type === 'image/jpeg') {
+            PHOTOS.push(file);
+          }
+          if (file.media_kind === 'file' && file.file_type?.includes('application/')) {
+            FILES.push(file);
+          }
+          if (file.media_kind === 'file' && file.file_type === 'video/webm') {
+            VOICES.push(file);
+          }
+        });
+      }
+    });
+  }
   const renderTab = (): ReactElement | null => {
     const tab = tabs[activeTab];
 
