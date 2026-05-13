@@ -10,13 +10,13 @@ export const MediaTab = ({ items, currentUid, wsUrl }: MediaTabProps): JSX.Eleme
   return (
     <div className={styles.container}>
       {items.map((item, index) => (
-        <Media key={index} item={item} sendDeleteMessage={sendDeleteMessage} />
+        <MediaCard key={index} item={item} sendDeleteMessage={sendDeleteMessage} />
       ))}
     </div>
   );
 };
 
-const Media = ({ item, sendDeleteMessage }: MediaProps): JSX.Element => {
+const MediaCard = ({ item, sendDeleteMessage }: MediaProps): JSX.Element => {
   // xyk для открытия модального окна с алертом
   const { confirm } = useAlert();
   // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов

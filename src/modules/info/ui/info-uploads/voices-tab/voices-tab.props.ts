@@ -1,4 +1,7 @@
-import type { RestMessageFileApi } from 'modules/conversation/messages-chat/model/messages-list/user-messages.api.schema';
+import type { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 export type VoicesTabProps = {
-  items: RestMessageFileApi[];
+  items: Msg[];
+};
+export type VoiceProps = {
+  item: Msg;
 };

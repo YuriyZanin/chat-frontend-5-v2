@@ -16,12 +16,18 @@ export const InfoUploads = ({ messagesByUser, chatKey, currentUid, wsUrl }: Info
 
   const PHOTOS: Msg[] = [];
   const FILES: RestMessageFileApi[] = [];
-  const VOICES: RestMessageFileApi[] = [];
+  const VOICES: Msg[] = [];
   const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   if (messagesByUser && messagesByUser.length) {
     messagesByUser.forEach((message) => {
       if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
         const filesList = message?.files_list?.length ? message.files_list : message.forwarded_messages[0].files_list;
+        const fromUserFirstName = message?.files_list?.length
+          ? message.from_user.first_name
+          : message.forwarded_messages[0].first_name;
+        const fromUserLastName = message?.files_list?.length
+          ? message.from_user.last_name
+          : message.forwarded_messages[0].last_name;
         filesList.forEach((file) => {
           if (file.media_kind === 'image' && file.file_type === 'image/jpeg') {
             PHOTOS.push({ ...message, files_list: [file] });
@@ -30,7 +36,11 @@ export const InfoUploads = ({ messagesByUser, chatKey, currentUid, wsUrl }: Info
             FILES.push(file);
           }
           if (file.media_kind === 'file' && file.file_type === 'video/webm') {
-            VOICES.push(file);
+            VOICES.push({
+              ...message,
+              files_list: [file],
+              from_user: { ...message.from_user, first_name: fromUserFirstName, last_name: fromUserLastName },
+            });
           }
         });
       }
