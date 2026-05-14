@@ -1,3 +1,4 @@
+import { useMessagesChatStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import { useGenerateInviteLinkQuery, useGroupOrChanelQuery } from 'modules/info/api/info.query';
 import { formatParticipants } from 'modules/info/shared/utils/format';
 import { ClearGroupModal } from 'modules/info/ui/clear-group-modal';
@@ -7,7 +8,6 @@ import { InfoAvatar } from 'modules/info/ui/info-avatar';
 import { InfoNotification } from 'modules/info/ui/info-notification';
 import { InfoSummary } from 'modules/info/ui/info-summary';
 import { InfoUploads } from 'modules/info/ui/info-uploads';
-import { GROUP_TABS } from 'modules/info/ui/info-uploads/info-uploads.constants';
 import { LeaveGroupModal } from 'modules/info/ui/leave-group-modal';
 import { JSX } from 'react';
 
@@ -28,6 +28,8 @@ export const GroupPanel = ({
   const name = profile?.name ?? '';
   const membersCount = profile?.participants.length ?? 0;
   const status = formatParticipants(membersCount);
+  // все сообщения определенного чата(определеного uid профиля)
+  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
 
   return (
     <>
@@ -43,7 +45,7 @@ export const GroupPanel = ({
           <InfoNotification chatId={profile?.id} />
           <InfoSummary description={profile?.description} />
           <InfoSummary inviteLink={link?.invite_link} chatKey={uid} />
-          <InfoUploads uid={uid} tabs={GROUP_TABS} chatKey={uid} currentUid={currentUid} />
+          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
           <ClearGroupModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} />
           <DeleteMemberModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} />
           <LeaveGroupModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} />

@@ -53,6 +53,7 @@ export const ContactPanel = ({
   const handleUnblockContact = (): void => {
     openUnblockModal();
   };
+
   // все сообщения определенного чата(определеного uid профиля)
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
   return (

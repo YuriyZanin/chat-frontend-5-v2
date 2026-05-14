@@ -62,7 +62,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
     };
   }, [uid, setUid]);
 
-  const isGroup = uid.startsWith('group');
+  const isGroup = uid.startsWith('group_');
   const isChannel = uid.startsWith('channel');
   const participant = participants?.find((p) => p.uid === currentUid);
 
