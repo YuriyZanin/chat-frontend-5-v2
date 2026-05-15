@@ -1,71 +1,51 @@
-import { JSX, useState } from 'react';
-import { CircularProgressLabel } from '../circular-progress-label';
-import { FileContent } from '../info-uploads.props';
+import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
+import { getMessageTimeOrDate } from 'modules/conversation/messages-chat/lib/get-message-time';
+import { HighlightedFileName } from 'modules/conversation/messages-chat/ui/message-card/file-card/highlighted-file-name/highlighted-file-name';
+import { JSX } from 'react';
 import styles from './files-tab.module.scss';
+import type { CardFileProps } from './files-tab.props';
 import { FilesTabProps } from './files-tab.props';
-import DownloadIcon from './icons/download.svg';
+import DeleteFileIcon from './icons/delete-file-icon.svg';
 import FileIcon from './icons/file.svg';
 
 export const FilesTab = ({ items }: FilesTabProps): JSX.Element => {
-  const [localFiles, setLocalFiles] = useState<FileContent[]>(items);
-
-  const handleDownload = (fileId: number): void => {
-    setLocalFiles((prev) =>
-      prev.map((file) => (file.id === fileId ? { ...file, isLoading: !file.isLoading, progress: 0 } : file)),
-    );
-
-    // имитация загрузки для проверки ui
-    const interval = setInterval(() => {
-      setLocalFiles((prev) => {
-        const updated = prev.map((file) => {
-          if (file.id === fileId && file.isLoading) {
-            const newProgress = file.progress! + 10;
-            return {
-              ...file,
-              progress: newProgress >= 100 ? 100 : newProgress,
-              isLoading: newProgress < 100,
-            };
-          }
-          return file;
-        });
-
-        const file = updated.find((f) => f.id === fileId);
-        if (file?.progress === 100) {
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.download = file.file;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          clearInterval(interval);
-        }
-
-        return updated;
-      });
-    }, 500);
-  };
-
   return (
     <div className={styles.container}>
       <ul className={styles.fileList}>
-        {localFiles.map((item) => (
-          <li key={item.id} className={styles.listItem}>
-            <div className={styles.fileItem} onClick={() => handleDownload(item.id)}>
-              <CircularProgressLabel progress={item.progress} isLoading={item.isLoading}>
-                {item.isLoading ? <DownloadIcon /> : <FileIcon />}
-              </CircularProgressLabel>
-              <div className={styles.fileInfo}>
-                <div className={styles.fileName}>{item.file}</div>
-                <div className={styles.fileDescription}>
-                  <div className={styles.fileSize}>{item.size}</div>
-                  <div className={styles.dot}>•</div>
-                  <div className={styles.fileDate}>{item.created}</div>
-                </div>
-              </div>
-            </div>
+        {items.map((item, index) => (
+          <li key={index} className={styles.listItem}>
+            <CardFile item={item} />
           </li>
         ))}
       </ul>
+    </div>
+  );
+};
+
+const CardFile = ({ item }: CardFileProps): JSX.Element => {
+  //хук для загрузки файла находящегося в сообщении
+  const { handleDownloadMessageFileClick, handleStopDownloadMessageFileClick, isDownloading } = useDownloadMessageFile([
+    item,
+  ]);
+  return (
+    <div className={styles.fileItem} onClick={handleDownloadMessageFileClick}>
+      {isDownloading ? (
+        <div className={styles.deleteFileIcon}>
+          <DeleteFileIcon onClick={handleStopDownloadMessageFileClick} />
+        </div>
+      ) : (
+        <FileIcon />
+      )}
+      <div className={styles.fileInfo}>
+        <div className={styles.fileName}>
+          <HighlightedFileName fileName={item.download_name} search={''} />
+        </div>
+        <div className={styles.fileDescription}>
+          <div className={styles.fileSize}>5.2 MБ</div>
+          <div className={styles.dot}>•</div>
+          <div className={styles.fileDate}>{getMessageTimeOrDate(item.created_at)}</div>
+        </div>
+      </div>
     </div>
   );
 };

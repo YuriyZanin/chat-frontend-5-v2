@@ -16,6 +16,8 @@ import { OutgoingImagesCard } from '../message-card/images-card/outgoing-images-
 import { IncomingMessagesCard } from '../message-card/incoming-message-card/incoming-message-card';
 import { NotificationCopyCard } from '../message-card/notification-copy-card/notification-copy-card';
 import { OutgoingMessagesCard } from '../message-card/outgoing-message-card/outgoing-message-card';
+import { IncomingPhoneCallCard } from '../message-card/phone-call-cards/incoming-phone-call-card/incoming-phone-call-card';
+import { OutgoingPhoneCallCard } from '../message-card/phone-call-cards/outgoing-phone-call-card/outgoing-phone-call-card';
 import { ScrollButton } from '../scroll-button/scroll-button';
 import styles from './message-list.module.scss';
 import type { MessageListProps } from './message-list.props';
@@ -281,13 +283,22 @@ export const MessagesList = ({
                             currentUserId={currentUserId}
                           />
                         )
-                      ) : (
+                      ) : message.message_rtc?.uid === '' || message.message_rtc === null ? (
                         <OutgoingMessagesCard
                           message={message}
                           sendDeleteMessage={sendDeleteMessage}
                           search={searchMessagesStore}
                           isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                           currentUserId={currentUserId}
+                        />
+                      ) : (
+                        <OutgoingPhoneCallCard
+                          message={message}
+                          sendDeleteMessage={sendDeleteMessage}
+                          search={searchMessagesStore}
+                          isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                          currentUserId={currentUserId}
+                          status="Исходящий звонок"
                         />
                       )
                     ) : message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
@@ -321,7 +332,7 @@ export const MessagesList = ({
                           currentUserId={currentUserId}
                         />
                       )
-                    ) : (
+                    ) : message.message_rtc?.uid === '' || message.message_rtc === null ? (
                       <IncomingMessagesCard
                         message={message}
                         register={register}
@@ -329,6 +340,16 @@ export const MessagesList = ({
                         search={searchMessagesStore}
                         isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                         currentUserId={currentUserId}
+                      />
+                    ) : (
+                      <IncomingPhoneCallCard
+                        message={message}
+                        register={register}
+                        sendDeleteMessage={sendDeleteMessage}
+                        search={searchMessagesStore}
+                        isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                        currentUserId={currentUserId}
+                        status="Входящий звонок"
                       />
                     )}
                   </div>

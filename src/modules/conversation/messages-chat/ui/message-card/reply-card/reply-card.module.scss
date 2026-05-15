@@ -8,7 +8,7 @@
   margin: 1rem 0rem;
   border-radius: 0.4rem;
   border-left: 0.4rem solid var(--brand-secondary);
-  padding: 0.4rem 1rem;
+  padding: 0.4rem;
   overflow: hidden;
 }
 .incomingWrapper {
@@ -68,4 +68,13 @@
   overflow: hidden;
   white-space: nowrap; // только одна строка
   text-overflow: ellipsis; // многоточие
+}
+.phoneIcon {
+  @include mixins.flex-box($gap: 1rem);
+  width: 3.7rem;
+  height: 3.7rem;
+  border-radius: 50%;
+  background-color: var(--text-inverse);
+  flex-shrink: 0;
+  overflow: hidden;
 }

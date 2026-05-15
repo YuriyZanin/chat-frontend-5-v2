@@ -1,8 +1,9 @@
+import { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 export type InfoUploadsProps = {
-  uid: string;
   currentUid: string;
   chatKey?: string;
-  tabs: Tab[];
+  messagesByUser: Msg[];
+  wsUrl: string;
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

@@ -1,30 +1,32 @@
 'use client';
-
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
+import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
 import { useSelectedMessagesStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import { JSX } from 'react';
-import { ContextMenu } from '../../context-menu/context-menu';
-import { HighlightedMessage } from '../../search-messages/highlighted-message/highlighted-message';
-import { ForvardCard } from '../forward-card/forward-card';
-import CheckOneIcon from '../icons/check-one.svg';
-import CheckTwoIcon from '../icons/check-two.svg';
-import WatchIcon from '../icons/watch.svg';
-import { MessageCheckBox } from '../message-checkbox/message-checkbox';
-import { ReplyCard } from '../reply-card/reply-card';
-import styles from './outgoing-message-card.module.scss';
-import { OutgoingMessagesCardProps } from './outgoing-message-card.props';
+import { ContextMenu } from '../../../context-menu/context-menu';
+import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
+import CheckOneIcon from '../../icons/check-one.svg';
+import CheckTwoIcon from '../../icons/check-two.svg';
+import WatchIcon from '../../icons/watch.svg';
+import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
+import { ReplyCard } from '../../reply-card/reply-card';
+import CanceledPhoneCallIcon from '../icons/canceled-phone-call.svg';
+import OutgoingPhoneCallIcon from '../icons/outgoing-phone-call.svg';
+import styles from './outgoing-phone-call-card.module.scss';
+import type { OutgoingPhoneCallProps } from './outgoing-phone-call-card.props';
 
-export const OutgoingMessagesCard = ({
+export const OutgoingPhoneCallCard = ({
   message,
   sendDeleteMessage,
   search,
   isHighlighted,
   currentUserId,
-}: OutgoingMessagesCardProps): JSX.Element => {
+  status,
+}: OutgoingPhoneCallProps): JSX.Element => {
   //размеры контекстного окна
   const menuWidth = 250;
-  const menuHeight = 220;
+  const menuHeight = 132;
   //показывать check-box при удалении либо нет
   const showCheckBox = true;
   //надпись на check-box при удалении сообщения
@@ -63,17 +65,26 @@ export const OutgoingMessagesCard = ({
         />
         <div className={styles.item}>
           {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
-          {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
-          <div className={styles.message}>
-            <span className={styles.messageText}>
-              <HighlightedMessage text={message.content ?? ''} search={search} />
-            </span>
-            <div className={styles.messageSentTime}>
-              <div className={styles.messageTime}> {getMessageTime(message.created_at)} </div>
-              <div className={styles.messageChatIcons}>
-                {message.status === 'sent' && message.new === true && <CheckOneIcon />}
-                {(message.status === 'pending' || message.status === 'failed') && <WatchIcon />}
-                {message.new === false && <CheckTwoIcon />}
+          <div className={styles.contentBlock}>
+            <div className={styles.phoneIcon}>
+              {status === `Исходящий звонок` ? <OutgoingPhoneCallIcon /> : <CanceledPhoneCallIcon />}
+            </div>
+            <div className={styles.phoneInfo}>
+              <div className={styles.text}>
+                <HighlightedFileName fileName={status} search={search} />
+              </div>
+              <div className={styles.durationAndMessageTimeBlock}>
+                <div className={styles.duration}>
+                  {status === `Исходящий звонок` ? formatTime(message.message_rtc?.duration ?? 0) : ''}
+                </div>
+                <div className={styles.messageTimeAndChatIcons}>
+                  <div className={styles.messageTime}>{getMessageTime(message.message_rtc?.created_at ?? 0)}</div>
+                  <div className={styles.messageChatIcons}>
+                    {message.status === 'sent' && message.new === true && <CheckOneIcon />}
+                    {(message.status === 'pending' || message.status === 'failed') && <WatchIcon />}
+                    {message.new === false && <CheckTwoIcon />}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

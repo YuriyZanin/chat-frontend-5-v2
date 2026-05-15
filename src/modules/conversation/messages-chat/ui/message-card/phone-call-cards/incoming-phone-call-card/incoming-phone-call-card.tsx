@@ -1,8 +1,8 @@
 'use client';
-import clsx from 'clsx';
-import { useAlert } from 'modules/conversation/messages-chat/hooks/use-alert';
+
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
+import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
 import {
   useSelectedMessagesStore,
   useUserIdStore,
@@ -10,24 +10,26 @@ import {
 import Image from 'next/image';
 import { JSX } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
-import { HighlightedMessage } from '../../../search-messages/highlighted-message/highlighted-message';
-import { ForvardCard } from '../../forward-card/forward-card';
+import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
 import { ReplyCard } from '../../reply-card/reply-card';
-import styles from './incoming-images-card.module.scss';
-import type { IncomingImagesCardProps } from './incoming-images-card.props';
+import IncomingPhoneIcon from '../icons/inconing-phone-call.svg';
+import MissedPhoneIcon from '../icons/missed-phone-call.svg';
+import styles from './incoming-phone-call-card.module.scss';
+import { IncomingPhoneCallProps } from './incoming-phone-call-card.props';
 
-export const IncomingImagesCard = ({
+export const IncomingPhoneCallCard = ({
   message,
   sendDeleteMessage,
   search,
   register,
   isHighlighted,
   currentUserId,
-}: IncomingImagesCardProps): JSX.Element => {
+  status,
+}: IncomingPhoneCallProps): JSX.Element => {
   //размеры контекстного окна
   const menuWidth = 250;
-  const menuHeight = 220;
+  const menuHeight = 132;
   //показывать check-box при удалении либо нет
   const showCheckBox = false;
   //хук для обработчиков контекстного меню сообщения
@@ -43,27 +45,18 @@ export const IncomingImagesCard = ({
   } = useContextMenu({ menuWidth, menuHeight, sendDeleteMessage, message, showCheckBox });
   // показывать компоненты <MessageCheckBox/> в DOM либо нет
   const checkBoxsVisibleStore = useSelectedMessagesStore((s) => s.checkBoxsVisible);
-
   // прописываем в компоненте актуальный user_uid открытого чата из store
   const userId = useUserIdStore((s) => s.userId);
   // выясняем это простой чат либо группа (если true то группа)
   const hasGroup = userId.includes('group_');
-  const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;
 
-  // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
-  const { confirm } = useAlert();
-  const handleOpenImages = async (): Promise<void> => {
-    const ok = await confirm({
-      openImages: { isOpenImages: true, message, isIncomingCard: true, sendDeleteMessage },
-    });
-  };
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
         <MessageCheckBox message={message} selected={has} handleCheckBoxClick={handleCheckBoxClick} />
       )}
       <div
-        className={styles.wrapperBlock}
+        className={styles.wrapper}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
         ref={(el) => {
@@ -93,37 +86,27 @@ export const IncomingImagesCard = ({
             )}
           </div>
         )}
-        <div className={styles.wrapper}>
+        <div className={styles.item}>
           {hasGroup && (
             <div className={styles.name}> {`${message.from_user.first_name} ${message.from_user.last_name}`}</div>
           )}
-          <div className={styles.replyAndForward}>
-            {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
-            {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
-          </div>
-          <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
-            {fileList.map((image) => (
-              <div key={image.uid} className={styles.image} onClick={handleOpenImages}>
-                <Image src={image.file_url} alt={image.download_name} width={500} height={376} />
+          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
+          <div className={styles.contentBlock}>
+            <div className={styles.phoneIcon}>
+              {status === 'Входящий звонок' ? <IncomingPhoneIcon /> : <MissedPhoneIcon />}
+            </div>
+            <div className={styles.phoneInfo}>
+              <div className={styles.text}>
+                <HighlightedFileName fileName={status} search={search} />
               </div>
-            ))}
-          </div>
-          {message.content && message.content !== ' ' ? (
-            <div className={styles.item}>
-              <div className={styles.message}>
-                <div className={styles.messageText}>
-                  <HighlightedMessage text={message.content ?? ''} search={search} />
+              <div className={styles.durationAndMessageTimeBlock}>
+                <div className={styles.duration}>
+                  {status === 'Входящий звонок' ? formatTime(message.message_rtc?.duration ?? 0) : ''}
                 </div>
-                <div className={styles.messageSentTime}>
-                  <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
-                </div>
+                <div className={styles.messageTime}>{getMessageTime(message.message_rtc?.created_at ?? 0)}</div>
               </div>
             </div>
-          ) : (
-            <div className={styles.messageSentTimeImg}>
-              <div className={styles.messageTimeImg}>{getMessageTime(message.created_at)}</div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

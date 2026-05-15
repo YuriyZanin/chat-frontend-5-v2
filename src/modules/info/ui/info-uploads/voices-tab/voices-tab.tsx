@@ -1,39 +1,41 @@
-import { JSX, useState } from 'react';
-import { VoiceContent } from '../info-uploads.props';
-import { Voice } from './voice/voice';
+import { useAudioPlayer } from 'modules/conversation/messages-chat/hooks/use-audio-player';
+import { getMessageTimeOrDate } from 'modules/conversation/messages-chat/lib/get-message-time';
+import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
+import { JSX } from 'react';
+import Play from './icons/play.svg';
+import Stop from './icons/stop.svg';
 import styles from './voices-tab.module.scss';
-import { VoicesTabProps } from './voices-tab.props';
-
+import { VoiceProps, VoicesTabProps } from './voices-tab.props';
 export const VoicesTab = ({ items }: VoicesTabProps): JSX.Element => {
-  const [localFiles, setLocalFiles] = useState<VoiceContent[]>(items);
-
-  const handleToggle = (fileId: number, audioRef: HTMLAudioElement | null): void => {
-    setLocalFiles((prev) => {
-      return prev.map((file) => {
-        if (file.id === fileId) {
-          if (!file.isPlaying) {
-            audioRef?.play();
-          } else {
-            audioRef?.pause();
-          }
-          return { ...file, isPlaying: !file.isPlaying, audioRef: audioRef };
-        } else {
-          file.audioRef?.pause();
-          return { ...file, isPlaying: false, audioRef: null };
-        }
-      });
-    });
-  };
-
   return (
     <div className={styles.container}>
-      <ul className={styles.fileList}>
-        {localFiles.map((item) => (
-          <li key={item.id} className={styles.listItem}>
-            <Voice item={item} onToggle={handleToggle} />
-          </li>
-        ))}
-      </ul>
+      {items.map((item, index) => (
+        <div key={index} className={styles.wrapper}>
+          <VoiceCard item={item} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const VoiceCard = ({ item }: VoiceProps): JSX.Element => {
+  // хук для прослушивания аудиосообщения
+  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(item);
+
+  return (
+    <div className={styles.box}>
+      <button className={styles.icon} onClick={handlePlayPause}>
+        {isPlaying ? <Stop /> : <Play />}
+      </button>
+      <div className={styles.info}>
+        <div className={styles.text}>{`${item.from_user.first_name} ${item.from_user.last_name}`}</div>
+        <div className={styles.voiceLine} ref={waveformRef} />
+        <div className={styles.durationEndDate}>
+          <div className={styles.duration}>{currentTime ? formatTime(currentTime) : formatTime(totalDuration)}</div>
+          <div className={styles.duration}>-</div>
+          <div className={styles.duration}>{getMessageTimeOrDate(item.created_at)}</div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { JSX, useEffect, useRef } from 'react';
 import Close from '../icons/close.svg';
 import FileIcon from '../icons/file.svg';
 import PlayIcon from '../icons/play-icon.svg';
+import IncomingPhoneIcon from '../phone-call-cards/icons/inconing-phone-call.svg';
 import styles from './reply-to-message-card.module.scss';
 import type { ReplyToMessageCardProps } from './reply-to-message-card.props';
 
@@ -68,7 +69,13 @@ export const ReplyToMessageCard = ({
               )}
             </div>
           )}
-
+          {repliedMessageStore?.message_rtc !== null && (
+            <div className={styles.fileIcon}>
+              <div className={styles.phoneIcon}>
+                <IncomingPhoneIcon />
+              </div>
+            </div>
+          )}
           <div className={styles.textBlock}>
             <div className={styles.text1}>
               В ответ
@@ -85,7 +92,11 @@ export const ReplyToMessageCard = ({
                       repliedMessageStore?.forwarded_messages[0]?.files_list?.length) &&
                     repliedMessageStore.content === ' '
                   ? 'Фото'
-                  : repliedMessageStore?.content}
+                  : repliedMessageStore?.message_rtc === null
+                    ? repliedMessageStore?.content
+                    : repliedMessageStore?.from_user.uid === userIdStore
+                      ? 'Входящий звонок'
+                      : 'Исходящий звонок'}
             </div>
           </div>
         </div>

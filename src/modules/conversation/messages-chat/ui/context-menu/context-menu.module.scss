@@ -3,7 +3,8 @@
 .wrapper {
   @include mixins.flex-box($direction: column);
   width: 25rem;
-  height: 22rem;
+  max-height: 22rem;
+  height: auto;
   box-shadow: 0rem 0.2rem 1.2rem 0rem rgba(0, 0, 0, 0.2);
   position: fixed;
   z-index: 1000;

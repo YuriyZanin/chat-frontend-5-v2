@@ -1,5 +1,7 @@
-import { VoiceContent } from '../info-uploads.props';
-
+import type { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 export type VoicesTabProps = {
-  items: VoiceContent[];
+  items: Msg[];
+};
+export type VoiceProps = {
+  item: Msg;
 };

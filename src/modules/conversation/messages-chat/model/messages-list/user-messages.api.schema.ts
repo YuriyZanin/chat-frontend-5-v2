@@ -30,8 +30,8 @@ export const restMessageFileApiSchema = z.object({
   file_webp_url: z.string(),
   file_small_url: z.string(),
   file_type: z.string().max(128).optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
+  created_at: z.number(),
+  updated_at: z.number(),
 });
 export type RestMessageFileApi = z.infer<typeof restMessageFileApiSchema>;
 
