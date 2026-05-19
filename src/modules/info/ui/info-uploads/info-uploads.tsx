@@ -11,13 +11,12 @@ import { MediaTab } from './media-tab';
 import { ParticipantsTab } from './participants-tab';
 import { VoicesTab } from './voices-tab';
 
-export const InfoUploads = ({ messagesByUser, chatKey, currentUid, wsUrl }: InfoUploadsProps): JSX.Element => {
+export const InfoUploads = ({ tabs, messagesByUser, chatKey, currentUid, wsUrl }: InfoUploadsProps): JSX.Element => {
   const [activeTab, setActiveTab] = useState(0);
 
   const PHOTOS: Msg[] = [];
   const FILES: RestMessageFileApi[] = [];
   const VOICES: Msg[] = [];
-  const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   if (messagesByUser && messagesByUser.length) {
     messagesByUser.forEach((message) => {
       if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
@@ -58,9 +57,9 @@ export const InfoUploads = ({ messagesByUser, chatKey, currentUid, wsUrl }: Info
         return <VoicesTab items={VOICES} />;
       case 'Ссылки':
         return <LinksTab items={LINKS} />;
-      case 'members':
+      case 'Участники':
         return <ParticipantsTab currentUid={currentUid} chatKey={chatKey || ''} />;
-      case 'subscribers':
+      case 'Подписчики':
         return <ParticipantsTab currentUid={currentUid} chatKey={chatKey || ''} />;
       default:
         return null;

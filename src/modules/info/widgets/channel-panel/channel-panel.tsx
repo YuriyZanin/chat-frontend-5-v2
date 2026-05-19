@@ -29,6 +29,7 @@ export const ChannelPanel = ({
   const status = formatSubscribers(membersCount);
   // все сообщения определенного чата(определеного uid профиля)
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
+  const tabs = ['Подписчики', 'Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   if (!profile) return null;
   return (
     <>
@@ -44,7 +45,13 @@ export const ChannelPanel = ({
           <InfoNotification chatId={profile?.id} />
           {profile?.description && <InfoSummary description={profile?.description} />}
           <InfoSummary inviteLinkChannel={link?.invite_link} chatKey={uid} />
-          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
+          <InfoUploads
+            tabs={tabs}
+            messagesByUser={messagesByUser}
+            currentUid={currentUid}
+            wsUrl={wsUrl}
+            chatKey={uid}
+          />
           <ClearChannelModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} name={name} />
           <DeleteMemberModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} />
           <LeaveChannelModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} />

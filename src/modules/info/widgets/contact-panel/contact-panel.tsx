@@ -56,6 +56,7 @@ export const ContactPanel = ({
 
   // все сообщения определенного чата(определеного uid профиля)
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
+  const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   return (
     <>
       {isLoading ? (
@@ -78,7 +79,7 @@ export const ContactPanel = ({
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
+          <InfoUploads tabs={tabs} messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />

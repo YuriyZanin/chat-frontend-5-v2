@@ -4,6 +4,7 @@ export type InfoUploadsProps = {
   chatKey?: string;
   messagesByUser: Msg[];
   wsUrl: string;
+  tabs: string[];
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

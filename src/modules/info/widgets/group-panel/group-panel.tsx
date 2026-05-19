@@ -30,7 +30,7 @@ export const GroupPanel = ({
   const status = formatParticipants(membersCount);
   // все сообщения определенного чата(определеного uid профиля)
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
-
+  const tabs = ['Участники', 'Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   return (
     <>
       {isLoading ? (
@@ -45,7 +45,13 @@ export const GroupPanel = ({
           <InfoNotification chatId={profile?.id} />
           <InfoSummary description={profile?.description} />
           <InfoSummary inviteLink={link?.invite_link} chatKey={uid} />
-          <InfoUploads messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
+          <InfoUploads
+            tabs={tabs}
+            messagesByUser={messagesByUser}
+            currentUid={currentUid}
+            wsUrl={wsUrl}
+            chatKey={uid}
+          />
           <ClearGroupModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} />
           <DeleteMemberModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} />
           <LeaveGroupModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} />
