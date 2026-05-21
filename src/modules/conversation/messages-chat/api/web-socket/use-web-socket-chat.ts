@@ -141,7 +141,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socket.readyState !== WebSocket.OPEN) return;
 
       // если pong давно не приходил — считаем соединение мёртвым
-      if (Date.now() - lastPongRef.current > 60000) {
+      if (Date.now() - lastPongRef.current > 600000) {
         console.warn('No pong received. Closing socket.');
         socket.close();
         return;
@@ -149,7 +149,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
 
       socket.send(JSON.stringify({ action: 'ping' }));
       console.log('Ping sent');
-    }, 30000); // каждые 30 секунд
+    }, 15000); // каждые 15 секунд
   };
 
   // Функция для подключаемся к ws-соединению и регистрации ws-обработчиков
