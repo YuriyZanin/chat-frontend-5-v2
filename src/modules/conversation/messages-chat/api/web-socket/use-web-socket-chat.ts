@@ -73,6 +73,8 @@ type UseWebSocketChat = {
 };
 
 export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSocketChat {
+  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastPongRef = useRef<number>(Date.now());
   // прописываем в компоненте актуальный user_uid открытого чата из store
   const userId = useUserIdStore((s) => s.userId);
   const { toUserUid, messageRtcUid, addCandidate, setCallData, setState, resetCall } = useCallsStore();
@@ -126,9 +128,31 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       | DeleteMessageApi
     )[]
   >([]);
+  // функции пин/понг
+  const stopHeartbeat = (): void => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  };
+  const startHeartbeat = (socket: WebSocket): void => {
+    stopHeartbeat();
+    heartbeatIntervalRef.current = setInterval(() => {
+      if (socket.readyState !== WebSocket.OPEN) return;
+
+      // если pong давно не приходил — считаем соединение мёртвым
+      if (Date.now() - lastPongRef.current > 60000) {
+        console.warn('No pong received. Closing socket.');
+        socket.close();
+        return;
+      }
+
+      socket.send(JSON.stringify({ action: 'ping' }));
+      console.log('Ping sent');
+    }, 30000); // каждые 30 секунд
+  };
 
   // Функция для подключаемся к ws-соединению и регистрации ws-обработчиков
-
   const clearReconnectTimer = (): void => {
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current);
@@ -169,6 +193,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socketInstanceIdRef.current !== myId) return; // устаревший
       console.log('WebSocket open');
       reconnectAttemptRef.current = 0; // сброс backoff
+      // отправлем ping
+      startHeartbeat(socket);
       // при новом открытии ws-cоединения поворно отправляем все ранее не отправленные сообщения (при наличии),
       messageQueueRef.current.forEach((msg) => {
         socket.send(JSON.stringify(msg));
@@ -178,6 +204,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
 
     socket.onclose = (e): void => {
       if (socketInstanceIdRef.current !== myId) return; // устаревший
+      stopHeartbeat();
       console.log('WebSocket close', e.code, e.reason);
       // Ошибки 1006 часто при обрыве сети/таймауте
       // Планируем reconnect
@@ -192,7 +219,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     socket.onmessage = (event: MessageEvent): void => {
       if (socketInstanceIdRef.current !== myId) return;
       const data = JSON.parse(event.data);
-      //console.log(data);
+      console.log(data);
       //Cобытия:
       // 1.Подтверждает отправленние созданного исходящего сообщения в обычный чат по request_uid
       if (
@@ -360,6 +387,12 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         const serverMessage = { ...data.object, status: 'sent' };
         upsertMessageForUser(fromUserUid, serverMessage);
         addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+      }
+      //8. поступило от сервера событие pong
+      if (data.action === 'pong') {
+        console.log('Поступило сообщение от сервера "Pong"');
+        lastPongRef.current = Date.now();
+        return;
       }
 
       if (data.action === 'offer_call' && data.status === 'OK') {
