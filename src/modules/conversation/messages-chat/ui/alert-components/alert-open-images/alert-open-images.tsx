@@ -81,7 +81,7 @@ export const AlertOpenImages = ({
     }
   };
   // хук для скачивания файла(картинки) с сервера, который находится в сообщении
-  const { handleDownloadMessageFileClick } = useDownloadMessageFile(message);
+  const { handleDownloadMessageFileClick } = useDownloadMessageFile(fileList);
   const handleCopyClick = (): void => {
     setIsCopy(true);
     setTimeout(() => setIsCopy(false), 2000);

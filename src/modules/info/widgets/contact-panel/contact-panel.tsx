@@ -1,6 +1,7 @@
 import { useChatsStore } from 'modules/conversation/chats/model/search';
 import { AddContactModal } from 'modules/conversation/chats/ui/add-contact-modal';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
+import { useMessagesChatStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import { useAddContactQuery, useSearchUserByNicknameQuery } from 'modules/info/api/info.query';
 import { ProfileInfo } from 'modules/info/entity/info.entity';
 import { useInfoStore } from 'modules/info/model/info.store';
@@ -12,10 +13,10 @@ import { FrowardProfileModal } from 'modules/info/ui/forward-profile-modal';
 import { InfoAvatar } from 'modules/info/ui/info-avatar';
 import { InfoNotification } from 'modules/info/ui/info-notification';
 import { InfoSummary } from 'modules/info/ui/info-summary';
+import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { JSX } from 'react';
 import AddIcon from '../../shared/icons/add.svg';
-
 export const ContactPanel = ({
   uid,
   currentUid,
@@ -53,6 +54,9 @@ export const ContactPanel = ({
     openUnblockModal();
   };
 
+  // все сообщения определенного чата(определеного uid профиля)
+  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
+  const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   return (
     <>
       {isLoading ? (
@@ -75,7 +79,7 @@ export const ContactPanel = ({
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          {/* {MAX_PROFILE.has_uploads && <InfoUploads uid={uid} />} */}
+          <InfoUploads tabs={tabs} messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />

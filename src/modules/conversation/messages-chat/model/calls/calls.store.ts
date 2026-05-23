@@ -14,12 +14,15 @@ type CallsState = {
   isIncomingModalOpen: boolean;
   isReceivingModalOpen: boolean;
   isSound: boolean;
+  isShowVideo: boolean;
+  hasRemoteVideo: boolean;
   duration: number;
   state: 'call' | 'connecting' | 'connected' | 'end' | 'error' | 'rejected' | 'unreceived';
   toggleCallsOpen: () => void;
   toggleFullScreen: () => void;
   toggleIncomingModalOpen: () => void;
   toggleReceivingModalOpen: () => void;
+  toggleShowVideo: () => void;
   toggleSound: () => void;
   addCandidate: (candidateStr: string) => void;
   setDuration: (val: number) => void;
@@ -42,6 +45,8 @@ export const useCallsStore = create<CallsState>((set, get) => ({
   isIncomingModalOpen: false,
   isReceivingModalOpen: false,
   isSound: true,
+  isShowVideo: false,
+  hasRemoteVideo: false,
   duration: 0,
   state: 'connecting',
   toggleCallsOpen: (): void => {
@@ -63,6 +68,10 @@ export const useCallsStore = create<CallsState>((set, get) => ({
   toggleSound: (): void => {
     const state = get();
     set({ isSound: !state.isSound });
+  },
+  toggleShowVideo: (): void => {
+    const state = get();
+    set({ isShowVideo: !state.isShowVideo });
   },
   addCandidate: (candidateStr: string): void => {
     const state = get();
@@ -90,6 +99,8 @@ export const useCallsStore = create<CallsState>((set, get) => ({
       isFullScreen: false,
       isIncomingModalOpen: false,
       isReceivingModalOpen: false,
+      isShowVideo: false,
+      hasRemoteVideo: false,
       isSound: true,
       duration: 0,
       state: 'connecting',

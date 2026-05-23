@@ -39,7 +39,9 @@ export const ContextMenu = ({
     onClose();
   };
   // хук для скачивания файла(картинки) с сервера, который находится в сообщении
-  const { handleDownloadMessageFileClick } = useDownloadMessageFile(message);
+  const { handleDownloadMessageFileClick } = useDownloadMessageFile(
+    message.files_list ?? message.forwarded_messages[0].files_list,
+  );
   //управлят состояние показать карточку, что сообщение скопировано, либо нет
   const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);
   //обработчика для контекстного меню 'Cкопировать'
@@ -73,18 +75,22 @@ export const ContextMenu = ({
           <Answer />
         </div>
       </button>
-      <button className={styles.cell} onClick={handleForwardClick}>
-        <div className={styles.text}>Переслать</div>
-        <div className={styles.icon}>
-          <Forward />
-        </div>
-      </button>
-      <button className={styles.cell} onClick={() => handleCopyClick(message)}>
-        <div className={styles.text}>Скопировать</div>
-        <div className={styles.icon}>
-          <Copy />
-        </div>
-      </button>
+      {message.message_rtc === null && (
+        <button className={styles.cell} onClick={handleForwardClick}>
+          <div className={styles.text}>Переслать</div>
+          <div className={styles.icon}>
+            <Forward />
+          </div>
+        </button>
+      )}
+      {message.message_rtc === null && (
+        <button className={styles.cell} onClick={() => handleCopyClick(message)}>
+          <div className={styles.text}>Скопировать</div>
+          <div className={styles.icon}>
+            <Copy />
+          </div>
+        </button>
+      )}
       <button className={styles.cell} onClick={handleSelectedClick}>
         <div className={styles.text}>Выбрать</div>
         <div className={styles.icon}>

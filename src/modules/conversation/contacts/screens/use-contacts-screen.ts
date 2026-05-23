@@ -30,10 +30,6 @@ export const useContactsScreen = (): UseContactsScreenReturn => {
     [myContacts],
   );
 
-  const myContactUids = new Set(contacts?.map((c) => c.uid) ?? []);
-
-  const filteredGlobals = globals?.filter((c) => !myContactUids.has(c.uid));
-
   const normalizedQuery = query.trim().toLowerCase();
 
   const filteredContacts = normalizedQuery
@@ -46,6 +42,6 @@ export const useContactsScreen = (): UseContactsScreenReturn => {
     clearQuery,
 
     contacts: filteredContacts,
-    globals: filteredGlobals,
+    globals: globals,
   };
 };

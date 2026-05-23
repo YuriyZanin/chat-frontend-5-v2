@@ -2,17 +2,11 @@
 
 import clsx from 'clsx';
 import { useAlert } from 'modules/conversation/messages-chat/hooks/use-alert';
+import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
-import {
-  useForAllDeleteStore,
-  useForwardMessageStore,
-  useRepliedMessageStore,
-  useSelectedMessagesStore,
-  useSelectedUidUserForForwardMessageStore,
-} from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { useSelectedMessagesStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { JSX, MouseEvent, useEffect, useRef, useState } from 'react';
+import { JSX, useState } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { HighlightedMessage } from '../../../search-messages/highlighted-message/highlighted-message';
 import DeleteFileIcon from '../../file-card/icons/delete-file-icon.svg';
@@ -26,6 +20,7 @@ import PlugBig from '../icons/plug-big.svg';
 import PlugLittle from '../icons/plug-little.svg';
 import styles from './outgoing-images-card.module.scss';
 import type { OutgoingImagesCardProps, PlugCardProps, PreviewImageCardProps } from './outgoing-images-card.props';
+
 export const OutgoingImagesCard = ({
   message,
   sendDeleteMessage,
@@ -33,82 +28,24 @@ export const OutgoingImagesCard = ({
   isHighlighted,
   currentUserId,
 }: OutgoingImagesCardProps): JSX.Element => {
-  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [contextMenuVisible, setContextMenuVisible] = useState<boolean>(false);
-  const handleContextMenu = (event: MouseEvent<HTMLDivElement>): void => {
-    event.preventDefault();
-    const menuWidth = 250;
-    const menuHeight = 220;
-    const x = event.pageX;
-    const y = event.pageY;
-    const adjustedX = x + 5;
-    const adjustedY = y - menuHeight - 5;
-    const constrainedX =
-      adjustedX + menuWidth > window.innerWidth - window.innerWidth / 3.77 ? x - menuWidth - 5 : adjustedX;
-    const constrainedY = adjustedY < 150 ? y + 5 : adjustedY;
-    setContextMenuPos({ x: constrainedX, y: constrainedY });
-    setContextMenuVisible(true);
-  };
-
-  const handleCloseMenu = (): void => {
-    setContextMenuVisible(false);
-  };
-
-  const { confirm } = useAlert();
-  const forAllDeleteStore = useForAllDeleteStore((s) => s.forAllDelete);
-  const forAllDeleteRef = useRef<boolean>(forAllDeleteStore);
-  const selectedUidUserForForwardMessageStore = useSelectedUidUserForForwardMessageStore(
-    (s) => s.selectedUidUserForForwardMessage,
-  );
-  const selectedUidUserForForwardMessageRef = useRef<string>(selectedUidUserForForwardMessageStore);
-  const clearSelectedMessagesStore = useSelectedMessagesStore((s) => s.clearSelectedMessages);
-  useEffect(() => {
-    forAllDeleteRef.current = forAllDeleteStore;
-    selectedUidUserForForwardMessageRef.current = selectedUidUserForForwardMessageStore;
-  }, [forAllDeleteRef, forAllDeleteStore, selectedUidUserForForwardMessageStore, selectedUidUserForForwardMessageRef]);
-
-  const handleDeleteClick = async (): Promise<void> => {
-    const ok = await confirm({
-      title: 'Удалить сообщение',
-      message: 'Вы действительно хотите удалить сообщение?',
-      showCheckBox: true,
-      labelCheckBox: `Удалить у меня и у ${message.to_user?.first_name !== '' ? message.to_user?.first_name : message.to_user?.nickname}`,
-    });
-    if (ok && forAllDeleteRef.current !== null) {
-      sendDeleteMessage(message, forAllDeleteRef.current);
-    }
-  };
-  const setForwardMessageStore = useForwardMessageStore((s) => s.setForwardMessage);
-  const clearRepliedMessageStore = useRepliedMessageStore((s) => s.clearRepliedMessage);
-  const router = useRouter();
-
-  const handleForwardClick = async (): Promise<void> => {
-    const ok = await confirm({
-      isMessageForwarding: true,
-    });
-    if (ok && selectedUidUserForForwardMessageRef.current) {
-      setForwardMessageStore(message);
-      clearRepliedMessageStore();
-      clearSelectedMessagesStore();
-      router.push(`/chats/${selectedUidUserForForwardMessageRef.current}`);
-    }
-  };
-  // выясняем имеется ли "message" в массиве выбранных сообщений ("selectedMessagesStore")
-  const selectedMessagesStore = useSelectedMessagesStore((s) => s.selectedMessages);
-  const addSelectedMessagesStore = useSelectedMessagesStore((s) => s.addSelectedMessages);
-  const deleteSelectedMessagesStore = useSelectedMessagesStore((s) => s.deleteSelectedMessages);
-
-  const [selected, setSelected] = useState<boolean>(true);
-  const has = selectedMessagesStore?.some((selectedMessage) => selectedMessage.uid === message.uid);
-
-  const handleCheckBoxClick = (): void => {
-    setSelected(!selected);
-    if (selected) {
-      addSelectedMessagesStore(message);
-    } else {
-      deleteSelectedMessagesStore(message);
-    }
-  };
+  //размеры контекстного окна
+  const menuWidth = 250;
+  const menuHeight = 220;
+  //показывать check-box при удалении либо нет
+  const showCheckBox = true;
+  //надпись на check-box при удалении сообщения
+  const labelCheckBox = `Удалить у меня и у ${message.to_user?.first_name !== '' ? message.to_user?.first_name : message.to_user?.nickname}`;
+  //хук для обработчиков контекстного меню сообщения
+  const {
+    handleContextMenu,
+    handleCloseMenu,
+    handleDeleteClick,
+    handleForwardClick,
+    handleCheckBoxClick,
+    contextMenuPos,
+    contextMenuVisible,
+    has,
+  } = useContextMenu({ menuWidth, menuHeight, sendDeleteMessage, message, showCheckBox, labelCheckBox });
   // показывать компоненты <MessageCheckBox/> в DOM либо нет
   const checkBoxsVisibleStore = useSelectedMessagesStore((s) => s.checkBoxsVisible);
   const fileList = message.files_list.length ? message.files_list : message.forwarded_messages[0].files_list;

@@ -23,6 +23,8 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
   const {
     isFullScreen,
     isSound,
+    isShowVideo,
+    hasRemoteVideo,
     contactFio,
     avatarUrl,
     fromUserUid,
@@ -33,6 +35,7 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
     toggleFullScreen,
     toggleIncomingModalOpen,
     toggleSound,
+    setCallData,
     setDuration,
     setState,
     resetCall,
@@ -81,6 +84,14 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
           });
 
           pc.ontrack = (event): void => {
+            const stream = event.streams[0];
+
+            stream.onremovetrack = (e): void => {
+              if (e.track.kind === 'video') {
+                setCallData({ hasRemoteVideo: false });
+              }
+            };
+
             // Проверяем, что есть хотя бы один поток
             if (!event.streams || event.streams.length === 0) {
               console.warn('ontrack: нет потоков в событии');
@@ -97,9 +108,21 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
 
             event.streams.forEach((incomingStream) => {
               incomingStream.getTracks().forEach((track) => {
-                const existingTrack = combinedStream.getTracks().find((t) => t.id === track.id);
-                if (!existingTrack) {
+                if (track.kind === 'video') {
+                  const existingVideoTracks = combinedStream.getTracks().filter((t) => t.kind === 'video');
+
+                  existingVideoTracks.forEach((oldTrack) => {
+                    combinedStream.removeTrack(oldTrack);
+                  });
+
                   combinedStream.addTrack(track);
+
+                  setCallData({ hasRemoteVideo: true });
+                } else {
+                  const existingTrack = combinedStream.getTracks().find((t) => t.id === track.id);
+                  if (!existingTrack) {
+                    combinedStream.addTrack(track);
+                  }
                 }
               });
             });
@@ -108,9 +131,19 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
 
             console.log('траки: ' + combinedStream.getTracks());
 
+            if (combinedStream.getTracks().length >= 2) {
+              setCallData({ hasRemoteVideo: true });
+            }
+
             combinedStream.getAudioTracks().forEach((track) => {
               track.enabled = isSound;
             });
+
+            const remoteVideo = document.getElementById('remote-video') as HTMLVideoElement | null;
+
+            if (remoteVideo) {
+              remoteVideo.srcObject = remoteStreamRef.current;
+            }
           };
 
           pc.onicecandidate = (event): void => {
@@ -245,6 +278,79 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
     }
   }, [isLoading]);
 
+  const checkPermissions = async (): Promise<boolean> => {
+    try {
+      const cameraPermission = await navigator.permissions.query({
+        name: 'camera',
+      });
+
+      if (cameraPermission.state === 'denied') {
+        alert('Для видео звонка нужно разрешить доступ к камере в настройках браузера');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.warn('Не удалось проверить разрешения:', error);
+      return false;
+    }
+  };
+
+  const enableVideo = async (): Promise<void> => {
+    if (!checkPermissions()) return;
+
+    try {
+      // Получаем видеопоток
+      const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const videoTrack = videoStream.getVideoTracks()[0];
+
+      // Добавляем видеодорожку в соединение
+      peerConnectionRef.current?.addTrack(videoTrack, videoStream);
+
+      // Добавляем в локальный поток
+      localStreamRef.current?.addTrack(videoTrack);
+
+      setCallData({ isShowVideo: true });
+    } catch (err) {
+      console.log('Ошибка включения видео:', err);
+    }
+  };
+
+  const disableVideo = (): void => {
+    try {
+      const videoTrack = localStreamRef.current?.getVideoTracks()[0];
+      const peerConnection = peerConnectionRef.current;
+
+      if (!videoTrack || !peerConnection) return;
+
+      // 1. Получаем sender для видеодорожки
+      const sender = peerConnection.getSenders().find((s) => s.track === videoTrack);
+
+      if (sender) {
+        // 2. Удаляем трек из соединения
+        peerConnection.removeTrack(sender);
+      }
+
+      // 4. Отключаем трек в локальном потоке
+      videoTrack.stop();
+      localStreamRef.current?.removeTrack(videoTrack);
+
+      // 5. Обновляем UI
+      setCallData({ isShowVideo: false });
+      console.log('Видео полностью отключено и удалено из соединения');
+    } catch (err) {
+      console.error('Ошибка отключения видео:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isShowVideo) {
+      const localVideo = document.getElementById('local-video') as HTMLVideoElement;
+      if (localVideo && localStreamRef.current) {
+        localVideo.srcObject = localStreamRef.current;
+      }
+    }
+  }, [isShowVideo]);
+
   const handleSound = (): void => {
     toggleSound();
     const streamRemote = remoteStreamRef.current;
@@ -310,6 +416,12 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
 
   return (
     <div className={clsx(styles.wrapper, { [styles.fullScreen]: isFullScreen })}>
+      <video
+        id="remote-video"
+        className={clsx(styles.remoteVideo, { [styles.hidden]: !hasRemoteVideo })}
+        autoPlay
+        playsInline
+      />
       <div className={styles.headerButtons}>
         <button onClick={toggleFullScreen}>
           <FullScreenIcon />
@@ -353,10 +465,11 @@ export const IncomingCallPanel = ({ wsUrl, currentUid }: IncomingCallPanelProps)
           </div>
         </div>
       </div>
+      {isShowVideo && <video id="local-video" className={styles.localVideo} autoPlay muted />}
       <div className={styles.footerButtons}>
-        <button className={styles.actionButton}>
+        <button className={styles.actionButton} onClick={() => (isShowVideo ? disableVideo() : enableVideo())}>
           <VideoIcon />
-          <p className={styles.buttonText}>Видео</p>
+          <p className={styles.buttonText}>{isShowVideo ? 'Аудио' : 'Видео'}</p>
         </button>
         <button className={styles.actionButton} onClick={handleSound}>
           <MicroIcon />

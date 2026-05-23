@@ -12,7 +12,6 @@ import { SearchPanel } from './search-panel';
 export const ParticipantsTab = ({ currentUid, chatKey }: ParticipantsTabProps): JSX.Element => {
   const { query, setQuery, clearQuery, participants, filtered } = useParticipantsScreen(chatKey);
   const { enterSelectionMode, clearSelection } = useInfoStore();
-
   const owner = filtered?.find((p) => p.isOwner);
   const members = filtered?.filter((p) => !p.isOwner) ?? [];
   const current = participants?.find((p) => p.uid === currentUid);

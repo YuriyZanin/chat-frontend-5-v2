@@ -106,6 +106,8 @@ export const ChooseMessagesCard = ({
       clearSelectedMessagesStore();
     }
   };
+  //выясняем имеются ли в выбранных сообщениях телефонные звонки
+  const hasPhoneCall = selectedMessagesStore?.some((message) => message.message_rtc !== null);
 
   return (
     <div className={styles.wrapper}>
@@ -118,28 +120,31 @@ export const ChooseMessagesCard = ({
         <div className={styles.text}>{`Выбрано ${formatMessages(selectedMessagesStore?.length ?? 0)}`}</div>
       </div>
       <div className={styles.icon}>
-        <div
-          className={(selectedMessagesStore?.length ?? 0) ? styles.icon : styles.iconBlock}
+        <button
+          className={(selectedMessagesStore?.length ?? 0) && !hasPhoneCall ? styles.icon : styles.iconBlock}
           onClick={handleForwardClick}
+          disabled={!selectedMessagesStore?.length || hasPhoneCall}
         >
           <Forward />
-        </div>
+        </button>
       </div>
       <div className={styles.icon}>
-        <div
-          className={(selectedMessagesStore?.length ?? 0) ? styles.icon : styles.iconBlock}
+        <button
+          className={(selectedMessagesStore?.length ?? 0) && !hasPhoneCall ? styles.icon : styles.iconBlock}
           onClick={handleCopyClick}
+          disabled={!selectedMessagesStore?.length || hasPhoneCall}
         >
           <Copy />
-        </div>
+        </button>
       </div>
       <div className={styles.icon}>
-        <div
+        <button
           className={(selectedMessagesStore?.length ?? 0) ? styles.iconRed : styles.iconBlock}
           onClick={handleDeleteClick}
+          disabled={!selectedMessagesStore?.length}
         >
           <Delete />
-        </div>
+        </button>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import { apiFetch } from './fetcher';
-
 // ============ СТАРЫЕ ФУНКЦИИ (для обратной совместимости) ============
 export type GetCodePayload = {
   phone_number: string;
@@ -89,10 +88,22 @@ export type PlusofonTokenResponse = {
   is_filled: boolean;
 };
 
-export const plusofonGetToken = (data: PlusofonTokenPayload): Promise<PlusofonTokenResponse> => {
+export const plusofonGetToken = async (data: PlusofonTokenPayload): Promise<PlusofonTokenResponse> => {
+  const res = await fetch(
+    `https://api.dev.chat.ktsf.ru/api/v1/auth/providers/plusofon/flash-call/claim/${data.session_uid}/`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_secret: data.session_secret }),
+      credentials: 'include',
+    },
+  );
+  // получаем ws_access_token и ws_refresh_token для домена api.dev.chat.ktsf.ru и записываем в cookies
+  const tokens = await res.json();
+  // отправляем полученные токены на прокси сервер Next.js
   return apiFetch<PlusofonTokenResponse>('/api/auth/get-plusofon-token', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(tokens),
   });
 };
 

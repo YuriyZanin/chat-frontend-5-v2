@@ -1,5 +1,7 @@
 import clsx from 'clsx';
-import { FILES, LINKS, PHOTOS, VOICES } from 'modules/info/shared/utils/mock';
+import type { RestMessageFileApi } from 'modules/conversation/messages-chat/model/messages-list/user-messages.api.schema';
+import type { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { LINKS } from 'modules/info/shared/utils/mock';
 import { JSX, ReactElement, useState } from 'react';
 import { FilesTab } from './files-tab';
 import styles from './info-uploads.module.scss';
@@ -9,26 +11,55 @@ import { MediaTab } from './media-tab';
 import { ParticipantsTab } from './participants-tab';
 import { VoicesTab } from './voices-tab';
 
-export const InfoUploads = ({ uid, tabs, chatKey, currentUid }: InfoUploadsProps): JSX.Element => {
-  void uid;
-
+export const InfoUploads = ({ tabs, messagesByUser, chatKey, currentUid, wsUrl }: InfoUploadsProps): JSX.Element => {
   const [activeTab, setActiveTab] = useState(0);
 
+  const PHOTOS: Msg[] = [];
+  const FILES: RestMessageFileApi[] = [];
+  const VOICES: Msg[] = [];
+  if (messagesByUser && messagesByUser.length) {
+    messagesByUser.forEach((message) => {
+      if (message?.files_list?.length || message?.forwarded_messages[0]?.files_list?.length) {
+        const filesList = message?.files_list?.length ? message.files_list : message.forwarded_messages[0].files_list;
+        const fromUserFirstName = message?.files_list?.length
+          ? message.from_user.first_name
+          : message.forwarded_messages[0].first_name;
+        const fromUserLastName = message?.files_list?.length
+          ? message.from_user.last_name
+          : message.forwarded_messages[0].last_name;
+        filesList.forEach((file) => {
+          if (file.media_kind === 'image' && file.file_type === 'image/jpeg') {
+            PHOTOS.push({ ...message, files_list: [file] });
+          }
+          if (file.media_kind === 'file' && file.file_type?.includes('application/')) {
+            FILES.push(file);
+          }
+          if (file.media_kind === 'file' && file.file_type === 'video/webm') {
+            VOICES.push({
+              ...message,
+              files_list: [file],
+              from_user: { ...message.from_user, first_name: fromUserFirstName, last_name: fromUserLastName },
+            });
+          }
+        });
+      }
+    });
+  }
   const renderTab = (): ReactElement | null => {
     const tab = tabs[activeTab];
 
-    switch (tab.id) {
-      case 'media':
-        return <MediaTab items={PHOTOS} />;
-      case 'files':
+    switch (tab) {
+      case 'Медиа':
+        return <MediaTab items={PHOTOS} currentUid={currentUid} wsUrl={wsUrl} />;
+      case 'Файлы':
         return <FilesTab items={FILES} />;
-      case 'voices':
+      case 'Голосовые':
         return <VoicesTab items={VOICES} />;
-      case 'links':
+      case 'Ссылки':
         return <LinksTab items={LINKS} />;
-      case 'members':
+      case 'Участники':
         return <ParticipantsTab currentUid={currentUid} chatKey={chatKey || ''} />;
-      case 'subscribers':
+      case 'Подписчики':
         return <ParticipantsTab currentUid={currentUid} chatKey={chatKey || ''} />;
       default:
         return null;
@@ -40,12 +71,12 @@ export const InfoUploads = ({ uid, tabs, chatKey, currentUid }: InfoUploadsProps
       <div className={styles.tabs}>
         {tabs.map((tab, index) => (
           <button
-            key={tab.id}
+            key={index}
             className={clsx(styles.tab, activeTab === index && styles.active)}
             onClick={() => setActiveTab(index)}
           >
             <div className={styles.tabButtons}>
-              <span className={styles.label}>{tab.title}</span>
+              <span className={styles.label}>{tab}</span>
               <div className={clsx(styles.border, activeTab === index && styles.active)}></div>
             </div>
           </button>

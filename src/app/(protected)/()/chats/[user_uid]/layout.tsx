@@ -18,7 +18,7 @@ export default async function MessagesLayout({
     const user_uid = (await params).user_uid;
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access')?.value;
-    const wsUrl = `${BACKEND_WS}/ws/chat?authorization=${accessToken}`;
+    const wsUrl = `${BACKEND_WS}/ws/chat`;
     const payload = parseJwtToken(accessToken ?? '');
     return (
       <main className={styles.wrapper}>

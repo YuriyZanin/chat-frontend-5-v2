@@ -46,6 +46,7 @@
   @include mixins.flex-box($justify: start);
   width: 100%;
   height: 100%;
+  padding-left: 1rem;
 }
 .previewImages {
   width: 100%;
