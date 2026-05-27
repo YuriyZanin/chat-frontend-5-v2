@@ -2,8 +2,8 @@
 
 import { useContactsSelectionStore } from 'modules/conversation/contacts/features/contacts-selection';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
+import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
 import { ConversationLayout, SearchInput } from 'modules/conversation/shared/ui';
-import { useWebSocketCreateGroup } from 'modules/new-group/api/web-socket/use-web-socket-create-group';
 import { useNewGroupStore } from 'modules/new-group/model/new-group-store';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,9 +14,10 @@ import styles from './invite-members-block.module.scss';
 
 type InviteMembersBlockProps = {
   wsUrl: string;
+  currentUserId: string;
 };
 
-export const InviteMembersBlock = ({ wsUrl }: InviteMembersBlockProps): JSX.Element => {
+export const InviteMembersBlock = ({ wsUrl, currentUserId }: InviteMembersBlockProps): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -26,14 +27,20 @@ export const InviteMembersBlock = ({ wsUrl }: InviteMembersBlockProps): JSX.Elem
   const { query, setQuery, clearQuery, contacts } = useContactsScreen();
   const enterSelectionMode = useContactsSelectionStore((s) => s.enterSelectionMode);
   const selectedUids = useContactsSelectionStore((s) => s.selectedIds);
-  const { name, description, chatType, avatarUid, resetGroup, setMode } = useNewGroupStore();
-  const { createGroup } = useWebSocketCreateGroup(wsUrl);
+  const nameStore = useNewGroupStore((s) => s.name);
+  const setModeStore = useNewGroupStore((s) => s.setMode);
+  const modeStore = useNewGroupStore((s) => s.mode);
+  const descriptionStore = useNewGroupStore((s) => s.description);
+  const chatTypeStore = useNewGroupStore((s) => s.chatType);
+  const avatarUidStore = useNewGroupStore((s) => s.avatarUid);
+  const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
+  const { createGroupOrChannel } = useWebSocketChat(wsUrl, currentUserId);
   const exitSelectionMode = useContactsSelectionStore((s) => s.exitSelectionMode);
 
   // Устанавливаем режим
   useEffect(() => {
-    setMode(mode);
-  }, [mode, setMode]);
+    setModeStore(mode);
+  }, [mode, setModeStore]);
 
   useEffect(() => {
     enterSelectionMode();
@@ -44,32 +51,29 @@ export const InviteMembersBlock = ({ wsUrl }: InviteMembersBlockProps): JSX.Elem
   const successPath = mode === 'group' ? '/new-group' : '/new-channel';
   const buttonLabel = 'Создать';
 
-  const handleCreate = async (): Promise<void> => {
-    if (!name.trim()) {
-      alert(`Введите название ${mode === 'group' ? 'группы' : 'канала'}`);
+  const handleCreate = (): void => {
+    if (!nameStore.trim()) {
+      alert(`Введите название ${modeStore === 'group' ? 'группы' : 'канала'}`);
       router.push(backPath);
       return;
     }
 
     const usersArray = Array.isArray(selectedUids) ? selectedUids : Array.from(selectedUids);
 
-    if (mode === 'group' && usersArray.length === 0) {
+    if (modeStore === 'group' && usersArray.length === 0) {
       alert('Выберите хотя бы одного участника');
       return;
     }
 
     try {
-      const result = await createGroup({
-        name,
-        chatType,
+      createGroupOrChannel({
+        name: nameStore,
+        chatType: chatTypeStore,
         uidUsersList: usersArray,
-        description: description || undefined,
-        avatarUid: avatarUid || undefined,
+        description: descriptionStore || undefined,
+        avatarUid: avatarUidStore || undefined,
       });
-
-      resetGroup();
       exitSelectionMode();
-      console.log(`Создан ${mode === 'group' ? 'группа' : 'канал'}:`, result);
       router.push(successPath);
     } catch (error) {
       console.error(`Ошибка создания ${mode === 'group' ? 'группы' : 'канала'}:`, error);
@@ -78,7 +82,7 @@ export const InviteMembersBlock = ({ wsUrl }: InviteMembersBlockProps): JSX.Elem
   };
 
   const hasSelected =
-    mode === 'group' ? (Array.isArray(selectedUids) ? selectedUids.length > 0 : selectedUids.size > 0) : true; // Для канала выбор участников опционален
+    modeStore === 'group' ? (Array.isArray(selectedUids) ? selectedUids.length > 0 : selectedUids.size > 0) : true; // Для канала выбор участников опционален
 
   return (
     <div className={styles.container}>

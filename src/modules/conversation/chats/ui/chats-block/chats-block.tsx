@@ -4,10 +4,11 @@ import { ChatCard } from 'modules/conversation/chats/entity/ui';
 import { DeleteSelectedContactsButton } from 'modules/conversation/contacts/features/contacts-selection';
 import { ConversationLayout, SearchInput } from 'modules/conversation/shared/ui';
 import { useRouter } from 'next/navigation';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { Dropdown } from 'shared/ui/dropdown';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useChatsScreen } from '../../screens/use-chats-screen';
+import { useChatsListStore } from '../../zustand-store-chats-list/zustand-store-chats-list';
 import { AddContactModal } from '../add-contact-modal';
 import { DeleteChatModal } from '../delete-chat-modal';
 import classes from './chat-block.module.scss';
@@ -31,7 +32,18 @@ export const ChatsBlock = (): JSX.Element => {
     is_favorite,
     setIsFavorite,
     chats,
+    status,
   } = useChatsScreen();
+
+  const chatsListStore = useChatsListStore((s) => s.chatsList);
+  const setChatsListStore = useChatsListStore((s) => s.setChatsList);
+  // при изменении массива chats незамедлительнол изменения вносим в store
+
+  useEffect(() => {
+    setChatsListStore(chats);
+  }, [chats, setChatsListStore]);
+  console.log('chatsListStore:', chatsListStore);
+
   const router = useRouter();
   const contactMenuItems: DropdownItem[] = [
     {
@@ -60,15 +72,17 @@ export const ChatsBlock = (): JSX.Element => {
         }
         footer={<DeleteSelectedContactsButton />}
       >
-        <>
-          <ul>
-            {chats.map((c) => (
-              <ChatCard key={c.peer.uid} peer={c.peer} chat={c.chat} messages={c.messages} />
-            ))}
-          </ul>
+        {status === 'success' && chatsListStore && chatsListStore.length > 0 && (
+          <>
+            <ul>
+              {chatsListStore?.map((c) => (
+                <ChatCard key={c.peer.uid} peer={c.peer} chat={c.chat} messages={c.messages} />
+              ))}
+            </ul>
+          </>
+        )}
 
-          {/*<ConversationEmptyState variant={'chats'} />*/}
-        </>
+        {/*<ConversationEmptyState variant={'chats'} />*/}
       </ConversationLayout>
       <DeleteChatModal />
       <AddContactModal />

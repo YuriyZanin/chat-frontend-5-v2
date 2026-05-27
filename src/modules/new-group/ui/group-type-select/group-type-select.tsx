@@ -4,9 +4,9 @@ import { ChatType, useGroupTypeSelect } from '../../lib/group-type-select/use-gr
 import styles from './group-type-select.module.scss';
 
 type GroupTypeSelectProps = {
-  mode?: 'group' | 'channel';
-  initial?: ChatType;
-  onChange?: (type: ChatType) => void;
+  mode: 'group' | 'channel';
+  initial: ChatType;
+  onChange: (type: ChatType) => void;
 };
 
 // Конфигурация для разных режимов
@@ -47,7 +47,6 @@ const GroupTypeSelect: React.FC<GroupTypeSelectProps> = ({ mode = 'group', initi
   const { selected, selectClosed, selectOpen, setSelected } = useGroupTypeSelect({ mode, initial });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -60,8 +59,9 @@ const GroupTypeSelect: React.FC<GroupTypeSelectProps> = ({ mode = 'group', initi
     };
   }, []);
 
-  const toggleOpen = (): void => setIsOpen((prev) => !prev);
+  onChange(selected);
 
+  const toggleOpen = (): void => setIsOpen((prev) => !prev);
   const handleChange = (type: ChatType): void => {
     if (type === 'private-group' || type === 'private-channel') {
       selectClosed();
@@ -69,7 +69,6 @@ const GroupTypeSelect: React.FC<GroupTypeSelectProps> = ({ mode = 'group', initi
       selectOpen();
     }
     setSelected(type);
-    onChange?.(type);
     setIsOpen(false);
   };
 

@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export type EntityMode = 'group' | 'channel';
 export type ChatType = 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
 
-type NewGroupStore = {
+type NewGroupState = {
   mode: EntityMode;
   name: string;
   description: string;
@@ -11,29 +11,24 @@ type NewGroupStore = {
   avatarUid: string | null;
   avatarPreview: string | null;
   setMode: (mode: EntityMode) => void;
-  setGroupData: (data: Partial<Omit<NewGroupStore, 'setGroupData' | 'resetGroup' | 'setMode'>>) => void;
-  resetGroup: () => void;
+  setName: (name: string) => void;
+  setDescription: (description: string) => void;
+  setChatType: (chatType: ChatType) => void;
+  setAvatarUid: (avatarUid: string) => void;
+  setAvatarPreview: (avatarPreview: string) => void;
 };
 
-export const useNewGroupStore = create<NewGroupStore>(
-  (set): NewGroupStore => ({
-    mode: 'group',
-    name: '',
-    description: '',
-    chatType: 'public-group',
-    avatarUid: null,
-    avatarPreview: null,
-    setMode: (mode: EntityMode): void => set({ mode }),
-    setGroupData: (data: Partial<Omit<NewGroupStore, 'setGroupData' | 'resetGroup' | 'setMode'>>): void =>
-      set((state): NewGroupStore => ({ ...state, ...data })),
-    resetGroup: (): void =>
-      set({
-        mode: 'group',
-        name: '',
-        description: '',
-        chatType: 'public-group',
-        avatarUid: null,
-        avatarPreview: null,
-      }),
-  }),
-);
+export const useNewGroupStore = create<NewGroupState>((set) => ({
+  mode: 'group',
+  name: '',
+  description: '',
+  chatType: 'public-group',
+  avatarUid: null,
+  avatarPreview: null,
+  setMode: (mode: EntityMode): void => set({ mode }),
+  setName: (name: string): void => set({ name }),
+  setDescription: (description: string): void => set({ description }),
+  setChatType: (chatType: ChatType): void => set({ chatType }),
+  setAvatarUid: (avatarUid: string): void => set({ avatarUid }),
+  setAvatarPreview: (avatarPreview: string): void => set({ avatarPreview }),
+}));
