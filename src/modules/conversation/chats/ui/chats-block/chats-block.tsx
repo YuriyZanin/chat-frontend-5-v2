@@ -47,7 +47,6 @@ export const ChatsBlock = (): JSX.Element => {
   useEffect(() => {
     setChatsListStore(chats);
   }, [chats, setChatsListStore]);
-
   const router = useRouter();
   const contactMenuItems: DropdownItem[] = [
     {

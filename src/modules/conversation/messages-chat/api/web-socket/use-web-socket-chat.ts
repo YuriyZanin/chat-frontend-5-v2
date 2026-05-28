@@ -164,12 +164,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socket.readyState !== WebSocket.OPEN) return;
 
       // если pong давно не приходил — считаем соединение мёртвым
-      if (Date.now() - lastPongRef.current > 600000) {
+      if (Date.now() - lastPongRef.current > 30000) {
         console.warn('No pong received. Closing socket.');
         socket.close();
         return;
       }
-
       socket.send(JSON.stringify({ action: 'ping' }));
       console.log('Ping sent');
     }, 15000); // каждые 15 секунд
@@ -201,8 +200,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   const connectWS = useCallback(() => {
     if (!navigator.onLine) return;
     if (wsRef.current) {
-      const st = wsRef.current.readyState;
-      if (st === WebSocket.OPEN || st === WebSocket.CONNECTING) return;
+      wsRef.current.close();
     }
     clearReconnectTimer();
 
@@ -484,17 +482,20 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (data.action === 'create_chat' && data.status === 'OK') {
         console.log('Подтверждение сервера об создании группы/канала:', data);
         // Если сервер пришлёт подтверждение с request_uid,
-        // заменим заклушку стоящую в DOM на присланное сервером сообщение
         if (data.request_uid) {
           const result = {
             peer: {
-              uid: data.object.chat_id,
+              uid: data.object.chat_key,
               username: data.object.chat_key,
               nickname: data.object.name,
               firstName: '',
               lastName: '',
-              avatarUrl: data.object.avatar.split('?')[0],
-              avatarWebpUrl: data.object.avatar.url.split('?')[0],
+              avatarUrl: data.object.avatar
+                ? `https://api.dev.chat.ktsf.ru/${data.object.avatar.url.split('?')[0]}`
+                : '',
+              avatarWebpUrl: data.object.avatar
+                ? `https://api.dev.chat.ktsf.ru/${data.object.avatar.url.split('?')[0]}`
+                : '',
               isBlocked: false,
               isOnline: false,
               isInContacts: false,
@@ -512,12 +513,16 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
             },
             messages: {},
           };
-          {
+          if (data.object.created_by === currentUserIdRef.current) {
+            // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
+            updateChatByUidStore(data.request_uid, result);
+          } else {
+            // если участник группы/канала, то добавим в список чатов в store новый чат
+            addChatInChatsListStore(result);
           }
-          updateChatByUidStore(data.request_uid, result);
-          // Очистим таймаут подтверждения
-          pendingTimeouts.current.delete(data.request_uid);
         }
+        // Очистим таймаут подтверждения
+        pendingTimeouts.current.delete(data.request_uid);
       }
       //входящее ws-сообщение сервера не подтверждающее создание группы/канала из-за возникшей ошибки
       if (data.action === 'create_chat' && data.status === 'error') {
