@@ -39,7 +39,8 @@
 }
 
 .name,
-.status {
+.status,
+.group {
   line-height: 1.2;
   letter-spacing: 0.01rem;
 }
@@ -56,6 +57,12 @@
   font-size: 1.4rem;
   font-weight: 400;
   color: var(--brand-primary);
+}
+.group {
+  height: 1.7rem;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-secondary);
 }
 .icon {
   @include mixins.flex-box();

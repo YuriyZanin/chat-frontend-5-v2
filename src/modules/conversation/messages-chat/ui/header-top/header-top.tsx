@@ -3,12 +3,14 @@ import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-scr
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { useInfoStore } from 'modules/info/model/info.store';
+import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 import { ImageUI } from 'shared/ui/image';
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
+import { formatParticipants } from '../../utils/format-messages';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
 import { OutgoingCallPanel } from '../../widgets/outgoing-call-panel';
 import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
@@ -26,9 +28,7 @@ import { SearchMessages } from '../search-messages/search/search-messages';
 import styles from './header-top.module.scss';
 import CallIcon from './icons/call-icon.svg';
 import SearchIcon from './icons/search-icon.svg';
-
 const URL_DEFAULT_Avatar = '/images/messages-chats/default-avatar.svg';
-
 export const HeaderTop = ({
   wsUrl,
   user_uid,
@@ -38,7 +38,11 @@ export const HeaderTop = ({
   user_uid: string;
   currentUid: string;
 }): JSX.Element => {
+  //хук для получения списка чатов
   const { chats } = useChatsScreen();
+  //хук для получения списка участников опреденной группы/канала (по chat_key)
+  const { participants } = useParticipantsScreen(user_uid);
+
   const {
     isCallModalOpen,
     isIncomingModalOpen,
@@ -57,7 +61,6 @@ export const HeaderTop = ({
   const chat = isGroupOrChannel
     ? chats.find((c) => c.chat.chatKey === user_uid)
     : chats.find((c) => c.peer.uid === user_uid);
-
   const {
     avatarUrl = '',
     firstName = '',
@@ -110,7 +113,6 @@ export const HeaderTop = ({
       },
     });
   };
-
   return (
     <>
       <div className={styles.wrapper}>
@@ -131,7 +133,13 @@ export const HeaderTop = ({
             <>
               <div className={styles.info} onClick={() => toggleInfoOpen()}>
                 <span className={styles.name}>{isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}</span>
-                <span className={styles.status}>{status}</span>
+                {isGroupOrChannel ? (
+                  <span className={styles.group}>
+                    {formatParticipants(participants?.length ? participants?.length - 1 : 1)}
+                  </span>
+                ) : (
+                  <span className={styles.status}>{status}</span>
+                )}
               </div>
               <div className={styles.icon} onClick={() => setSearchMessagesVisible(true)}>
                 <SearchIcon />

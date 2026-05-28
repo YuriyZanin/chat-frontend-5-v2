@@ -88,7 +88,7 @@ export const InviteMembersBlock = ({ wsUrl, currentUserId }: InviteMembersBlockP
         avatarFileData: avatarFileData || undefined,
       });
       exitSelectionMode();
-      router.push(successPath);
+      router.push('/chats');
     } catch (error) {
       console.error(`Ошибка создания ${mode === 'group' ? 'группы' : 'канала'}:`, error);
       alert(`Не удалось создать ${mode === 'group' ? 'группу' : 'канал'}. Попробуйте позже.`);

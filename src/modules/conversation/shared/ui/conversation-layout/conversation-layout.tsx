@@ -10,7 +10,7 @@ export const ConversationLayout = ({
   header: ReactNode;
   children: ReactNode;
   footer: ReactNode;
-  wrapperRef: RefObject<HTMLDivElement | null>;
+  wrapperRef?: RefObject<HTMLDivElement | null>;
 }): JSX.Element => {
   return (
     <div className={styles.wrapper}>

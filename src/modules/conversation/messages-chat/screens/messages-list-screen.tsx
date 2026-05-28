@@ -14,12 +14,13 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
     setUserIdStore(user_uid);
   }, [user_uid, setUserIdStore]);
 
+  const parts = userIdStore.split('_');
+  const userUid = parts.length > 1 ? parts[1] : parts[0];
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]) ?? [];
-  const { messagesList, status, fetchNextPage, hasNextPage, isFetchingNextPage } = useMessagesListScreen(
-    userIdStore.replace('group_', ''),
-  );
+  const { messagesList, status, fetchNextPage, hasNextPage, isFetchingNextPage } = useMessagesListScreen(userUid);
 
   const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
+
   if ((status === 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
     return (
       <MessagesList
@@ -35,7 +36,31 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
     );
   } else {
     if (status === 'success' && messagesByUser.length === 0) {
-      return <DefaultMessagesPage />;
+      if (parts[0] === 'group') {
+        return (
+          <DefaultMessagesPage
+            url={'/images/messages-chats/default-img-group.svg'}
+            topText={'Вы создали группу'}
+            bottomText={''}
+          />
+        );
+      }
+      if (parts[0] === 'channel') {
+        return (
+          <DefaultMessagesPage
+            url={'/images/messages-chats/default-img-channel.svg'}
+            topText={'Вы создали канал'}
+            bottomText={'Добавьте публикацию'}
+          />
+        );
+      }
+      return (
+        <DefaultMessagesPage
+          url={'/images/messages-chats/default-img.svg'}
+          topText={'Сообщений пока нет'}
+          bottomText={'Напишите первым :)'}
+        />
+      );
     } else {
       return <></>;
     }
