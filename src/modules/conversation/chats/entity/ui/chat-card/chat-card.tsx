@@ -15,7 +15,7 @@ import { MutedIcon } from './icons';
 
 export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
   const { setChatId } = useInfoStore();
-  const { id, notifications, is_favorite, newMessageCount } = chat;
+  const { id, notifications, is_favorite, newMessageCount, chatType } = chat;
   const { firstName, lastName, uid, nickname } = peer;
   const {
     lastSeenMessage,
@@ -56,6 +56,7 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
         classNames: { root: styles.imageWrapper },
       }}
       selectAction={handleClick}
+      chatType={chatType}
     >
       <div className={styles.card}>
         <div className={styles.header}>
