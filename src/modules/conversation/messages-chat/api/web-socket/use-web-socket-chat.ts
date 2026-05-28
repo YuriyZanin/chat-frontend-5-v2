@@ -485,7 +485,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         if (data.request_uid) {
           const result = {
             peer: {
-              uid: data.object.chat_key,
+              uid: data.object.chat_id,
               username: data.object.chat_key,
               nickname: data.object.name,
               firstName: '',
