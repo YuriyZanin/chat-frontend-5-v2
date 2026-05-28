@@ -100,6 +100,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   const { toUserUid, messageRtcUid, addCandidate, setCallData, setState, resetCall } = useCallsStore();
   //делаем ссылку на актуальный user_uid открытого чата
   const userIdRef = useRef<string>(userId);
+  const stopRef = useRef<boolean>(true);
+
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
@@ -514,8 +516,19 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
             messages: {},
           };
           if (data.object.created_by === currentUserIdRef.current) {
+            let text: string;
+            if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
+              text = `@@@ Канал создан`;
+            } else {
+              text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
+            }
             // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
             updateChatByUidStore(data.request_uid, result);
+            if (!stopRef.current) {
+              // после создания группы/чата от имени владельца отправляем сообщение всем подписчикам
+              sendMessage({ content: text, chatKey: data.object.chat_key });
+              stopRef.current = true;
+            }
           } else {
             // если участник группы/канала, то добавим в список чатов в store новый чат
             addChatInChatsListStore(result);
@@ -529,6 +542,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         console.log('Cообщение сервера что при создании группы/канала возникла ошибка :', data);
         // Если сервер прислал ошибку, удалим по request_uid из store заглушку стоящую в DOM на созданную группу/канал
         deleteChatByUidStore(data.request_uid);
+        stopRef.current = true;
         // Очистим таймаут подтверждения
         pendingTimeouts.current.delete(data.request_uid);
       }
@@ -581,12 +595,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       forwardMessage,
       file,
       images,
+      chatKey,
     }: {
       content: string;
       repliedMessage?: RestMessageApi | null | undefined;
       forwardMessage?: RestMessageApi | null | undefined;
       file?: Attachment | null | undefined;
       images?: Attachment[] | null | undefined;
+      chatKey?: string;
     }): void => {
       if (
         !content?.trim() &&
@@ -599,21 +615,22 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       )
         return;
       const requestUid = crypto.randomUUID();
-      // выясняем это простой чат либо группа (если true то группа)
-      const has = userIdRef.current.includes('group_');
+      // выясняем это простой чат либо группа (если true, то группа/канал)
+      const hasGroup = userIdRef.current.includes('group_');
+      const hasChannel = userIdRef.current.includes('channel_');
       //создаем в DOM временное сообщение-заглушку для помещения в список сообщений
       const tempMessage: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' } = {
         id: 0,
         uid: requestUid,
         from_user: {
-          uid: '',
+          uid: currentUserIdRef.current,
           username: '',
           nickname: '',
           avatar_url: '',
           avatar_webp_url: '',
         },
         to_user: {
-          uid: has ? '' : userIdRef.current,
+          uid: hasGroup || hasChannel ? '' : userIdRef.current,
           username: '',
           nickname: '',
           avatar_url: '',
@@ -627,7 +644,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         created_at: Date.now() / 1000,
         updated_at: 0,
         chat_id: 0,
-        chat_key: has ? userIdRef.current : '',
+        chat_key: chatKey ? chatKey : hasGroup || hasChannel ? userIdRef.current : '',
         chat_type: 'chat',
         message_rtc: {
           uid: '',
@@ -717,11 +734,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
           forwarded_messages: [],
         },
       };
-
-      if (has) {
-        payloadMessage.object.chat_key = userIdRef.current;
+      if (chatKey) {
+        payloadMessage.object.chat_key = chatKey;
       } else {
-        payloadMessage.object.to_user_uid = userIdRef.current;
+        if (hasGroup || hasChannel) {
+          payloadMessage.object.chat_key = userIdRef.current;
+        } else {
+          payloadMessage.object.to_user_uid = userIdRef.current;
+        }
       }
       if (repliedMessage) {
         payloadMessage.object.replied_messages = [repliedMessage.uid];
@@ -793,6 +813,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       avatarFileName?: string;
       avatarFileData?: string;
     }): void => {
+      stopRef.current = false;
       const requestUid = crypto.randomUUID();
       //создаем временную чат-заглушку для помещения в список чатов DOM
       const tempChat: Chat = {
