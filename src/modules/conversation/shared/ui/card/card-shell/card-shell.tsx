@@ -9,6 +9,7 @@ import styles from './card-shell.module.scss';
 import { CardShellProps } from './card-shell.props';
 
 const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
+const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const CardShell = ({
   children,
@@ -25,6 +26,7 @@ export const CardShell = ({
   isModal,
   selected,
   selectAction,
+  chatType,
 }: CardShellProps): JSX.Element => {
   const pathname = usePathname();
   const isActive = isModal ? selected : pathname === href || selected;
@@ -79,7 +81,7 @@ export const CardShell = ({
           onClick={selectAction}
         >
           <ImageUI
-            src={src ? src : URL_DEFAUIT_Avatar}
+            src={src ? src : chatType === 'chat' ? URL_DEFAUIT_Avatar : URL_DEFAUIT_Avatar_Croup}
             alt={alt}
             fill
             classNames={{

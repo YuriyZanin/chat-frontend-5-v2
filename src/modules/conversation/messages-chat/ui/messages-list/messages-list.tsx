@@ -14,6 +14,7 @@ import { OutgoingFileCard } from '../message-card/file-card/outgoing-file-card/o
 import { IncomingImagesCard } from '../message-card/images-card/incoming-images-card/incoming-images-card';
 import { OutgoingImagesCard } from '../message-card/images-card/outgoing-images-card/outgoing-images-card';
 import { IncomingMessagesCard } from '../message-card/incoming-message-card/incoming-message-card';
+import { InformationForGroupCard } from '../message-card/information-card-for-group/information-card-for-group';
 import { NotificationCopyCard } from '../message-card/notification-copy-card/notification-copy-card';
 import { OutgoingMessagesCard } from '../message-card/outgoing-message-card/outgoing-message-card';
 import { IncomingPhoneCallCard } from '../message-card/phone-call-cards/incoming-phone-call-card/incoming-phone-call-card';
@@ -283,15 +284,7 @@ export const MessagesList = ({
                             currentUserId={currentUserId}
                           />
                         )
-                      ) : message.message_rtc?.uid === '' || message.message_rtc === null ? (
-                        <OutgoingMessagesCard
-                          message={message}
-                          sendDeleteMessage={sendDeleteMessage}
-                          search={searchMessagesStore}
-                          isHighlighted={isSearchMatch && message.uid === targetSearchUid}
-                          currentUserId={currentUserId}
-                        />
-                      ) : (
+                      ) : message.message_rtc && !message.content ? (
                         <OutgoingPhoneCallCard
                           message={message}
                           sendDeleteMessage={sendDeleteMessage}
@@ -299,6 +292,16 @@ export const MessagesList = ({
                           isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                           currentUserId={currentUserId}
                           status="Исходящий звонок"
+                        />
+                      ) : message.content && message.content.split(' ')[0] === '@@@' ? (
+                        <InformationForGroupCard text={message.content.split(' ').slice(1).join(' ')} />
+                      ) : (
+                        <OutgoingMessagesCard
+                          message={message}
+                          sendDeleteMessage={sendDeleteMessage}
+                          search={searchMessagesStore}
+                          isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                          currentUserId={currentUserId}
                         />
                       )
                     ) : message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
@@ -332,16 +335,7 @@ export const MessagesList = ({
                           currentUserId={currentUserId}
                         />
                       )
-                    ) : message.message_rtc?.uid === '' || message.message_rtc === null ? (
-                      <IncomingMessagesCard
-                        message={message}
-                        register={register}
-                        sendDeleteMessage={sendDeleteMessage}
-                        search={searchMessagesStore}
-                        isHighlighted={isSearchMatch && message.uid === targetSearchUid}
-                        currentUserId={currentUserId}
-                      />
-                    ) : (
+                    ) : message.message_rtc && !message.content ? (
                       <IncomingPhoneCallCard
                         message={message}
                         register={register}
@@ -350,6 +344,17 @@ export const MessagesList = ({
                         isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                         currentUserId={currentUserId}
                         status="Входящий звонок"
+                      />
+                    ) : message.content && message.content.split(' ')[0] === '@@@' ? (
+                      <InformationForGroupCard text={message.content.split(' ').slice(1).join(' ')} />
+                    ) : (
+                      <IncomingMessagesCard
+                        message={message}
+                        register={register}
+                        sendDeleteMessage={sendDeleteMessage}
+                        search={searchMessagesStore}
+                        isHighlighted={isSearchMatch && message.uid === targetSearchUid}
+                        currentUserId={currentUserId}
                       />
                     )}
                   </div>

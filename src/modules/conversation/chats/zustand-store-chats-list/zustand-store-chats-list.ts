@@ -7,6 +7,8 @@ type ChatsListState = {
   clearChatsList: () => void;
   addChatInChatsList: (chat: Chat) => void;
   deleteChatInChatsList: (id: number | undefined) => void;
+  updateChatByUid: (request_uid: string, patch: Partial<Chat>) => void;
+  deleteChatByUid: (request_uid: string) => void;
 };
 
 export const useChatsListStore = create<ChatsListState>((set) => ({
@@ -38,6 +40,7 @@ export const useChatsListStore = create<ChatsListState>((set) => ({
     set({
       chatsList: null,
     }),
+
   addChatInChatsList: (chat: Chat): void =>
     set((s) => {
       const prev = s.chatsList ?? [];
@@ -49,6 +52,7 @@ export const useChatsListStore = create<ChatsListState>((set) => ({
       }
       return { chatsList: [chat, ...prev] };
     }),
+
   deleteChatInChatsList: (id: number | undefined): void =>
     set((s) => {
       const prev = s.chatsList ?? [];
@@ -56,6 +60,25 @@ export const useChatsListStore = create<ChatsListState>((set) => ({
       if (exists) {
         return {
           chatsList: [...prev.filter((c) => c.chat.id !== id)],
+        };
+      }
+      return { chatsList: [...prev] };
+    }),
+
+  updateChatByUid: (request_uid: string, patch): void =>
+    set((s) => {
+      const prev = s.chatsList ?? [];
+      return {
+        chatsList: prev.map((chat) => (chat.peer.uid === request_uid ? { ...chat, ...patch } : chat)),
+      };
+    }),
+  deleteChatByUid: (request_uid: string): void =>
+    set((s) => {
+      const prev = s.chatsList ?? [];
+      const exists = prev.find((c) => c.peer.uid === request_uid);
+      if (exists) {
+        return {
+          chatsList: [...prev.filter((c) => c.peer.uid !== request_uid)],
         };
       }
       return { chatsList: [...prev] };

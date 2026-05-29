@@ -9,7 +9,7 @@ export const CardPreview = ({ content, filesSummary, replied, forwarded }: CardP
   const { count = 0, types = [] } = filesSummary || {};
 
   const getPreviewText = (): string => {
-    if (content) return content;
+    if (content) return content.split(' ')[0] === '@@@' ? content.split(' ').slice(1).join(' ') : content;
     if (!count) return '';
 
     if (types.length > 1) return `${count} медиа`;

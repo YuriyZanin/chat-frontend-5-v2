@@ -1,4 +1,5 @@
 // src/modules/settings/lib/use-image-upload/use-image-upload.ts
+'use client';
 import { useCallback, useRef, useState } from 'react';
 
 type UseImageUploadReturn = {

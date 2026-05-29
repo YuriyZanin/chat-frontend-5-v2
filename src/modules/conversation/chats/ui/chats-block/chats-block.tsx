@@ -2,18 +2,21 @@
 
 import { ChatCard } from 'modules/conversation/chats/entity/ui';
 import { DeleteSelectedContactsButton } from 'modules/conversation/contacts/features/contacts-selection';
+import { useInfiniteScroll } from 'modules/conversation/messages-chat/hooks/use-infinite-scroll';
 import { ConversationLayout, SearchInput } from 'modules/conversation/shared/ui';
 import { useRouter } from 'next/navigation';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { Dropdown } from 'shared/ui/dropdown';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useChatsScreen } from '../../screens/use-chats-screen';
+import { useChatsListStore } from '../../zustand-store-chats-list/zustand-store-chats-list';
 import { AddContactModal } from '../add-contact-modal';
 import { DeleteChatModal } from '../delete-chat-modal';
 import classes from './chat-block.module.scss';
 import CreateChannelIcon from './icons/CreateChannelIcon.svg';
 import CreateGroupIcon from './icons/CreateGroupIcon.svg';
 import CreateGropOrChannelIcon from './icons/CreateGroupOrChannelIcon.svg';
+
 // const chats = mockChatListApiResponse.results.map((r) => mapChatFromApi(r));
 
 export const ChatsBlock = (): JSX.Element => {
@@ -31,7 +34,19 @@ export const ChatsBlock = (): JSX.Element => {
     is_favorite,
     setIsFavorite,
     chats,
+    status,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useChatsScreen();
+
+  const chatsListStore = useChatsListStore((s) => s.chatsList);
+  const setChatsListStore = useChatsListStore((s) => s.setChatsList);
+  // при изменении массива chats незамедлительнол изменения вносим в store
+
+  useEffect(() => {
+    setChatsListStore(chats);
+  }, [chats, setChatsListStore]);
   const router = useRouter();
   const contactMenuItems: DropdownItem[] = [
     {
@@ -49,6 +64,17 @@ export const ChatsBlock = (): JSX.Element => {
       },
     },
   ];
+
+  // хук запускает работу бесконечного скролла
+  const { wrapperRef, sentinelRef } = useInfiniteScroll({
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    arrayLenght: chatsListStore?.length ? chatsListStore?.length : 0,
+    scrollType: 'down',
+  });
+  // подгружаем новую страницу, когда пользователь приблизится к предпоследнему элементу от низа
+  const triggerIndex = chatsListStore?.length ? chatsListStore?.length - 1 : 0;
   return (
     <>
       <ConversationLayout
@@ -59,16 +85,29 @@ export const ChatsBlock = (): JSX.Element => {
           </div>
         }
         footer={<DeleteSelectedContactsButton />}
+        wrapperRef={wrapperRef}
       >
-        <>
-          <ul>
-            {chats.map((c) => (
-              <ChatCard key={c.peer.uid} peer={c.peer} chat={c.chat} messages={c.messages} />
-            ))}
-          </ul>
+        {status === 'success' && chatsListStore && chatsListStore.length > 0 && (
+          <>
+            <ul>
+              {chatsListStore?.map((chat, index) => {
+                const isSentinel = index === triggerIndex;
+                return (
+                  <div
+                    key={chat.peer.uid}
+                    ref={(el) => {
+                      if (isSentinel) sentinelRef.current = el;
+                    }}
+                  >
+                    <ChatCard peer={chat.peer} chat={chat.chat} messages={chat.messages} />
+                  </div>
+                );
+              })}
+            </ul>
+          </>
+        )}
 
-          {/*<ConversationEmptyState variant={'chats'} />*/}
-        </>
+        {/*<ConversationEmptyState variant={'chats'} />*/}
       </ConversationLayout>
       <DeleteChatModal />
       <AddContactModal />

@@ -1,5 +1,5 @@
+import type { ChatType } from 'modules/conversation/chats/model/chat';
 import React, { ReactNode } from 'react';
-
 export type CardShellProps = {
   children: ReactNode;
   chatId?: number;
@@ -22,4 +22,5 @@ export type CardShellProps = {
   selectAction?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   selected?: boolean;
   isModal?: boolean;
+  chatType?: ChatType;
 };

@@ -1,5 +1,8 @@
 'use client';
 
+import type { Chat } from 'modules/conversation/chats/entity';
+import type { CreateChatRequestApi } from 'modules/conversation/chats/model/chat/chat.api.schema';
+import { CreateChatRequestSchema } from 'modules/conversation/chats/model/chat/chat.api.schema';
 import { translateMessageIntoChat } from 'modules/conversation/chats/utils/utils';
 import { useChatsListStore } from 'modules/conversation/chats/zustand-store-chats-list/zustand-store-chats-list';
 import {
@@ -39,8 +42,7 @@ import {
 } from '../../model/messages-list';
 import type { Attachment } from '../../ui/context-menu/context-menu-attach-file/context-menu-attach-file.props';
 import { useMessagesChatStore, useUserIdStore } from '../../zustand-store/zustand-store';
-
-type UseWebSocketChat = {
+type UseWebSocketChatReturn = {
   sendMessage: ({
     content,
     repliedMessage,
@@ -70,9 +72,27 @@ type UseWebSocketChat = {
     message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' },
     selected?: boolean,
   ) => void;
+  createGroupOrChannel: ({
+    name,
+    chatType,
+    uidUsersList,
+    description,
+    avatarUid,
+    avatarFileName,
+    avatarFileData,
+  }: {
+    name: string;
+    chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
+    uidUsersList: string[];
+    description?: string;
+    avatarUid?: string;
+    avatarPreview?: string;
+    avatarFileName?: string;
+    avatarFileData?: string;
+  }) => void;
 };
 
-export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSocketChat {
+export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSocketChatReturn {
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPongRef = useRef<number>(Date.now());
   // прописываем в компоненте актуальный user_uid открытого чата из store
@@ -80,6 +100,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   const { toUserUid, messageRtcUid, addCandidate, setCallData, setState, resetCall } = useCallsStore();
   //делаем ссылку на актуальный user_uid открытого чата
   const userIdRef = useRef<string>(userId);
+  const stopRef = useRef<boolean>(true);
+
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
@@ -105,6 +127,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   const upsertMessageForUser = useMessagesChatStore.getState().upsertMessageForUser;
   const deleteMessageByUidForUser = useMessagesChatStore.getState().deleteMessageByUidForUser;
   const addChatInChatsListStore = useChatsListStore.getState().addChatInChatsList;
+  const updateChatByUidStore = useChatsListStore.getInitialState().updateChatByUid;
+  const deleteChatByUidStore = useChatsListStore.getInitialState().deleteChatByUid;
 
   // maccив интервалов [{requestUid:timeout_id},...] на каждое отправленное сообщение с помошью ws
   // нужно отследить через какое время на отправленное клиентом сообщение, ws пришлет ответ-подтверждение,
@@ -126,6 +150,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       | IceCandidateRequestAPI
       | OfferCallRequestAPI
       | DeleteMessageApi
+      | CreateChatRequestApi
     )[]
   >([]);
   // функции пин/понг
@@ -141,12 +166,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socket.readyState !== WebSocket.OPEN) return;
 
       // если pong давно не приходил — считаем соединение мёртвым
-      if (Date.now() - lastPongRef.current > 600000) {
+      if (Date.now() - lastPongRef.current > 30000) {
         console.warn('No pong received. Closing socket.');
         socket.close();
         return;
       }
-
       socket.send(JSON.stringify({ action: 'ping' }));
       console.log('Ping sent');
     }, 15000); // каждые 15 секунд
@@ -178,8 +202,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   const connectWS = useCallback(() => {
     if (!navigator.onLine) return;
     if (wsRef.current) {
-      const st = wsRef.current.readyState;
-      if (st === WebSocket.OPEN || st === WebSocket.CONNECTING) return;
+      wsRef.current.close();
     }
     clearReconnectTimer();
 
@@ -457,8 +480,82 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
           resetCall();
         }
       }
+      //входящее ws-сообщение сервера подтверждающее создание группы/канала
+      if (data.action === 'create_chat' && data.status === 'OK') {
+        console.log('Подтверждение сервера об создании группы/канала:', data);
+        // Если сервер пришлёт подтверждение с request_uid,
+        if (data.request_uid) {
+          const result = {
+            peer: {
+              uid: data.object.chat_id,
+              username: data.object.chat_key,
+              nickname: data.object.name,
+              firstName: '',
+              lastName: '',
+              avatarUrl: data.object.avatar
+                ? `https://api.dev.chat.ktsf.ru/${data.object.avatar.url.split('?')[0]}`
+                : '',
+              avatarWebpUrl: data.object.avatar
+                ? `https://api.dev.chat.ktsf.ru/${data.object.avatar.url.split('?')[0]}`
+                : '',
+              isBlocked: false,
+              isOnline: false,
+              isInContacts: false,
+              wasOnlineAt: 0,
+            },
+            chat: {
+              id: data.object.chat_id,
+              chatKey: data.object.chat_key,
+              chatType: data.object.chat_type,
+              name: data.object.name,
+              is_favorite: false,
+              notifications: true,
+              newMessageCount: 0,
+              lastActivityAt: 0,
+            },
+            messages: {},
+          };
+          if (data.object.created_by === currentUserIdRef.current) {
+            let text: string;
+            if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
+              text = `@@@ Канал создан`;
+            } else {
+              text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
+            }
+            // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
+            updateChatByUidStore(data.request_uid, result);
+            if (!stopRef.current) {
+              // после создания группы/чата от имени владельца отправляем сообщение всем подписчикам
+              sendMessage({ content: text, chatKey: data.object.chat_key });
+              stopRef.current = true;
+            }
+          } else {
+            // если участник группы/канала, то добавим в список чатов в store новый чат
+            addChatInChatsListStore(result);
+          }
+        }
+        // Очистим таймаут подтверждения
+        pendingTimeouts.current.delete(data.request_uid);
+      }
+      //входящее ws-сообщение сервера не подтверждающее создание группы/канала из-за возникшей ошибки
+      if (data.action === 'create_chat' && data.status === 'error') {
+        console.log('Cообщение сервера что при создании группы/канала возникла ошибка :', data);
+        // Если сервер прислал ошибку, удалим по request_uid из store заглушку стоящую в DOM на созданную группу/канал
+        deleteChatByUidStore(data.request_uid);
+        stopRef.current = true;
+        // Очистим таймаут подтверждения
+        pendingTimeouts.current.delete(data.request_uid);
+      }
     };
-  }, [wsUrl, addMessageForUser, updateMessageByUidForUser, upsertMessageForUser, deleteMessageByUidForUser]);
+  }, [
+    wsUrl,
+    addMessageForUser,
+    updateMessageByUidForUser,
+    upsertMessageForUser,
+    deleteMessageByUidForUser,
+    updateChatByUidStore,
+    deleteChatByUidStore,
+  ]);
 
   // чтобы scheduleReconnect мог вызывать connectWS
   useEffect(() => {
@@ -482,10 +579,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     connectWS();
     return (): void => {
       isUnmountedRef.current = true;
-      clearReconnectTimer();
+      //clearReconnectTimer();
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
-      wsRef.current?.close();
       pendingTimeouts.current.forEach((id) => clearTimeout(id));
       pendingTimeouts.current.clear();
     };
@@ -499,12 +595,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       forwardMessage,
       file,
       images,
+      chatKey,
     }: {
       content: string;
       repliedMessage?: RestMessageApi | null | undefined;
       forwardMessage?: RestMessageApi | null | undefined;
       file?: Attachment | null | undefined;
       images?: Attachment[] | null | undefined;
+      chatKey?: string;
     }): void => {
       if (
         !content?.trim() &&
@@ -517,21 +615,22 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       )
         return;
       const requestUid = crypto.randomUUID();
-      // выясняем это простой чат либо группа (если true то группа)
-      const has = userIdRef.current.includes('group_');
+      // выясняем это простой чат либо группа (если true, то группа/канал)
+      const hasGroup = userIdRef.current.includes('group_');
+      const hasChannel = userIdRef.current.includes('channel_');
       //создаем в DOM временное сообщение-заглушку для помещения в список сообщений
       const tempMessage: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' } = {
         id: 0,
         uid: requestUid,
         from_user: {
-          uid: '',
+          uid: currentUserIdRef.current,
           username: '',
           nickname: '',
           avatar_url: '',
           avatar_webp_url: '',
         },
         to_user: {
-          uid: has ? '' : userIdRef.current,
+          uid: hasGroup || hasChannel ? '' : userIdRef.current,
           username: '',
           nickname: '',
           avatar_url: '',
@@ -545,7 +644,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         created_at: Date.now() / 1000,
         updated_at: 0,
         chat_id: 0,
-        chat_key: has ? userIdRef.current : '',
+        chat_key: chatKey ? chatKey : hasGroup || hasChannel ? userIdRef.current : '',
         chat_type: 'chat',
         message_rtc: {
           uid: '',
@@ -635,11 +734,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
           forwarded_messages: [],
         },
       };
-
-      if (has) {
-        payloadMessage.object.chat_key = userIdRef.current;
+      if (chatKey) {
+        payloadMessage.object.chat_key = chatKey;
       } else {
-        payloadMessage.object.to_user_uid = userIdRef.current;
+        if (hasGroup || hasChannel) {
+          payloadMessage.object.chat_key = userIdRef.current;
+        } else {
+          payloadMessage.object.to_user_uid = userIdRef.current;
+        }
       }
       if (repliedMessage) {
         payloadMessage.object.replied_messages = [repliedMessage.uid];
@@ -660,9 +762,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
         socket.send(JSON.stringify(payloadMessage));
         console.log('Send of server message: ', payloadMessage);
-        //Устанавливаем таймаут ожидания подтверждения (10cek)
+        //Устанавливаем таймаут ожидания подтверждения (5cek)
         const to = setTimeout(() => {
-          // Если за 10 cек не пришло сообщение-подтверждение от ws меняем в сообщении
+          // Если за 5 cек не пришло сообщение-подтверждение от ws меняем в сообщении
           //  статус с 'pending' на 'failed' - {status:failed}
           updateMessageByUidForUser(userIdRef.current, requestUid, { status: 'failed' });
           pendingTimeouts.current.delete(requestUid);
@@ -689,6 +791,99 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       messageQueueRef.current.push(payload);
     }
   };
+
+  // Функция создания группы/канала
+  const createGroupOrChannel = useCallback(
+    ({
+      name,
+      chatType,
+      uidUsersList,
+      description,
+      avatarUid,
+      avatarPreview,
+      avatarFileName,
+      avatarFileData,
+    }: {
+      name: string;
+      chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
+      uidUsersList: string[];
+      description?: string;
+      avatarUid?: string;
+      avatarPreview?: string;
+      avatarFileName?: string;
+      avatarFileData?: string;
+    }): void => {
+      stopRef.current = false;
+      const requestUid = crypto.randomUUID();
+      //создаем временную чат-заглушку для помещения в список чатов DOM
+      const tempChat: Chat = {
+        peer: {
+          uid: requestUid,
+          username: '',
+          nickname: name,
+          firstName: '',
+          lastName: '',
+          avatarUrl: avatarPreview ?? '',
+          avatarWebpUrl: avatarPreview ?? '',
+          isBlocked: false,
+          isOnline: false,
+          isInContacts: false,
+          wasOnlineAt: 0,
+        },
+        chat: {
+          id: 0,
+          chatKey: '',
+          chatType: chatType,
+          name,
+          is_favorite: false,
+          notifications: true,
+          newMessageCount: 0,
+          lastActivityAt: 0,
+        },
+        messages: {},
+      };
+
+      // записываем в store и показываем локально сразу в DOM созданный клиентом чат (tempChat)
+      addChatInChatsListStore(tempChat);
+      const payload: CreateChatRequestApi = {
+        action: 'create_chat',
+        request_uid: requestUid,
+        object: {
+          name,
+          chat_type: chatType,
+          uid_users_list: uidUsersList,
+          ...(description && { description }),
+          ...(avatarUid && { avatar_uid: avatarUid }),
+        },
+      };
+      if (avatarFileName && avatarFileData) {
+        payload.object.avatar = {
+          filename: avatarFileName,
+          data: avatarFileData,
+        };
+      }
+
+      // Валидация через Zod
+      const resultZod = CreateChatRequestSchema.safeParse(payload);
+      const socket = wsRef.current;
+      if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
+        socket.send(JSON.stringify(payload));
+        console.log('Sent create_chat request:', payload);
+        //Устанавливаем таймаут ожидания подтверждения (5cek)
+        const to = setTimeout(() => {
+          // Если за 5 cек не пришло сообщение-подтверждение от ws меняем в сообщении
+          console.log('Группа/канал не созданы');
+          pendingTimeouts.current.delete(requestUid);
+        }, 5000);
+        pendingTimeouts.current.set(requestUid, to);
+      } else {
+        // Если ws-соединение по какой-то причине закрыто, тогда ставим это сообщение (payload) в очередь на отправку
+        // когда ws-соединение установиться
+        messageQueueRef.current.push(payload);
+      }
+    },
+    [],
+  );
 
   // Добавление / удаление участников в группу / канал
   const sendMembers = (payload: AddOrRemoveMembersRequestAPI): void => {
@@ -917,5 +1112,6 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     sendOfferCall,
     sendChangeStatusReadMessage,
     sendDeleteMessage,
+    createGroupOrChannel,
   };
 }

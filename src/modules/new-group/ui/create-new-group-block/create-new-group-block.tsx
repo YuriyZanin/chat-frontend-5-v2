@@ -12,13 +12,17 @@ import GroupTypeSelect from '../group-type-select/group-type-select';
 import styles from './create-new-group-block.module.scss';
 
 export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
-  const { setGroupData, setMode, resetGroup } = useNewGroupStore();
+  const setNameStore = useNewGroupStore((s) => s.setName);
+  const setModeStore = useNewGroupStore((s) => s.setMode);
+  const setDescriptionStore = useNewGroupStore((s) => s.setDescription);
+  const setChatTypeStore = useNewGroupStore((s) => s.setChatType);
+  const setAvatarUidStore = useNewGroupStore((s) => s.setAvatarUid);
+  const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
+  const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
   const router = useRouter();
   const pathname = usePathname();
-
   // Определяем режим по пути
   const mode = pathname.includes('/new-channel') ? 'channel' : 'group';
-
   const {
     selectedFile,
     previewUrl,
@@ -40,29 +44,29 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
 
   // Устанавливаем режим при монтировании
   useEffect(() => {
-    setMode(mode);
-    resetGroup();
-  }, [mode, setMode, resetGroup]);
+    setModeStore(mode);
+  }, [mode, setModeStore]);
 
   useEffect(() => {
-    if (previewUrl) {
-      setGroupData({ avatarPreview: previewUrl });
+    if (previewUrl && selectedFile) {
+      setAvatarPreviewStore(previewUrl);
+      setAvatarFileStore(selectedFile);
     }
-  }, [previewUrl, setGroupData]);
+  }, [previewUrl, selectedFile, setAvatarPreviewStore, setAvatarFileStore]);
 
   const handleNameChange = (val: string): void => {
     setGroupName(val);
-    setGroupData({ name: val });
+    setNameStore(val);
   };
 
   const handleDescChange = (val: string): void => {
     setGroupDescription(val);
-    setGroupData({ description: val });
+    setDescriptionStore(val);
   };
 
-  const handleTypeChange = (type: typeof chatType): void => {
+  const handleTypeChange = (type: 'public-group' | 'private-group' | 'public-channel' | 'private-channel'): void => {
     setChatType(type);
-    setGroupData({ chatType: type });
+    setChatTypeStore(type);
   };
 
   const uploadAvatar = async (file: File): Promise<string> => {
@@ -77,6 +81,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
     }
     const data = await response.json();
     return data.uid;
+    return '';
   };
 
   const handleConfirmCrop = async (file: File, zoom: number): Promise<void> => {
@@ -86,7 +91,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
     setIsUploadingAvatar(true);
     try {
       const uid = await uploadAvatar(file);
-      setGroupData({ avatarUid: uid });
+      setAvatarUidStore(uid);
     } catch (error) {
       console.error('Ошибка загрузки аватара:', error);
     } finally {

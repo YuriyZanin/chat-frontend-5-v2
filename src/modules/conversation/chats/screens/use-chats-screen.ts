@@ -1,10 +1,12 @@
 'use client';
 
+import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { Chat } from 'modules/conversation/chats/entity/chat.entity';
 import { useDebouncedValue } from 'modules/conversation/shared/hooks';
 import { useMemo } from 'react';
 import { useChatsQuery } from '../api/chat.query';
 import { mapChatFromApi } from '../model/chat';
+import type { ChatListApiResponse } from '../model/chat.api.schema';
 import { useChatsStore } from '../model/search/search-chats.store';
 
 type UseChatsScreenReturn = {
@@ -26,6 +28,11 @@ type UseChatsScreenReturn = {
   chats: Chat[];
   modalChats: Chat[];
   status: string;
+  fetchNextPage: (
+    options?: FetchNextPageOptions,
+  ) => Promise<InfiniteQueryObserverResult<InfiniteData<ChatListApiResponse>, unknown>>;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
 };
 
 export const useChatsScreen = (): UseChatsScreenReturn => {
@@ -53,7 +60,7 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
   const debouncedOrdering = useDebouncedValue<string>(ordering, 300);
   const debouncedSearch = useDebouncedValue<string>(search, 300);
 
-  const { data: myChats, status } = useChatsQuery();
+  const { data: myChats, status, isFetchingNextPage, fetchNextPage, hasNextPage } = useChatsQuery();
 
   const chats = useMemo(() => myChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [], [myChats]);
 
@@ -104,5 +111,8 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
     chats: sortedChats,
     modalChats: sortedModalChats,
     status,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
   };
 };
