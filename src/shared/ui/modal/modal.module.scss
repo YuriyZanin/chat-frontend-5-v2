@@ -41,6 +41,9 @@
   font-weight: 500;
   margin-bottom: 0.8rem;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .content {
