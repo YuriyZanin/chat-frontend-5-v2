@@ -80,7 +80,7 @@ export const ChatsBlock = (): JSX.Element => {
       <ConversationLayout
         header={
           <div className={classes.searchInputContainer}>
-            <SearchInput query={search} onChange={setSearch} />
+            <SearchInput query={search} onChange={setSearch} onClear={clearSearch} />
             <Dropdown trigger={<CreateGropOrChannelIcon />} items={contactMenuItems} />
           </div>
         }
