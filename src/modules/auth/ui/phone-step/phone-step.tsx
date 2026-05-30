@@ -55,6 +55,7 @@ export const PhoneStep: React.FC<PhoneStepProps> = ({ next, prev, onPhoneConfirm
               className={styles.image}
             />
           </div>
+          <h1 className={styles.headerTitle}>А-Чат</h1>
           <h1 className={styles.title}>Вход/регистрация</h1>
           <PhoneNumberInput onChange={handlePhoneChange} onValidationChange={handleValidationChange} />
           {error && <p className={styles.errorText}>{error}</p>}

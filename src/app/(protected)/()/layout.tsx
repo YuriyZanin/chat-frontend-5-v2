@@ -1,4 +1,4 @@
-import { ProtectedLayout } from 'layouts/protected-layout';
+import { AdaptiveLayout } from 'layouts/adaptive-layout/adaptive-layout';
 import { Navigation } from 'layouts/protected-layout/navigation';
 // import { ProfileBlock } from 'modules/profile';
 import { JSX, ReactNode } from 'react';
@@ -16,7 +16,8 @@ export default function Layout({
 }): JSX.Element {
   return (
     <QueryProvider>
-      <ProtectedLayout nav={<Navigation />} list={list} main={children} info={info} />
+      {/* <ProtectedLayout nav={<Navigation />} list={list} main={children} info={info} /> */}
+      <AdaptiveLayout nav={<Navigation />} list={list} main={children} info={info} />
       <QueryDevtools />
     </QueryProvider>
   );
