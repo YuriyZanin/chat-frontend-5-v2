@@ -24,3 +24,9 @@
 .menu {
   @include mixins.flex-box($align: center, $justify: end, $gap: 12px);
 }
+
+@media (max-width: 410px) {
+  .header {
+    background-color: #d6d2f6;
+  }
+}

@@ -1,4 +1,5 @@
 'use client';
+
 import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
@@ -7,27 +8,36 @@ import { useNotificationStore } from 'modules/notification/model/notification.st
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 import { ImageUI } from 'shared/ui/image';
+
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
 import { OutgoingCallPanel } from '../../widgets/outgoing-call-panel';
 import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
+
 import {
   useHeaderButtonsModalStore,
   useSearchIndicatorStore,
   useSearchMessagesStore,
 } from '../../zustand-store/zustand-store';
+
 import { AddModal } from '../header-top-buttons-block/add-modal';
 import { BlockModal } from '../header-top-buttons-block/block-modal';
 import { HeaderTopButtonsBlock } from '../header-top-buttons-block/header-top-buttons-block';
 import { LeaveGroupModal } from '../header-top-buttons-block/leave-group-modal';
+
 import { SearchResultCard } from '../search-messages/search-result-card/search-result-card';
 import { SearchMessages } from '../search-messages/search/search-messages';
+
+import { usePathname, useRouter } from 'next/navigation';
+import { useMediaQuery } from 'shared/hooks/use-media-query';
 import styles from './header-top.module.scss';
+
+import BackIcon from './icons/back-icon.svg';
 import CallIcon from './icons/call-icon.svg';
 import SearchIcon from './icons/search-icon.svg';
 
-const URL_DEFAULT_Avatar = '/images/messages-chats/default-avatar.svg';
+const URL_DEFAULT_AVATAR = '/images/messages-chats/default-avatar.svg';
 
 export const HeaderTop = ({
   wsUrl,
@@ -39,6 +49,7 @@ export const HeaderTop = ({
   currentUid: string;
 }): JSX.Element => {
   const { chats } = useChatsScreen();
+
   const {
     isCallModalOpen,
     isIncomingModalOpen,
@@ -48,12 +59,16 @@ export const HeaderTop = ({
     toggleCallsOpen,
     toggleIncomingModalOpen,
   } = useCallsStore();
+
   const { toggleInfoOpen } = useInfoStore();
+
   const { isModalOpen } = useNotificationStore();
+
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
 
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
+
   const chat = isGroupOrChannel
     ? chats.find((c) => c.chat.chatKey === user_uid)
     : chats.find((c) => c.peer.uid === user_uid);
@@ -67,10 +82,15 @@ export const HeaderTop = ({
     isBlocked = false,
     isInContacts = false,
   } = chat?.peer ?? {};
+
   const status = getLastSeenLabel(wasOnlineAt);
+
   const [searchMessagesVisible, setSearchMessagesVisible] = useState<boolean>(false);
+
   const searchIndicatorStore = useSearchIndicatorStore((s) => s.searchIndicator);
+
   const searchMessagesStore = useSearchMessagesStore((s) => s.searchMessages);
+
   useEffect(() => {
     if (isBlocked && isInContacts) {
       closeButtonMenu();
@@ -78,7 +98,15 @@ export const HeaderTop = ({
       openButtonMenu();
     }
   }, [closeButtonMenu, openButtonMenu, isBlocked, isInContacts, user_uid]);
+
+  const router = useRouter();
+
+  const isMobile = useMediaQuery('(max-width: 410px)');
+
+  const pathname = usePathname();
+
   const { contacts } = useContactsScreen();
+
   const { sendCallCompletion } = useWebSocketChat(wsUrl, currentUid);
 
   const handleCall = async (): Promise<void> => {
@@ -93,11 +121,13 @@ export const HeaderTop = ({
         alert('Нет доступа к микрофону');
       }
     }
+
     toggleCallsOpen();
   };
 
   const handleRejectCall = (): void => {
     const requestUid = crypto.randomUUID();
+
     sendCallCompletion({
       action: 'call_completion',
       request_uid: requestUid,
@@ -111,41 +141,70 @@ export const HeaderTop = ({
     });
   };
 
+  const handleOpenProfile = (): void => {
+    if (isMobile) {
+      if (!pathname.endsWith('/profile')) {
+        router.push(`${pathname}/profile`);
+      }
+
+      return;
+    }
+
+    toggleInfoOpen();
+  };
+
   return (
     <>
       <div className={styles.wrapper}>
         <div className={styles.contactWrapper}>
-          <ImageUI
-            src={avatarUrl ? avatarUrl : URL_DEFAULT_Avatar}
-            alt={firstName}
-            width={40}
-            height={40}
-            className={styles.image}
-            onClick={() => toggleInfoOpen()}
-          />
-          {searchMessagesVisible ? (
-            <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
-          ) : (
-            <>
-              <div className={styles.info} onClick={() => toggleInfoOpen()}>
+          <div className={styles.left}>
+            {isMobile && (
+              <button type="button" className={''} onClick={() => router.push('/chats')}>
+                <BackIcon />
+              </button>
+            )}
+            <ImageUI
+              src={avatarUrl || URL_DEFAULT_AVATAR}
+              alt={firstName}
+              width={40}
+              height={40}
+              className={styles.image}
+              onClick={handleOpenProfile}
+            />
+
+            {searchMessagesVisible ? (
+              <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
+            ) : (
+              <div className={styles.info} onClick={handleOpenProfile}>
                 <span className={styles.name}>{isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}</span>
+
                 <span className={styles.status}>{status}</span>
               </div>
-              <div className={styles.icon} onClick={() => setSearchMessagesVisible(true)}>
-                <SearchIcon />
-              </div>
-              <div className={styles.icon} onClick={handleCall}>
+            )}
+          </div>
+
+          {!searchMessagesVisible && (
+            <div className={styles.right}>
+              {!isMobile && (
+                <button type="button" className={styles.icon} onClick={() => setSearchMessagesVisible(true)}>
+                  <SearchIcon />
+                </button>
+              )}
+
+              <button type="button" className={styles.icon} onClick={handleCall}>
                 <CallIcon />
-              </div>
-            </>
+              </button>
+            </div>
           )}
         </div>
+
         {searchMessagesStore && (
           <SearchResultCard
             currentSearchIndex={searchIndicatorStore?.currentSearchIndex ?? 0}
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
+
         {!contacts?.some((c) => c.uid === user_uid) && (
           <HeaderTopButtonsBlock
             wsUrl={wsUrl}
@@ -156,14 +215,20 @@ export const HeaderTop = ({
             isInContact={isInContacts}
           />
         )}
+
         {isModalOpen && <NotificationModal />}
+
         {isBlockModalOpen && <BlockModal />}
+
         {isAddModalOpen && <AddModal fullName={`${firstName} ${lastName}`} />}
+
         {isLeaveGroupModalOpen && (
           <LeaveGroupModal wsUrl={wsUrl} chatKey={user_uid} currentUid={currentUid} name={nickname} />
         )}
       </div>
+
       {isReceivingModalOpen && <ReceivingCallPanel onReject={handleRejectCall} onAccept={toggleIncomingModalOpen} />}
+
       {isCallModalOpen && (
         <OutgoingCallPanel
           avatarUrl={avatarUrl}
@@ -173,6 +238,7 @@ export const HeaderTop = ({
           currentUid={currentUid}
         />
       )}
+
       {isIncomingModalOpen && <IncomingCallPanel wsUrl={wsUrl} currentUid={currentUid} />}
     </>
   );

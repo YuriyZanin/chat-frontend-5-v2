@@ -49,7 +49,10 @@
   &:hover::-webkit-scrollbar-thumb {
     background-color: var(--surface-scroll);
   }
+}
 
-  .footer {
+@media (max-width: 410px) {
+  .wrapper {
+    gap: 0rem;
   }
 }

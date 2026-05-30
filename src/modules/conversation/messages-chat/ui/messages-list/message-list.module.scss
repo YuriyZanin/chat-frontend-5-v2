@@ -28,3 +28,9 @@
   background-color: var(--surface-scroll);
   border-radius: 0.4rem;
 }
+
+@media (max-width: 411px) {
+  .wrapper {
+    background-color: #d6d2f6;
+  }
+}

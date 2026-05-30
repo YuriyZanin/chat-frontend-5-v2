@@ -43,3 +43,10 @@
   height: 36rem;
   overflow: hidden;
 }
+
+@media (max-width: 410px) {
+  .imageWrapper {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+}

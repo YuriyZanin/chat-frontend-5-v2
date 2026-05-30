@@ -1,0 +1,17 @@
+// layout.module.scss
+
+.wrapper {
+  width: 100%;
+  min-height: 100dvh;
+
+  display: flex;
+  justify-content: center;
+
+  background-color: #d6d2f6;
+}
+
+.content {
+  width: 100%;
+  max-width: 41rem;
+  min-height: 100dvh;
+}
