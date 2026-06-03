@@ -1,7 +1,10 @@
 import { JSX } from 'react';
-import styles from './information-card-for-group.module.scss';
-import type { InformationForGroupCardProps } from './information-card-for-group.props';
-export const InformationForGroupCard = ({ message, register }: InformationForGroupCardProps): JSX.Element => {
+import styles from './incoming-information-card-for-group.module.scss';
+import type { IncomingInformationForGroupCardProps } from './incoming-information-card-for-group.props';
+export const IncomingInformationForGroupCard = ({
+  message,
+  register,
+}: IncomingInformationForGroupCardProps): JSX.Element => {
   return (
     <div
       className={styles.box}
