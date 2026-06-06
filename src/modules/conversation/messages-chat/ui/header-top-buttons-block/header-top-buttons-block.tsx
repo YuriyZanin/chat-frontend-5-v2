@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useAddContactQuery, useSearchUserByNicknameQuery } from 'modules/info/api/info.query';
+import { useAddContactQuery } from 'modules/info/api/info.query';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { usePathname } from 'next/navigation';
@@ -31,16 +31,13 @@ export const HeaderTopButtonsBlock = ({
   const member = participants?.find((p) => p.uid === currentUid);
   const isOwner = member?.isOwner ?? false;
 
-  const { data: users } = useSearchUserByNicknameQuery(nickname);
-  const user = users ? users[0] : undefined;
-
   const pathname = usePathname();
   const isGroup = pathname.startsWith('/chats/group');
   const isChannel = pathname.startsWith('/chats/channel');
 
   const handleAddContact = (): void => {
-    if (!!user) {
-      addToContact({ phone: user?.phone, first_name: user?.first_name, last_name: user?.last_name });
+    if (!!chatKey) {
+      addToContact({ user_uid: chatKey });
       openAddModal();
     }
   };
