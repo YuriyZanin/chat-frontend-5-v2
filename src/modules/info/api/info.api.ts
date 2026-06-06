@@ -52,7 +52,7 @@ export const addToContact = async (
   contact: NewContact,
   { signal }: { signal?: AbortSignal } = {},
 ): Promise<UserContactApiResponse> => {
-  return apiFetch<UserContactApiResponse>(`/api/proxy/api/v1/contact/messenger-add-by-phone/`, {
+  return apiFetch<UserContactApiResponse>(`/api/proxy/api/v1/contact/messenger-add-by-uid/`, {
     method: 'POST',
     body: JSON.stringify(contact),
     signal,

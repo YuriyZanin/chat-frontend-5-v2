@@ -20,6 +20,29 @@ export const globalContactApiSchema = z.object({
 
 export type GlobalContactApi = z.infer<typeof globalContactApiSchema>;
 
+const contactSchema = z.object({
+  uid: z.string(),
+  username: z.string(),
+  nickname: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
+  phone: z.string(),
+  avatar_webp_url: z.string(),
+  avatar_small_url: z.string(),
+  is_online: z.boolean(),
+  was_online_at: z.number().int(),
+});
+
+const apiResponseSchema = z.object({
+  count: z.number().int(),
+  next: z.string().nullable(),
+  previous: z.string().nullable(),
+  results: z.array(contactSchema),
+});
+
+export type ContactApiResponse = z.infer<typeof apiResponseSchema>;
+export type ContactSchemaApi = z.infer<typeof contactSchema>;
+
 export const contactOrderingFields = [
   'first_name',
   'last_name',

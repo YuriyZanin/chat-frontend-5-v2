@@ -9,7 +9,8 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { searchUsers } from 'modules/conversation/contacts/api';
-import { GlobalContactApi, UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { ContactSchemaApi } from 'modules/conversation/contacts/model/contact/search-contact.api.schema';
 import { blockUser, getProfileInfoById, mapInfoProfileFromApi } from '.';
 import { GroupInfo, ProfileInfo } from '../entity/info.entity';
 import {
@@ -67,11 +68,11 @@ export const useGroupOrChanelQuery = (chatKey: string): UseQueryResult<GroupInfo
   });
 };
 
-export const useSearchUserByNicknameQuery = (query: string): UseQueryResult<GlobalContactApi[]> => {
+export const useSearchUserByNicknameQuery = (query: string): UseQueryResult<ContactSchemaApi[]> => {
   return useQuery({
     queryKey: ['search', 'user', query],
     queryFn: async ({ signal }) => {
-      return await searchUsers(query, { signal });
+      return (await searchUsers(query, { signal })).results;
     },
 
     enabled: !!query,

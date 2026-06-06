@@ -1,5 +1,6 @@
 import { Contact } from 'modules/conversation/contacts/entity';
 import { ContactApi } from './contact.types';
+import { ContactSchemaApi } from './search-contact.api.schema';
 
 export const mapContactFromApi = (api: ContactApi): Contact => {
   const { uid, first_name, last_name } = api;
@@ -29,6 +30,33 @@ export const mapContactFromApi = (api: ContactApi): Contact => {
     chatId: chat_id,
     fullName,
     avatarUrl: avatar_url,
+    isOnline: is_online,
+    wasOnlineAt: was_online_at,
+  };
+};
+
+export const mapSearchingContactFromApi = (api: ContactSchemaApi): Contact => {
+  const {
+    uid,
+    username,
+    nickname,
+    first_name,
+    last_name,
+    phone,
+    avatar_webp_url,
+    avatar_small_url,
+    is_online,
+    was_online_at,
+  } = api;
+  const fullName = `${first_name} ${last_name}`;
+
+  return {
+    uid,
+    nickname,
+    firstName: first_name,
+    lastName: last_name,
+    fullName,
+    avatarUrl: avatar_webp_url,
     isOnline: is_online,
     wasOnlineAt: was_online_at,
   };

@@ -41,7 +41,7 @@ export const ContactPanel = ({
   const user = users ? users[0] : undefined;
   const handleAddContact = (): void => {
     if (!!user) {
-      addToContact({ phone: user?.phone, first_name: user?.first_name, last_name: user?.last_name });
+      addToContact({ user_uid: uid });
       openAddModal();
     }
   };
@@ -67,8 +67,8 @@ export const ContactPanel = ({
           <InfoSummary
             nickname={nickname ?? ''}
             phoneNumber={user?.phone}
-            birthDay={formatTimestamp(user?.birthday)}
-            about={user?.additional_information}
+            birthDay={formatTimestamp(profile?.birthday)}
+            about={profile?.additionalInformation}
           />
           {!isInContacts && (
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />

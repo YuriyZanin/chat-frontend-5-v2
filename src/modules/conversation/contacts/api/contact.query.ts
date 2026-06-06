@@ -11,8 +11,9 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { Contact } from 'modules/conversation/contacts/entity';
-import { mapContactFromApi, UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { NewContact } from 'modules/info/model/info.api.schema';
+import { mapSearchingContactFromApi } from '../model/contact/contact.mapper';
 import { addToContact, getContactsList, searchUsers } from './contact.api';
 
 const PAGE_SIZE = 15;
@@ -50,7 +51,12 @@ export const useSearchUsersQuery = (query: string): UseQueryResult<Contact[]> =>
       return await searchUsers(query, { signal });
     },
 
-    select: (data) => data.map(mapContactFromApi),
+    select: (data) => {
+      if (query.length < 2) {
+        return [];
+      }
+      return data.results.map(mapSearchingContactFromApi);
+    },
 
     enabled: query.length >= 2,
     placeholderData: (previousData) => previousData,

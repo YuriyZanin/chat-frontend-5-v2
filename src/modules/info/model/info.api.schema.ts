@@ -46,9 +46,7 @@ export type BlockProfileApi = z.infer<typeof blockApiSchema>;
 export type BlockProfileApiResponse = z.infer<typeof blockApiSchema>;
 
 export type NewContact = {
-  phone: string;
-  first_name: string;
-  last_name: string;
+  user_uid: string;
 };
 
 export type ChatPost = {
