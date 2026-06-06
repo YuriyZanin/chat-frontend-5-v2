@@ -1,6 +1,7 @@
-import { ContactQuery, GlobalContactApi, UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { ContactQuery, UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { NewContact } from 'modules/info/model/info.api.schema';
 import { apiFetch } from 'shared/api';
+import { ContactApiResponse } from '../model/contact/search-contact.api.schema';
 
 export const getContactsList = (params: ContactQuery): Promise<UserContactApiResponse> => {
   const searchParams = new URLSearchParams();
@@ -17,14 +18,12 @@ export const getContactsList = (params: ContactQuery): Promise<UserContactApiRes
 export const searchUsers = async (
   query: string | string[],
   { signal }: { signal?: AbortSignal } = {},
-): Promise<GlobalContactApi[]> => {
-  const data = (Array.isArray(query) ? query : [query]).map((q) => ({
-    phone_or_nickname: q,
-  }));
+): Promise<ContactApiResponse> => {
+  const searchParams = new URLSearchParams();
+  if (query) searchParams.set('search', String(query));
 
-  return apiFetch<GlobalContactApi[]>('/api/proxy/api/v1/contact/check/list/', {
-    method: 'POST',
-    body: JSON.stringify(data),
+  return apiFetch<ContactApiResponse>(`/api/proxy/api/v1/contact/search/?${searchParams.toString()}`, {
+    method: 'GET',
     signal,
     headers: {
       'Content-Type': 'application/json',
