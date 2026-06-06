@@ -6,6 +6,7 @@ import Play from './icons/play.svg';
 import Stop from './icons/stop.svg';
 import styles from './voices-tab.module.scss';
 import { VoiceProps, VoicesTabProps } from './voices-tab.props';
+
 export const VoicesTab = ({ items }: VoicesTabProps): JSX.Element => {
   return (
     <div className={styles.container}>
@@ -20,7 +21,10 @@ export const VoicesTab = ({ items }: VoicesTabProps): JSX.Element => {
 
 const VoiceCard = ({ item }: VoiceProps): JSX.Element => {
   // хук для прослушивания аудиосообщения
-  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(item);
+  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(
+    item.uid,
+    item.file_protected_url || item.file_webp_url || '',
+  );
 
   return (
     <div className={styles.box}>
@@ -28,7 +32,7 @@ const VoiceCard = ({ item }: VoiceProps): JSX.Element => {
         {isPlaying ? <Stop /> : <Play />}
       </button>
       <div className={styles.info}>
-        <div className={styles.text}>{`${item.from_user.first_name} ${item.from_user.last_name}`}</div>
+        <div className={styles.text}>{`${item.from_user?.first_name} ${item.from_user?.last_name}`}</div>
         <div className={styles.voiceLine} ref={waveformRef} />
         <div className={styles.durationEndDate}>
           <div className={styles.duration}>{currentTime ? formatTime(currentTime) : formatTime(totalDuration)}</div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { useInfoStore } from 'modules/info/model/info.store';
@@ -39,7 +40,8 @@ import BackIcon from './icons/back-icon.svg';
 import CallIcon from './icons/call-icon.svg';
 import SearchIcon from './icons/search-icon.svg';
 
-const URL_DEFAULT_AVATAR = '/images/messages-chats/default-avatar.svg';
+const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
+const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const HeaderTop = ({
   wsUrl,
@@ -142,19 +144,8 @@ export const HeaderTop = ({
       },
     });
   };
-
-  const handleOpenProfile = (): void => {
-    if (isMobile) {
-      if (!pathname.endsWith('/profile')) {
-        router.push(`${pathname}/profile`);
-      }
-
-      return;
-    }
-
-    toggleInfoOpen();
-  };
-
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(avatarUrl)}`;
   return (
     <>
       <div className={styles.wrapper}>
@@ -166,8 +157,9 @@ export const HeaderTop = ({
               </button>
             )}
             <ImageUI
-              src={avatarUrl || URL_DEFAULT_AVATAR}
+              src={result !== '/api/proxy' ? result : isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar}
               alt={firstName}
+              unoptimized
               width={40}
               height={40}
               className={styles.image}

@@ -14,7 +14,8 @@ import { OutgoingFileCard } from '../message-card/file-card/outgoing-file-card/o
 import { IncomingImagesCard } from '../message-card/images-card/incoming-images-card/incoming-images-card';
 import { OutgoingImagesCard } from '../message-card/images-card/outgoing-images-card/outgoing-images-card';
 import { IncomingMessagesCard } from '../message-card/incoming-message-card/incoming-message-card';
-import { InformationForGroupCard } from '../message-card/information-card-for-group/information-card-for-group';
+import { IncomingInformationForGroupCard } from '../message-card/information-card-for-group/incoming-information-card-for-group/incoming-information-card-for-group';
+import { OutgoingInformationForGroupCard } from '../message-card/information-card-for-group/outgoing-information-card-for-group/outgoing-information-card-for-group';
 import { NotificationCopyCard } from '../message-card/notification-copy-card/notification-copy-card';
 import { OutgoingMessagesCard } from '../message-card/outgoing-message-card/outgoing-message-card';
 import { IncomingPhoneCallCard } from '../message-card/phone-call-cards/incoming-phone-call-card/incoming-phone-call-card';
@@ -257,8 +258,10 @@ export const MessagesList = ({
                       )}
                     {message.from_user.uid === currentUserId || message.from_user.uid === '' ? (
                       message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
-                        message.files_list[0]?.file_type === 'video/webm' ||
-                        message.forwarded_messages[0]?.files_list[0].file_type === 'video/webm' ? (
+                        (message.files_list[0]?.media_kind === 'voice' &&
+                          message.files_list[0]?.file_type?.includes('audio')) ||
+                        (message.forwarded_messages[0]?.files_list[0].media_kind === 'voice' &&
+                          message.forwarded_messages[0]?.files_list[0].file_type?.includes('audio')) ? (
                           <OutgoingAudioCard
                             message={message}
                             sendDeleteMessage={sendDeleteMessage}
@@ -266,8 +269,11 @@ export const MessagesList = ({
                             isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                             currentUserId={currentUserId}
                           />
-                        ) : message.files_list[0]?.file_type?.includes('image') ||
-                          message.forwarded_messages[0]?.files_list[0].file_type?.includes('image') ? (
+                        ) : (message.files_list[0]?.file_type?.includes('image') ||
+                            message.forwarded_messages[0]?.files_list[0].file_type?.includes('image')) &&
+                          (message.content !== message.files_list[0]?.download_name ||
+                            message.forwarded_messages[0]?.content !==
+                              message.forwarded_messages[0]?.files_list[0].download_name) ? (
                           <OutgoingImagesCard
                             message={message}
                             sendDeleteMessage={sendDeleteMessage}
@@ -294,7 +300,7 @@ export const MessagesList = ({
                           status="Исходящий звонок"
                         />
                       ) : message.content && message.content.split(' ')[0] === '@@@' ? (
-                        <InformationForGroupCard text={message.content.split(' ').slice(1).join(' ')} />
+                        <OutgoingInformationForGroupCard message={message} />
                       ) : (
                         <OutgoingMessagesCard
                           message={message}
@@ -305,8 +311,10 @@ export const MessagesList = ({
                         />
                       )
                     ) : message.files_list.length || message.forwarded_messages[0]?.files_list.length ? (
-                      message.files_list[0]?.file_type === 'video/webm' ||
-                      message.forwarded_messages[0]?.files_list[0].file_type === 'video/webm' ? (
+                      (message.files_list[0]?.media_kind === 'voice' &&
+                        message.files_list[0]?.file_type?.includes('audio')) ||
+                      (message.forwarded_messages[0]?.files_list[0].media_kind === 'voice' &&
+                        message.forwarded_messages[0]?.files_list[0].file_type?.includes('audio')) ? (
                         <IncomingAudioCard
                           message={message}
                           register={register}
@@ -315,8 +323,11 @@ export const MessagesList = ({
                           isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                           currentUserId={currentUserId}
                         />
-                      ) : message.files_list[0]?.file_type?.includes('image') ||
-                        message.forwarded_messages[0]?.files_list[0].file_type?.includes('image') ? (
+                      ) : (message.files_list[0]?.file_type?.includes('image') ||
+                          message.forwarded_messages[0]?.files_list[0].file_type?.includes('image')) &&
+                        (message.content !== message.files_list[0]?.download_name ||
+                          message.forwarded_messages[0]?.content !==
+                            message.forwarded_messages[0]?.files_list[0].download_name) ? (
                         <IncomingImagesCard
                           message={message}
                           register={register}
@@ -346,7 +357,7 @@ export const MessagesList = ({
                         status="Входящий звонок"
                       />
                     ) : message.content && message.content.split(' ')[0] === '@@@' ? (
-                      <InformationForGroupCard text={message.content.split(' ').slice(1).join(' ')} />
+                      <IncomingInformationForGroupCard message={message} register={register} />
                     ) : (
                       <IncomingMessagesCard
                         message={message}

@@ -1,8 +1,8 @@
-import type { RestMessageFileApi } from 'modules/conversation/messages-chat/model/messages-list/user-messages.api.schema';
+import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
 export type FilesTabProps = {
-  items: RestMessageFileApi[];
+  items: ChatFilesListApi[];
 };
 
 export type CardFileProps = {
-  item: RestMessageFileApi;
+  item: ChatFilesListApi;
 };

@@ -26,8 +26,8 @@ import { ContactPanel } from '../widgets/contact-panel';
 import { GroupPanel } from '../widgets/group-panel';
 import { SettingsPanel } from '../widgets/settings-panel';
 import { InfoScreenProps } from './info-screen.props';
+import { useChatFilesListScreen } from './use-chat-files-list-screen';
 import { useParticipantsScreen } from './use-participant-screen';
-
 export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Element => {
   const {
     openClearModal,
@@ -50,6 +50,8 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
   const { hasChanges } = useInfoEditGroupStore();
   const { sendMembers } = useWebSocketChat(wsUrl, currentUid);
   const { data: profile, isLoading } = useInfoProfileQuery(uid);
+  const { filesList } = useChatFilesListScreen(uid);
+
   const { participants } = useParticipantsScreen(uid);
   const queryClient = useQueryClient();
 
@@ -63,7 +65,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
   }, [uid, setUid]);
 
   const isGroup = uid.startsWith('group_');
-  const isChannel = uid.startsWith('channel');
+  const isChannel = uid.startsWith('channel_');
   const participant = participants?.find((p) => p.uid === currentUid);
 
   const groupMenuItems: DropdownItem[] = [
@@ -203,7 +205,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <GroupPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} />,
+      <GroupPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />,
     );
   }
 
@@ -230,12 +232,19 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <ChannelPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} />,
+      <ChannelPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />,
     );
   }
 
   return renderWithLayout(
     <InfoHeader menuItems={contactMenuItems} onClose={toggleInfoOpen} />,
-    <ContactPanel uid={uid} profile={profile} isLoading={isLoading} currentUid={currentUid} wsUrl={wsUrl} />,
+    <ContactPanel
+      uid={uid}
+      profile={profile}
+      isLoading={isLoading}
+      currentUid={currentUid}
+      wsUrl={wsUrl}
+      filesList={filesList}
+    />,
   );
 };

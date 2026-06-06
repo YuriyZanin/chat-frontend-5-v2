@@ -1,4 +1,5 @@
 'use client';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
 import { getMessageTimeOrDate } from 'modules/conversation/messages-chat/lib/get-message-time';
 import {
@@ -87,6 +88,8 @@ export const AlertOpenImages = ({
     setTimeout(() => setIsCopy(false), 2000);
     handleDownloadMessageFileClick();
   };
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain((message.files_list[0].file_protected_url || message.files_list[0].file_webp_url) ?? '')}`;
   return (
     <div className={styles.wrapper}>
       <div className={styles.headerTop}>
@@ -96,6 +99,7 @@ export const AlertOpenImages = ({
               <Image
                 src={message.from_user.avatar_webp_url ?? '/images/messages-chats/default-avatar.svg'}
                 alt={message.from_user.username}
+                unoptimized
                 width={60}
                 height={60}
               />
@@ -103,6 +107,7 @@ export const AlertOpenImages = ({
               <Image
                 src={message.forwarded_messages[0].avatar_webp_url ?? '/images/messages-chats/default-avatar.svg'}
                 alt={message.forwarded_messages[0].from_user ?? 'Дефолтный Аватар'}
+                unoptimized
                 width={60}
                 height={60}
               />
@@ -163,7 +168,7 @@ export const AlertOpenImages = ({
         </div>
       </div>
       <div className={styles.image}>
-        <Image src={fileList[indexImage].file_url} alt={fileList[indexImage].download_name} width={626} height={417} />
+        <Image src={result} alt={fileList[indexImage].download_name} unoptimized width={626} height={417} />
       </div>
       <div className={styles.headerBottom}>
         <div className={styles.headerBottomText}>

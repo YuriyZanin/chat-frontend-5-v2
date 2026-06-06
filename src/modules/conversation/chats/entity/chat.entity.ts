@@ -3,10 +3,10 @@ import { ChatType } from 'modules/conversation/chats/model/chat';
 type PeerEntity = {
   uid: string;
 
-  username: string;
-  nickname: string;
-  firstName: string;
-  lastName: string;
+  username: string | undefined;
+  nickname: string | undefined;
+  firstName: string | undefined;
+  lastName: string | undefined;
 
   avatarUrl: string;
   avatarWebpUrl: string;
@@ -23,7 +23,7 @@ export type ChatEntity = {
   chatKey: string;
   chatType: ChatType;
   name: string;
-  is_favorite: boolean;
+  is_favorite: boolean | undefined;
   notifications: boolean;
   newMessageCount: number;
   lastActivityAt: number;
@@ -47,7 +47,7 @@ type LastMessageEntity = BaseMessageEntity & {
   filesSummary: FilesSummaryEntity;
   hasRepliedMessage: boolean;
   hasForwardedMessage: boolean;
-  new: boolean;
+  new: boolean | undefined;
   createdAt: number;
   updatedAt: number;
 };

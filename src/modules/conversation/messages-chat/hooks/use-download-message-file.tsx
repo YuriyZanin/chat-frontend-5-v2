@@ -1,7 +1,9 @@
 'use client';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useRef, useState } from 'react';
 import type { RestMessageFileApi } from '../model/messages-list/user-messages.api.schema';
 import { useToastVisibleStore } from '../zustand-store/zustand-store';
+
 type UseDownloadMessageFileReturn = {
   handleDownloadMessageFileClick: () => Promise<void>;
   handleStopDownloadMessageFileClick: () => void;
@@ -13,7 +15,6 @@ export const useDownloadMessageFile = (files: RestMessageFileApi[]): UseDownload
   const [isDownloading, setIsDownloading] = useState(false);
   //управлят состояние показать карточку, что сообщение скопировано, либо нет
   const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);
-
   const handleDownloadMessageFileClick = async (): Promise<void> => {
     // Если уже идёт загрузка — отменяем предыдущую
     if (downloadControllerRef.current) {
@@ -23,20 +24,15 @@ export const useDownloadMessageFile = (files: RestMessageFileApi[]): UseDownload
     const controller = new AbortController();
     downloadControllerRef.current = controller;
     setIsDownloading(true);
-
     try {
       if (!files.length) throw new Error('Файл не найден');
       for (const file of files) {
-        const cleanUrl = file.file_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
-        const urlObj = new URL(cleanUrl);
-        const pathAfterFirstSlash = urlObj.pathname.slice(1);
-        const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;
-
+        // создаем url для запроса файла через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+        const proxyUrl = `/api/proxy${removeDomain(file.file_protected_url)}`;
         const response = await fetch(proxyUrl, {
           method: 'GET',
           signal: controller.signal,
         });
-
         const blob = await response.blob();
         const fileToSave = new File([blob], file.download_name, { type: blob.type });
         const isImage = blob.type.startsWith('image/');

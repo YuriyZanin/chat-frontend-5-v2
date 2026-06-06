@@ -7,7 +7,7 @@ export const CardNewMessageMeta = ({
   isFavorite,
 }: {
   newMessageCount: number;
-  isFavorite: boolean;
+  isFavorite: boolean | undefined;
 }): JSX.Element | null => {
   if (newMessageCount > 0) {
     return (

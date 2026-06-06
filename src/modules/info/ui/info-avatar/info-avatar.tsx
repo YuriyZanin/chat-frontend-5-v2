@@ -7,7 +7,7 @@ export const InfoAvatar = ({ avatarHref, label, status }: InfoAvatarProps): JSX.
   return (
     <div className={styles.container}>
       <div className={styles.imageWrapper}>
-        <ImageUI src={avatarHref} alt={label} width={360} height={360} />
+        <ImageUI src={avatarHref} alt={label} unoptimized width={360} height={360} />
       </div>
       <div className={styles.imageLabel}>
         <div className={styles.name}>{label}</div>

@@ -152,3 +152,14 @@
   color: var(--text-secondary);
   overflow: hidden;
 }
+.deleteFileIcon :global([class$='__white-segment']) {
+  display: block;
+  transform-origin: 24px 24px;
+  animation: rotateSegment 2s linear infinite;
+}
+
+@keyframes rotateSegment {
+  100% {
+    transform: rotate(360deg);
+  }
+}

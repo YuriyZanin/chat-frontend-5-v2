@@ -1,4 +1,4 @@
-import { useMessagesChatStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useGenerateInviteLinkQuery, useGroupOrChanelQuery } from 'modules/info/api/info.query';
 import { formatSubscribers } from 'modules/info/shared/utils/format';
 import { ClearChannelModal } from 'modules/info/ui/clear-channel-modal';
@@ -10,16 +10,11 @@ import { InfoSummary } from 'modules/info/ui/info-summary';
 import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { LeaveChannelModal } from 'modules/info/ui/leave-channel-modal';
 import { JSX } from 'react';
+import type { ChannelPanelProps } from './channel-panel.props';
 
-export const ChannelPanel = ({
-  uid,
-  currentUid,
-  wsUrl,
-}: {
-  uid: string;
-  currentUid: string;
-  wsUrl: string;
-}): JSX.Element | null => {
+const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
+
+export const ChannelPanel = ({ uid, currentUid, wsUrl, filesList }: ChannelPanelProps): JSX.Element | null => {
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
@@ -27,10 +22,11 @@ export const ChannelPanel = ({
   const name = profile?.name ?? '';
   const membersCount = profile?.participants.length ?? 0;
   const status = formatSubscribers(membersCount);
-  // все сообщения определенного чата(определеного uid профиля)
-  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
   const tabs = ['Подписчики', 'Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
   if (!profile) return null;
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(profile?.avatar ?? '')}`;
+
   return (
     <>
       {isLoading ? (
@@ -38,20 +34,14 @@ export const ChannelPanel = ({
       ) : (
         <>
           <InfoAvatar
-            avatarHref={profile?.avatar ?? '/images/profile/group-default.png'}
+            avatarHref={result !== '/api/proxy' ? result : URL_DEFAUIT_Avatar_Croup}
             label={name}
             status={status}
           />
           <InfoNotification chatId={profile?.id} />
           {profile?.description && <InfoSummary description={profile?.description} />}
           <InfoSummary inviteLinkChannel={link?.invite_link} chatKey={uid} />
-          <InfoUploads
-            tabs={tabs}
-            messagesByUser={messagesByUser}
-            currentUid={currentUid}
-            wsUrl={wsUrl}
-            chatKey={uid}
-          />
+          <InfoUploads tabs={tabs} currentUid={currentUid} wsUrl={wsUrl} chatKey={uid} filesList={filesList} />
           <ClearChannelModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} name={name} />
           <DeleteMemberModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} />
           <LeaveChannelModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} />

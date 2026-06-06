@@ -1,5 +1,6 @@
 'use client';
 import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useSelectedUidUserForForwardMessageStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import Image from 'next/image';
 import { JSX, useEffect, useRef } from 'react';
@@ -10,6 +11,9 @@ import { AlertForwardProps } from './alert-forward.props';
 import Close from './icons/close.svg';
 import DefauitBox from './icons/default-box.svg';
 import Search from './icons/search.svg';
+
+const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
+const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const AlertForward = ({ onOk, onCancel }: AlertForwardProps): JSX.Element => {
   const { chats, search, setSearch, clearSearch } = useChatsScreen();
@@ -90,14 +94,25 @@ const AlertForwardChatCard = ({ chat, onOk, clearSearch }: AlertForwardChatCardP
     clearSearch?.();
     onOk();
   };
+  // создаем url для запроса аватара через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(avatarUrl)}`;
+
   return (
     <div className={styles.cardWrapper} onClick={handlerOnClick}>
       <div className={styles.avatar}>
-        {avatarUrl ? (
-          <Image src={avatarUrl} alt="Аватар" width={40} height={40} />
-        ) : (
-          <Image src="/images/messages-chats/default-avatar.svg" alt="Дефолтный Аватар" width={40} height={40} />
-        )}
+        <Image
+          src={
+            result !== '/api/proxy'
+              ? result
+              : chat.chat.chatKey.includes('group') || chat.chat.chatKey.includes('channel')
+                ? URL_DEFAUIT_Avatar_Croup
+                : URL_DEFAUIT_Avatar
+          }
+          alt="Аватар"
+          unoptimized
+          width={40}
+          height={40}
+        />
       </div>
       <div className={styles.nameEndStatus}>
         <div className={styles.name}>

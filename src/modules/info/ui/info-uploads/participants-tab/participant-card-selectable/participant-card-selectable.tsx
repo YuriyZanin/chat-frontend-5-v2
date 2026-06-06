@@ -33,7 +33,6 @@ export const ParticipantCardSelectable = (participant: Participant): JSX.Element
       onSelectHandler={() => toggleSelection(participant.uid)}
       contact={{
         uid,
-        phone: '',
         nickname: '',
         firstName,
         lastName,

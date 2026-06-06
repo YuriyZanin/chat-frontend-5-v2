@@ -9,7 +9,8 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { searchUsers } from 'modules/conversation/contacts/api';
-import { GlobalContactApi, UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
+import { ContactSchemaApi } from 'modules/conversation/contacts/model/contact/search-contact.api.schema';
 import { blockUser, getProfileInfoById, mapInfoProfileFromApi } from '.';
 import { GroupInfo, ProfileInfo } from '../entity/info.entity';
 import {
@@ -20,6 +21,7 @@ import {
   InviteLinkApiResponse,
   InviteSettingsPost,
   NewContact,
+  PaginatedGroupChannelFileListApi,
   ParticipantApiResponse,
   UserForAddApiResponse,
 } from '../model/info.api.schema';
@@ -27,6 +29,7 @@ import {
   addToContact,
   editChat,
   generateInvite,
+  getChatFileList,
   getGroupOrChannel,
   getParticipantList,
   getUserForAddList,
@@ -65,11 +68,11 @@ export const useGroupOrChanelQuery = (chatKey: string): UseQueryResult<GroupInfo
   });
 };
 
-export const useSearchUserByNicknameQuery = (query: string): UseQueryResult<GlobalContactApi[]> => {
+export const useSearchUserByNicknameQuery = (query: string): UseQueryResult<ContactSchemaApi[]> => {
   return useQuery({
     queryKey: ['search', 'user', query],
     queryFn: async ({ signal }) => {
-      return await searchUsers(query, { signal });
+      return (await searchUsers(query, { signal })).results;
     },
 
     enabled: !!query,
@@ -282,5 +285,35 @@ export const useUserForAddQuery = (
 export const useUpdateProfileAvatarQuery = (): UseMutationResult<GroupAvatarApiResponse, unknown, File> => {
   return useMutation({
     mutationFn: updateAvatar,
+  });
+};
+
+export const useChatFilesListQuery = (
+  query: string,
+  chatKey: string,
+): UseInfiniteQueryResult<InfiniteData<PaginatedGroupChannelFileListApi>, unknown> => {
+  return useInfiniteQuery<
+    PaginatedGroupChannelFileListApi,
+    unknown,
+    InfiniteData<PaginatedGroupChannelFileListApi>,
+    ['chat', 'files-list', string],
+    number
+  >({
+    queryKey: ['chat', 'files-list', chatKey],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      getChatFileList(
+        {
+          page: pageParam,
+          page_size: 50,
+          search: query,
+        },
+        chatKey,
+      ),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.next) return undefined;
+      const url = new URL(lastPage.next, 'http://localhost');
+      return Number(url.searchParams.get('page'));
+    },
   });
 };

@@ -3,9 +3,12 @@
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
-import { useSelectedMessagesStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import {
+  useIsDeletedFileStore,
+  useSelectedMessagesStore,
+} from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import Image from 'next/image';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { ForvardCard } from '../../forward-card/forward-card';
 import CheckOneIcon from '../../icons/check-one.svg';
@@ -18,7 +21,6 @@ import DeleteFileIcon from '../icons/delete-file-icon.svg';
 import FileIcon from '../icons/file-icon.svg';
 import styles from './outgoing-file-card.module.scss';
 import { OutgoingFileCardProps } from './outgoing-file-card.props';
-
 export const OutgoingFileCard = ({
   message,
   sendDeleteMessage,
@@ -61,22 +63,26 @@ export const OutgoingFileCard = ({
     );
   }
   // мгновенно скрывает в DOM карточку файла, отправку которого отменил пользователь
-  const [isDeletedFile, setIsDeletedFile] = useState<boolean>(false);
+  const isDeletedFileStore = useIsDeletedFileStore((s) => s.isDeletedFile);
+  const setIsDeletedFileStore = useIsDeletedFileStore((s) => s.setIsDeletedFile);
   const handleDeleteFileClick = (): void => {
-    setIsDeletedFile(true);
+    setIsDeletedFileStore(true);
   };
   //эффект для удаления незагруженного файла (который имеет статус 'pending' либо 'failed' )
   useEffect(() => {
-    if (isDeletedFile && message.status === 'sent') {
+    if (isDeletedFileStore && message.status === 'sent') {
       sendDeleteMessage(message, true);
+      setIsDeletedFileStore(false);
     }
-  }, [message]);
+  }, [isDeletedFileStore, message.status]);
+
   // Получаем объект файла
   const files = message.files_list.length ? message.files_list : message.forwarded_messages[0]?.files_list;
   //хук для загрузки файла находящегося в сообщении
   const { handleDownloadMessageFileClick, handleStopDownloadMessageFileClick, isDownloading } =
     useDownloadMessageFile(files);
-
+  // получить размер файла
+  //const sizeFile = formatBytes(message);
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
@@ -95,7 +101,7 @@ export const OutgoingFileCard = ({
           handleForwardClick={handleForwardClick}
           message={message}
         />
-        {!isDeletedFile && (
+        {!isDeletedFileStore && (
           <div className={styles.item}>
             {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
             {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
@@ -120,8 +126,8 @@ export const OutgoingFileCard = ({
                         }
                         src={
                           message.files_list.length
-                            ? message.files_list[0].file_url
-                            : message.forwarded_messages[0].files_list[0].file_url
+                            ? message.files_list[0].file_webp_url
+                            : message.forwarded_messages[0].files_list[0].file_webp_url
                         }
                         alt={
                           message.files_list.length
@@ -155,7 +161,7 @@ export const OutgoingFileCard = ({
                   />
                 </div>
                 <div className={styles.fileSizeAndMessageTimeBlock}>
-                  <div className={styles.fileSize}>5.2 MБ</div>
+                  <div className={styles.fileSize}>5.2 MB</div>
                   <div className={styles.messageTimeAndChatIcons}>
                     <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
                     <div className={styles.messageChatIcons}>

@@ -104,7 +104,7 @@ export const IncomingImagesCard = ({
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
               <div key={image.uid} className={styles.image} onClick={handleOpenImages}>
-                <Image src={image.file_url} alt={image.download_name} width={500} height={376} />
+                <Image src={image.file_webp_url} alt={image.download_name} width={500} height={376} />
               </div>
             ))}
           </div>

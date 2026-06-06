@@ -1,7 +1,8 @@
-import type { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
+
 export type VoicesTabProps = {
-  items: Msg[];
+  items: ChatFilesListApi[];
 };
 export type VoiceProps = {
-  item: Msg;
+  item: ChatFilesListApi;
 };

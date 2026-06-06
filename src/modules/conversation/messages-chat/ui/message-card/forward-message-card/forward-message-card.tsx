@@ -1,4 +1,5 @@
 'use client';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import Image from 'next/image';
 import { JSX } from 'react';
 import Close from '../icons/close.svg';
@@ -16,7 +17,6 @@ export const ForwardMessageCard = ({
   };
   //выясняем картинка это или файл по расширению в названии файла (если true - картинка)
   const fileImage = ['.jpeg', '.png', '.gif', '.webp', '.jpg'];
-
   return (
     <div className={styles.wrapper}>
       <div className={styles.forwardBlock}>
@@ -40,10 +40,11 @@ export const ForwardMessageCard = ({
                   forwardMessageStore?.files_list[0]?.uid ||
                   forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.uid
                 }
-                src={
-                  forwardMessageStore?.files_list[0]?.file_url ||
-                  forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.file_url
-                }
+                src={`/api/proxy${removeDomain(
+                  forwardMessageStore?.files_list[0]?.file_webp_url ||
+                    forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.file_webp_url,
+                )}`}
+                unoptimized
                 alt={
                   forwardMessageStore?.files_list[0]?.download_name ||
                   forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.download_name

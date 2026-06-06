@@ -26,8 +26,8 @@ export const mapChatFromApi = (api: ChatApi): Chat => {
       firstName: api.chat.first_name,
       lastName: api.chat.last_name,
 
-      avatarUrl: api.chat.avatar_url,
-      avatarWebpUrl: api.chat.avatar_webp_url,
+      avatarUrl: api.chat.avatar_master_url || api.chat.avatar_webp_url,
+      avatarWebpUrl: api.chat.avatar_master_url || api.chat.avatar_webp_url,
 
       isBlocked: api.chat.is_blocked,
       isOnline: api.chat.is_online,

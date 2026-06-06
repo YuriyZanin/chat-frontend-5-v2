@@ -89,7 +89,8 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*"
+        accept=".jpg,.jpeg,.png,.bmp,image/jpeg,image/png,image/bmp"
+        multiple
         style={{ display: 'none' }}
         onClick={() => {
           if (fileInputRef.current) fileInputRef.current.value = '';

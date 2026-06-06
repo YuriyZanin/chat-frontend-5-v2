@@ -1,6 +1,5 @@
 export type Contact = {
   uid: string;
-  phone: string;
   firstName: string;
   lastName: string;
   nickname: string;

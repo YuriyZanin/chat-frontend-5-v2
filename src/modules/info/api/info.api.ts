@@ -1,5 +1,6 @@
 import { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { apiFetch } from 'shared/api';
+import type { FilesSeachQueryApi, PaginatedGroupChannelFileListApi } from '../model/info.api.schema';
 import {
   BlockProfileApiResponse,
   ChatPost,
@@ -51,7 +52,7 @@ export const addToContact = async (
   contact: NewContact,
   { signal }: { signal?: AbortSignal } = {},
 ): Promise<UserContactApiResponse> => {
-  return apiFetch<UserContactApiResponse>(`/api/proxy/api/v1/contact/messenger-add-by-phone/`, {
+  return apiFetch<UserContactApiResponse>(`/api/proxy/api/v1/contact/messenger-add-by-uid/`, {
     method: 'POST',
     body: JSON.stringify(contact),
     signal,
@@ -126,4 +127,22 @@ export const updateAvatar = (file: File): Promise<GroupAvatarApiResponse> => {
     method: 'POST',
     body: formData,
   });
+};
+
+export const getChatFileList = (
+  params: FilesSeachQueryApi,
+  chatKey: string,
+): Promise<PaginatedGroupChannelFileListApi> => {
+  const searchParams = new URLSearchParams();
+
+  if (params.page) searchParams.set('page', String(params.page));
+  if (params.page_size) searchParams.set('page_size', String(params.page_size));
+  if (params.search) searchParams.set('search', params.search);
+
+  return apiFetch<PaginatedGroupChannelFileListApi>(
+    `/api/proxy/api/v1/chat/message/files/${chatKey}/?${searchParams.toString()}`,
+    {
+      method: 'GET',
+    },
+  );
 };

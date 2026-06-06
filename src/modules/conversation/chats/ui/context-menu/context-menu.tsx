@@ -43,7 +43,7 @@ export const ContextMenu = ({
   const handleAddContact = (): void => {
     const contact = users ? users[0] : undefined;
     if (!!contact) {
-      addContact({ phone: contact?.phone, first_name: contact?.first_name, last_name: contact?.last_name });
+      addContact({ user_uid: contact.uid });
       setSelected(chatId);
       openAddModal();
     }

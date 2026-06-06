@@ -70,17 +70,17 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   };
 
   const uploadAvatar = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    const response = await fetch('/api/upload-avatar', {
-      method: 'POST',
-      body: formData,
-    });
-    if (!response.ok) {
-      throw new Error('Ошибка загрузки аватара');
-    }
-    const data = await response.json();
-    return data.uid;
+    // const formData = new FormData();
+    // formData.append('avatar', file);
+    // const response = await fetch('/api/upload-avatar', {
+    //   method: 'POST',
+    //   body: formData,
+    // });
+    // if (!response.ok) {
+    //   throw new Error('Ошибка загрузки аватара');
+    // }
+    // const data = await response.json();
+    // return data.uid;
     return '';
   };
 

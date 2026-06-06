@@ -1,9 +1,8 @@
 import { useChatsStore } from 'modules/conversation/chats/model/search';
 import { AddContactModal } from 'modules/conversation/chats/ui/add-contact-modal';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
-import { useMessagesChatStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import { useAddContactQuery, useSearchUserByNicknameQuery } from 'modules/info/api/info.query';
-import { ProfileInfo } from 'modules/info/entity/info.entity';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { formatTimestamp } from 'modules/info/shared/utils/date-time';
 import { ActionButton } from 'modules/info/ui/action-button';
@@ -17,19 +16,18 @@ import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { JSX } from 'react';
 import AddIcon from '../../shared/icons/add.svg';
+import type { ContactPanelProps } from './contact-panel.props';
+
+const URL_DEFAUIT_Avatar = '/images/profile/default.png';
+
 export const ContactPanel = ({
   uid,
   currentUid,
   wsUrl,
   profile,
   isLoading,
-}: {
-  uid: string;
-  currentUid: string;
-  wsUrl: string;
-  profile?: ProfileInfo;
-  isLoading: boolean;
-}): JSX.Element => {
+  filesList,
+}: ContactPanelProps): JSX.Element => {
   const { mutate: addToContact } = useAddContactQuery();
   const { openAddModal } = useChatsStore();
   const { openUnblockModal } = useInfoStore();
@@ -39,24 +37,21 @@ export const ContactPanel = ({
   const { nickname, firstName, lastName, avatarUrl, isOnline, isBlocked } = profile ?? {};
   const isInContacts = !!contact;
   const chatId = profile?.chatId;
-
   const { data: users } = useSearchUserByNicknameQuery(nickname ?? '');
   const user = users ? users[0] : undefined;
-
   const handleAddContact = (): void => {
     if (!!user) {
-      addToContact({ phone: user?.phone, first_name: user?.first_name, last_name: user?.last_name });
+      addToContact({ user_uid: uid });
       openAddModal();
     }
   };
-
   const handleUnblockContact = (): void => {
     openUnblockModal();
   };
-
-  // все сообщения определенного чата(определеного uid профиля)
-  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[uid]);
   const tabs = ['Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(avatarUrl ?? '')}`;
+
   return (
     <>
       {isLoading ? (
@@ -64,7 +59,7 @@ export const ContactPanel = ({
       ) : (
         <>
           <InfoAvatar
-            avatarHref={avatarUrl ?? '/images/profile/default.png'}
+            avatarHref={result !== '/api/proxy' ? result : URL_DEFAUIT_Avatar}
             label={`${firstName} ${lastName}`}
             status={isOnline ? 'в сети' : 'не в сети'}
           />
@@ -72,14 +67,14 @@ export const ContactPanel = ({
           <InfoSummary
             nickname={nickname ?? ''}
             phoneNumber={user?.phone}
-            birthDay={formatTimestamp(user?.birthday)}
-            about={user?.additional_information}
+            birthDay={formatTimestamp(profile?.birthday)}
+            about={profile?.additionalInformation}
           />
           {!isInContacts && (
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          <InfoUploads tabs={tabs} messagesByUser={messagesByUser} currentUid={currentUid} wsUrl={wsUrl} />
+          <InfoUploads tabs={tabs} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />

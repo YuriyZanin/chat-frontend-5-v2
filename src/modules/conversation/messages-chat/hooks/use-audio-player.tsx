@@ -2,7 +2,6 @@
 
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import type { RestMessageApi } from '../model/messages-list';
 import { useAudioManagerStore } from '../zustand-store/zustand-store';
 
 type UseAudioPlayerReturn = {
@@ -14,11 +13,7 @@ type UseAudioPlayerReturn = {
   isLoading: boolean;
 };
 
-export const useAudioPlayer = (
-  message: RestMessageApi & {
-    status?: 'pending' | 'sent' | 'failed' | 'read';
-  },
-): UseAudioPlayerReturn => {
+export const useAudioPlayer = (uid: string, audioUrl: string): UseAudioPlayerReturn => {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -27,12 +22,8 @@ export const useAudioPlayer = (
   const [totalDuration, setTotalDuration] = useState(0);
   const { currentPlayingId, setCurrentPlaying, stopCurrentPlaying } = useAudioManagerStore();
   const isDestroyedRef = useRef(false);
-  const audioUrl = message.files_list.length
-    ? message.files_list[0].file_url
-    : message.forwarded_messages[0]?.files_list[0]?.file_url;
   // Очищаем URL от лишнего слеша
-
-  const cleanUrl = audioUrl.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
+  const cleanUrl = audioUrl?.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
   const urlObj = new URL(cleanUrl);
   const pathAfterFirstSlash = urlObj.pathname.slice(1);
   const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;
@@ -144,7 +135,7 @@ export const useAudioPlayer = (
   }, []);
 
   //авто‑стоп если другой начал играть
-  const isCurrentPlaying = useAudioManagerStore((state) => state.currentPlayingId === message.uid);
+  const isCurrentPlaying = useAudioManagerStore((state) => state.currentPlayingId === uid);
   useEffect(() => {
     const ws = wavesurferRef.current;
     if (!ws) return;
@@ -163,7 +154,7 @@ export const useAudioPlayer = (
       ws.pause();
       stopCurrentPlaying();
     } else {
-      setCurrentPlaying(message.uid, () => {
+      setCurrentPlaying(uid, () => {
         ws.pause();
         setIsPlaying(false);
       });

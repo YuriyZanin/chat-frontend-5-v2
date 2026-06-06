@@ -12,7 +12,6 @@ const serializerRequestObjectCreateMessageApiSchema = z.object({
   chat_key: z.string().nullable().optional(),
   content: z.string().trim(),
   status: z.enum(['publish', 'draft']),
-  files: z.array(serializerFileMessageApiSchema).max(10).nullable().optional(),
   message_attachment_uids: z.array(string()).nullable().optional(),
   replied_messages: z.array(string()).nullable().optional(),
   forwarded_messages: z.array(string()).nullable().optional(),

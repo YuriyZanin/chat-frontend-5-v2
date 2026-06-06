@@ -3,8 +3,11 @@ import { useAudioPlayer } from 'modules/conversation/messages-chat/hooks/use-aud
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
 import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
-import { useSelectedMessagesStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
-import { JSX, useEffect, useState } from 'react';
+import {
+  useIsDeletedFileStore,
+  useSelectedMessagesStore,
+} from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { JSX, useEffect } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
 import DeleteFileIcon from '../../file-card/icons/delete-file-icon.svg';
@@ -48,18 +51,28 @@ export const OutgoingAudioCard = ({
   const checkBoxsVisibleStore = useSelectedMessagesStore((s) => s.checkBoxsVisible);
 
   // мгновенно скрывает в DOM карточку файла, отправку которого отменил пользователь
-  const [isDeletedFile, setIsDeletedFile] = useState<boolean>(false);
+  const isDeletedFileStore = useIsDeletedFileStore((s) => s.isDeletedFile);
+  const setIsDeletedFileStore = useIsDeletedFileStore((s) => s.setIsDeletedFile);
   const handleDeleteFileClick = (): void => {
-    setIsDeletedFile(true);
+    setIsDeletedFileStore(true);
   };
   //эффект для удаления незагруженного файла (который имеет статус 'pending' либо 'failed' )
   useEffect(() => {
-    if (isDeletedFile && message.status === 'sent') {
+    if (isDeletedFileStore && message.status === 'sent') {
       sendDeleteMessage(message, true);
+      setIsDeletedFileStore(false);
     }
-  }, [message]);
+  }, [isDeletedFileStore, message.status]);
+
+  // находим url voice-сообщения
+  const audioUrl = message.files_list.length
+    ? message.files_list[0].file_protected_url
+    : message.forwarded_messages[0]?.files_list[0]?.file_protected_url;
   // хук для прослушивания аудиосообщения
-  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(message);
+  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(
+    message.uid,
+    audioUrl,
+  );
 
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
@@ -79,7 +92,7 @@ export const OutgoingAudioCard = ({
           handleForwardClick={handleForwardClick}
           message={message}
         />
-        {!isDeletedFile && (
+        {!isDeletedFileStore && (
           <div className={styles.item}>
             {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
             {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
@@ -90,7 +103,7 @@ export const OutgoingAudioCard = ({
                     <DeleteFileIcon />
                   </button>
                 ) : isLoading ? (
-                  <DeleteFileIcon />
+                  <DeleteFileIcon className={styles.deleteFileIcon} />
                 ) : (
                   <button onClick={handlePlayPause} className={styles.fileIcon}>
                     {isPlaying ? <AudioStopIcon /> : <AudioPlayIcon />}

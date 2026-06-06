@@ -430,3 +430,12 @@ export const useTextForAttachmentImagesStore = create<TextForAttachmentImagesSta
   setTextForAttachmentImages: (textForAttachmentImages: string): void => set({ textForAttachmentImages }),
   clearTextForAttachmentImages: (): void => set({ textForAttachmentImages: '' }),
 }));
+
+type IsDeletedFileState = {
+  isDeletedFile: boolean;
+  setIsDeletedFile: (isDeletedFile: boolean) => void;
+};
+export const useIsDeletedFileStore = create<IsDeletedFileState>((set) => ({
+  isDeletedFile: false,
+  setIsDeletedFile: (isDeletedFile: boolean): void => set({ isDeletedFile }),
+}));

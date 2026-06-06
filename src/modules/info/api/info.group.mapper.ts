@@ -36,7 +36,7 @@ export const mapInfoGroupFromApi = (api: GroupOrChanelApiResponse): GroupInfo =>
     createdBy: created_by,
     description: description ?? '',
     uid: api.chat.uid,
-    avatar: api.chat.avatar_url,
+    avatar: api.chat.avatar_master_url || api.chat.avatar_webp_url || '',
     lastMessage: { content, fromUser: from_user, createdAt: created_at },
     participants,
   };

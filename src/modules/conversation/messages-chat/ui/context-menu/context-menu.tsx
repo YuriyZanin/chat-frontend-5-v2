@@ -40,7 +40,7 @@ export const ContextMenu = ({
   };
   // хук для скачивания файла(картинки) с сервера, который находится в сообщении
   const { handleDownloadMessageFileClick } = useDownloadMessageFile(
-    message.files_list ?? message.forwarded_messages[0].files_list,
+    message.files_list.length ? message.files_list : message.forwarded_messages[0]?.files_list,
   );
   //управлят состояние показать карточку, что сообщение скопировано, либо нет
   const setToastVisibleStore = useToastVisibleStore((s) => s.setToastVisible);

@@ -1,10 +1,11 @@
-import { Msg } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { ChatFilesListApi } from 'modules/info/model/info.api.schema';
+
 export type InfoUploadsProps = {
   currentUid: string;
   chatKey?: string;
-  messagesByUser: Msg[];
   wsUrl: string;
   tabs: string[];
+  filesList: ChatFilesListApi[] | undefined;
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

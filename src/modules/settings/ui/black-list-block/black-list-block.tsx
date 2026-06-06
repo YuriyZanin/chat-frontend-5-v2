@@ -24,7 +24,6 @@ export const BlackListBlock: React.FC = (): JSX.Element => {
   const mapApiProfileToContact = (apiProfile: BlacklistedUser): Contact => {
     return {
       uid: apiProfile.uid,
-      phone: apiProfile.phone,
       firstName: apiProfile.first_name,
       lastName: apiProfile.last_name,
       nickname: apiProfile.nickname,

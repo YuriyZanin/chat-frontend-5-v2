@@ -25,7 +25,6 @@ export const restMessageFileApiSchema = z.object({
   uid: z.string(),
   download_name: z.string(),
   media_kind: z.string(),
-  file_url: z.string(),
   file_protected_url: z.string(),
   file_webp_url: z.string(),
   file_small_url: z.string(),
@@ -96,3 +95,23 @@ export const messagesListQuerySchema = z.object({
   search: z.string().trim().optional(),
 });
 export type MessagesListQuery = z.infer<typeof messagesListQuerySchema>;
+
+export const ChatAttachmentUploadResultSchema = z.object({
+  uid: z.string(),
+  download_name: z.string().max(255).optional(),
+  media_kind: z.enum(['image', 'file', 'voice']).optional(),
+  upload_status: z.enum(['draft', 'attached', 'expired', 'deleted']).optional(),
+});
+export const ChatAttachmentUploadResponseSchema = z.object({
+  results: z.array(ChatAttachmentUploadResultSchema),
+});
+export type ChatAttachmentUploadResponseApi = z.infer<typeof ChatAttachmentUploadResponseSchema>;
+
+export const VoiceAttachmentUploadResponseSchema = z.object({
+  uid: z.string(),
+  download_name: z.string().max(255).optional(),
+  media_kind: z.enum(['image', 'file', 'voice']).optional(),
+  upload_status: z.enum(['draft', 'attached', 'expired', 'deleted']).optional(),
+  duration_seconds: z.number().min(0).max(2147483647).optional(),
+});
+export type VoiceAttachmentUploadResponseApi = z.infer<typeof VoiceAttachmentUploadResponseSchema>;

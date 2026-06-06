@@ -8,10 +8,10 @@ export const contactsPaginatedResponseSchema = z.object({
 
 export const systemContactSchema = z.object({
   uid: z.string(),
-  avatar: z.string(),
-  avatar_url: z.string(),
-  avatar_webp: z.string(),
+  is_deleted: z.boolean(),
   avatar_webp_url: z.string(),
+  avatar_small_url: z.string(),
+  avatar_master_url: z.string(),
   is_online: z.boolean(),
   was_online_at: z.number(),
 });
@@ -21,7 +21,6 @@ export const userContactApiSchema = z.object({
   owner_user: z.string(),
   first_name: z.string(),
   last_name: z.string(),
-  phone: z.string(),
   system_contact: systemContactSchema,
 });
 

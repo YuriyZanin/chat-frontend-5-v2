@@ -54,8 +54,8 @@ export const ReplyToMessageCard = ({
                     repliedMessageStore?.forwarded_messages[0]?.files_list[0]?.uid
                   }
                   src={
-                    repliedMessageStore?.files_list[0]?.file_url ||
-                    repliedMessageStore?.forwarded_messages[0]?.files_list[0]?.file_url
+                    repliedMessageStore?.files_list[0]?.file_webp_url ||
+                    repliedMessageStore?.forwarded_messages[0]?.files_list[0]?.file_webp_url
                   }
                   alt={
                     repliedMessageStore?.files_list[0]?.download_name ||

@@ -38,7 +38,6 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
   const handleClick = (): void => {
     setChatId(id);
   };
-
   return (
     <CardShell
       chatId={chat.id}
@@ -51,7 +50,7 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
       href={`/chats/${chat.chatType === 'chat' ? peer.uid : `${prefix}_${peer.uid}`}`}
       hasContextMenu={true}
       imageOptions={{
-        src: peer.avatarUrl,
+        src: peer.avatarWebpUrl ?? peer.avatarUrl,
         alt: chat.name,
         classNames: { root: styles.imageWrapper },
       }}

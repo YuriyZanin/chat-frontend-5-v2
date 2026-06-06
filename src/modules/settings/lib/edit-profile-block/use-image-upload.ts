@@ -66,7 +66,6 @@ export const useImageUpload = (): UseImageUploadReturn => {
       }
 
       setSelectedFile(file);
-
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
 

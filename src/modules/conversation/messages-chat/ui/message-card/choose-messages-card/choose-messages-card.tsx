@@ -60,7 +60,7 @@ export const ChooseMessagesCard = ({
           if (!files.length) throw new Error('Файл не найден');
           files.forEach(async (file) => {
             // Очищаем URL от лишнего слеша
-            const cleanUrl = file.file_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
+            const cleanUrl = file.file_protected_url.replace(/\.(jpe?g|png|gif|webp)\/$/i, '.$1');
             const urlObj = new URL(cleanUrl);
             const pathAfterFirstSlash = urlObj.pathname.slice(1);
             const proxyUrl = `/api/proxy/${pathAfterFirstSlash}/`;

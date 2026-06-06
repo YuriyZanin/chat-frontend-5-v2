@@ -44,3 +44,10 @@ export const translateMessageIntoChat = (msg: Msg): Chat => {
     },
   };
 };
+
+//функция которая из url убирает домен
+export const removeDomain = (fullUrl: string): string => {
+  if (!fullUrl) return '';
+  const url = new URL(fullUrl);
+  return url.pathname + url.search + url.hash;
+};

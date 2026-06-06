@@ -43,13 +43,13 @@ export type GroupInfo = {
   id: number;
   uid: string;
   notifications: boolean;
-  isActive: boolean;
-  isFavorite: boolean;
+  isActive: boolean | undefined;
+  isFavorite: boolean | undefined;
   chatKey: string;
   chatType: ChatType;
   name: string;
   description: string;
-  avatar?: string | null;
+  avatar: string;
   messageCount: number;
   newMessageCount: number;
   lastMessage?: {

@@ -62,11 +62,13 @@ export const IncomingFileCard = ({
   //хук для загрузки файла находящегося в сообщении
   const { handleDownloadMessageFileClick, handleStopDownloadMessageFileClick, isDownloading } =
     useDownloadMessageFile(files);
+
   // прописываем в компоненте актуальный user_uid открытого чата из store
   const userId = useUserIdStore((s) => s.userId);
   // выясняем это простой чат либо группа (если true то группа)
   const hasGroup = userId.includes('group_');
-
+  // получить размер файла
+  //const sizeFile = formatBytes(message);
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
@@ -126,8 +128,8 @@ export const IncomingFileCard = ({
                       }
                       src={
                         message.files_list.length
-                          ? message.files_list[0].file_url
-                          : message.forwarded_messages[0].files_list[0].file_url
+                          ? message.files_list[0].file_webp_url
+                          : message.forwarded_messages[0].files_list[0].file_webp_url
                       }
                       alt={
                         message.files_list.length
@@ -161,7 +163,7 @@ export const IncomingFileCard = ({
                 />
               </div>
               <div className={styles.fileSizeAndMessageTimeBlock}>
-                <div className={styles.fileSize}>5.2 MБ</div>
+                <div className={styles.fileSize}>5.2 MB</div>
                 <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
               </div>
             </div>

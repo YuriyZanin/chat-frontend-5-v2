@@ -4,9 +4,16 @@
   @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 2px, $wrap: wrap);
   padding-left: 2px;
 }
-
+/* === Общий стиль картинки === */
 .image {
-  width: 117px;
-  height: 117px;
+  width: 11.7rem;
+  height: 11.7rem;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

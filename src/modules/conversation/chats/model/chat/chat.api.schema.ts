@@ -2,12 +2,14 @@ import { z } from 'zod';
 
 const chatSchema = z.object({
   uid: z.string(),
-  username: z.string(),
-  nickname: z.string(),
-  first_name: z.string(),
-  last_name: z.string(),
-  avatar_url: z.string(),
+  is_deleted: z.boolean(),
+  username: z.string().optional(),
+  nickname: z.string().optional(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
   avatar_webp_url: z.string(),
+  avatar_small_url: z.string(),
+  avatar_master_url: z.string(),
   is_blocked: z.boolean(),
   is_online: z.boolean(),
   was_online_at: z.number().nullable(),
@@ -31,7 +33,7 @@ const lastMessageSchema = messageSchema.extend({
   }),
   has_replied_message: z.boolean(),
   has_forwarded_message: z.boolean(),
-  new: z.boolean(),
+  new: z.boolean().optional(),
   created_at: z.number(),
   updated_at: z.number(),
 });
@@ -39,12 +41,13 @@ const lastMessageSchema = messageSchema.extend({
 export const chatListSchema = z.object({
   id: z.number(),
   chat: chatSchema,
-  is_favorite: z.boolean(),
+  is_favorite: z.boolean().optional(),
   notifications: z.boolean(),
   new_message_count: z.number(),
   name: z.string(),
   chat_type: chatTypeSchema,
   chat_key: z.string(),
+  created_by: z.string(),
   last_activity_at: z.number(),
   last_seen_message: messageSchema,
   first_new_message: messageSchema.optional(),
@@ -78,21 +81,14 @@ const ChatTypeEnum = z.enum(['public-group', 'private-group', 'public-channel', 
 const CreateChatObjectSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(250).optional(),
-  avatar: z
-    .object({
-      filename: z.string(),
-      data: z.string(),
-      uid: z.string().optional(),
-    })
-    .optional(),
   avatar_uid: z.string().optional(),
   chat_type: ChatTypeEnum,
-  uid_users_list: z.array(z.string().uuid()),
+  uid_users_list: z.array(z.string()),
 });
 
 export const CreateChatRequestSchema = z.object({
   action: z.enum(['create_chat']),
-  request_uid: z.string(),
+  request_uid: z.string().optional(),
   object: CreateChatObjectSchema,
 });
 export type CreateChatRequestApi = z.infer<typeof CreateChatRequestSchema>;
