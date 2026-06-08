@@ -21,7 +21,7 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
 
   const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
 
-  if ((status === 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
+  if ((status !== 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
     return (
       <MessagesList
         messagesList={messagesList}
@@ -35,34 +35,30 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
       />
     );
   } else {
-    if (status === 'success' && messagesByUser.length === 0) {
-      if (parts[0] === 'group') {
-        return (
-          <DefaultMessagesPage
-            url={'/images/messages-chats/default-img-group.svg'}
-            topText={'Вы создали группу'}
-            bottomText={''}
-          />
-        );
-      }
-      if (parts[0] === 'channel') {
-        return (
-          <DefaultMessagesPage
-            url={'/images/messages-chats/default-img-channel.svg'}
-            topText={'Вы создали канал'}
-            bottomText={'Добавьте публикацию'}
-          />
-        );
-      }
+    if (parts[0] === 'group') {
       return (
         <DefaultMessagesPage
-          url={'/images/messages-chats/default-img.svg'}
-          topText={'Сообщений пока нет'}
-          bottomText={'Напишите первым :)'}
+          url={'/images/messages-chats/default-img-group.svg'}
+          topText={'Вы создали группу'}
+          bottomText={''}
         />
       );
-    } else {
-      return <></>;
     }
+    if (parts[0] === 'channel') {
+      return (
+        <DefaultMessagesPage
+          url={'/images/messages-chats/default-img-channel.svg'}
+          topText={'Вы создали канал'}
+          bottomText={'Добавьте публикацию'}
+        />
+      );
+    }
+    return (
+      <DefaultMessagesPage
+        url={'/images/messages-chats/default-img.svg'}
+        topText={'Сообщений пока нет'}
+        bottomText={'Напишите первым :)'}
+      />
+    );
   }
 };

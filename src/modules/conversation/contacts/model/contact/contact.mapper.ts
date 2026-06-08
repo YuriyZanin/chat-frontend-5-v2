@@ -56,7 +56,7 @@ export const mapSearchingContactFromApi = (api: ContactSchemaApi): Contact => {
     firstName: first_name,
     lastName: last_name,
     fullName,
-    avatarUrl: avatar_webp_url,
+    avatarUrl: avatar_webp_url || avatar_small_url,
     isOnline: is_online,
     wasOnlineAt: was_online_at,
   };

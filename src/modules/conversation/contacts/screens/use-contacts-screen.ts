@@ -40,7 +40,6 @@ export const useContactsScreen = (): UseContactsScreenReturn => {
     query,
     setQuery,
     clearQuery,
-
     contacts: filteredContacts,
     globals: globals,
   };

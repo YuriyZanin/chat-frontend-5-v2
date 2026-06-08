@@ -7,5 +7,5 @@ export type Contact = {
   fullName: string;
   avatarUrl: string;
   isOnline: boolean;
-  wasOnlineAt: number;
+  wasOnlineAt: number | null;
 };

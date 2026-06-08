@@ -11,7 +11,6 @@ import { useContactsScreen } from './use-contacts-screen';
 
 export const ContactsScreen = (): JSX.Element => {
   const { query, setQuery, clearQuery, contacts, globals } = useContactsScreen();
-
   const renderWithLayout = (content: JSX.Element): JSX.Element => (
     <>
       <ConversationLayout

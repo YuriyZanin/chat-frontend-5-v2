@@ -17,7 +17,7 @@ export const ContactsPanel = ({
       <SectionHeaderSelection variant={variant} />
       <ul>
         {contacts?.map((contact) => (
-          <ContactCardSelectable key={contact.uid} {...contact} />
+          <ContactCardSelectable key={contact.uid} contact={contact} variant={variant} />
         ))}
       </ul>
     </div>

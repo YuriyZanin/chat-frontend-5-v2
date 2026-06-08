@@ -5,4 +5,5 @@ export type ContactCardProps = {
   selectionMode: boolean;
   selected: boolean;
   onSelectHandler: () => void;
+  variant?: 'personal' | 'globals';
 };

@@ -201,9 +201,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   }, [wsUrl]); // connectWS объявим ниже (через function declaration или useCallback)
 
   const connectWS = useCallback(() => {
-    if (!navigator.onLine) return;
-    if (wsRef.current) {
-      wsRef.current.close();
+    if (
+      wsRef.current &&
+      (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
     }
     clearReconnectTimer();
 
