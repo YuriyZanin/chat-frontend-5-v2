@@ -18,6 +18,7 @@ import {
   serializerRequestLeaveGroupApiSchema,
 } from 'modules/info/model/info.web-socket.api.schema';
 import { useCallback, useEffect, useRef } from 'react';
+import { refreshWsSession } from 'shared/api/session/wsAuth.api';
 import { AnswerCallRequestAPI, useCallsStore } from '../../model/calls';
 import {
   CallCompleteRequestAPI,
@@ -45,7 +46,6 @@ import type { Attachment } from '../../ui/context-menu/context-menu-attach-file/
 import { useMessagesChatStore, useUserIdStore } from '../../zustand-store/zustand-store';
 import { filesUploadApi } from '../files-upload.api';
 import { voiceUploadApi } from '../voice-upload.api';
-
 type UseWebSocketChatReturn = {
   sendMessage: ({
     content,
@@ -102,7 +102,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
   //делаем ссылку на актуальный user_uid открытого чата
   const userIdRef = useRef<string>(userId);
   const stopRef = useRef<boolean>(true);
-
+  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
@@ -165,16 +165,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     stopHeartbeat();
     heartbeatIntervalRef.current = setInterval(() => {
       if (socket.readyState !== WebSocket.OPEN) return;
-
-      // если pong давно не приходил — считаем соединение мёртвым
-      if (Date.now() - lastPongRef.current > 30000) {
-        console.warn('No pong received. Closing socket.');
-        socket.close();
-        return;
-      }
       socket.send(JSON.stringify({ action: 'ping' }));
       console.log('Ping sent');
-    }, 15000); // каждые 15 секунд
+    }, 20000); // каждые 20 секунд
   };
 
   // Функция для подключаемся к ws-соединению и регистрации ws-обработчиков
@@ -200,352 +193,369 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     }, delay);
   }, [wsUrl]); // connectWS объявим ниже (через function declaration или useCallback)
 
-  const connectWS = useCallback(() => {
-    if (
-      wsRef.current &&
-      (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)
-    ) {
-      return;
-    }
-    clearReconnectTimer();
-
-    // увеличиваем id инстанса
-    const myId = ++socketInstanceIdRef.current;
-    //подключение к ws-соединению
-    const socket = new WebSocket(wsUrl);
-    wsRef.current = socket;
-
-    socket.onopen = (): void => {
-      if (socketInstanceIdRef.current !== myId) return; // устаревший
-      console.log('WebSocket open');
-      reconnectAttemptRef.current = 0; // сброс backoff
-      // отправлем ping
-      startHeartbeat(socket);
-      // при новом открытии ws-cоединения поворно отправляем все ранее не отправленные сообщения (при наличии),
-      messageQueueRef.current.forEach((msg) => {
-        socket.send(JSON.stringify(msg));
-      });
-      messageQueueRef.current = [];
-    };
-
-    socket.onclose = (e): void => {
-      if (socketInstanceIdRef.current !== myId) return; // устаревший
-      stopHeartbeat();
-      console.log('WebSocket close', e.code, e.reason);
-      // Ошибки 1006 часто при обрыве сети/таймауте
-      // Планируем reconnect
-      scheduleReconnect();
-    };
-
-    socket.onerror = (err): void => {
-      // ВАЖНО: не закрываем вручную, пусть onclose сам решит
-      console.log('WebSocket Error', err);
-    };
-
-    socket.onmessage = (event: MessageEvent): void => {
-      if (socketInstanceIdRef.current !== myId) return;
-      const data = JSON.parse(event.data);
-      console.log(data);
-      //Cобытия:
-      // 1.Подтверждает отправленние созданного исходящего сообщения в обычный чат по request_uid
+  const connectWS = useCallback(async () => {
+    try {
       if (
-        data.action === 'create_text_message' &&
-        data.status === 'OK' &&
-        data.object.to_user?.uid === userIdRef.current
+        wsRef.current &&
+        (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)
       ) {
-        console.log('Подтверждение сервера об отправке исходящего сообщения в обычный чат) :', data);
-        // Если сервер пришлёт подтверждение с request_uid,
-        // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
-        if (data.request_uid) {
-          updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
-          // Очистим таймаут подтверждения
-          pendingTimeouts.current.delete(data.request_uid);
-        }
-      }
-      // Подтверждает отправленние созданного исходящего сообщения в группу по request_uid
-      if (
-        data.action === 'create_text_message' &&
-        data.status === 'OK' &&
-        data.object.from_user.uid === currentUserIdRef.current &&
-        data.object.chat_key === userIdRef.current
-      ) {
-        console.log('Подтверждение сервера об отправке исходящего сообщения в группу) :', data);
-        // Если сервер пришлёт подтверждение с request_uid,
-        // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
-        if (data.request_uid) {
-          updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
-          // Очистим таймаут подтверждения
-          pendingTimeouts.current.delete(data.request_uid);
-        }
-      }
-
-      // 2. Не подтверждает отправленние созданного исходящего сообщения по request_uid
-      if (data.action === 'create_text_message' && data.status === 'error') {
-        updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'failed' });
-        // Очистим таймаут подтверждения
-        pendingTimeouts.current.delete(data.request_uid);
-        console.error('Ошибка, исходящее сообщение не прошло):', data.error);
-      }
-
-      //  3. Поступило входящее c обычного чата сообщение
-      if (
-        data.action === 'create_text_message' &&
-        data.status === 'OK' &&
-        data.object.chat_type === 'chat' &&
-        data.object.to_user?.uid === currentUserIdRef.current
-      ) {
-        console.log('Получили входящее сообщение c обычного чата) :', data);
-        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
-        // (это id лица отправивщего входящее сообщение)
-        const fromUserUid = data.object.from_user.uid;
-        const serverMessage = { ...data.object, status: 'sent' };
-        upsertMessageForUser(fromUserUid, serverMessage);
-        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
-      }
-      //  Поступило входящее сообщение c группы
-      if (
-        data.action === 'create_text_message' &&
-        data.status === 'OK' &&
-        (data.object.chat_type === 'public-group' || data.object.chat_type === 'private-group') &&
-        data.object.from_user?.uid !== currentUserIdRef.current
-      ) {
-        console.log('Получили входящее сообщение с группы) :', data);
-        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
-        // (это id группы отправившей входящее сообщение)
-        const fromUserUid = data.object.chat_key;
-        const serverMessage = { ...data.object, status: 'sent' };
-        upsertMessageForUser(fromUserUid, serverMessage);
-        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
-      }
-
-      //4. входящее ws-сообщение read-status поступило отправителю первоначального исходящего текстового сообщения в обычном чате
-      if (
-        data.action === 'change_status_read_message' &&
-        data.status === 'OK' &&
-        data.object.from_user.uid === currentUserIdRef.current
-      ) {
-        console.log('Подтверждение об изменения read-status исходящего сообщения обычного чата :', data);
-        // в store находим нужное первоначальное исходящее {текстовое сообщение} в котором свойство new меняем на false
-        updateMessageByUidForUser(data.object.to_user.uid, data.object.uid, { status: 'read', new: false });
-      }
-      //Входящее ws-сообщение read-status поступило отправителю первоначального исходящего текстового сообщения в группе
-      if (
-        data.action === 'change_status_read_message' &&
-        data.status === 'OK' &&
-        data.object.from_user.uid === currentUserIdRef.current &&
-        data.object.chat_data.chat_key === userIdRef.current
-      ) {
-        console.log('Подтверждение об изменения read-status исходящего сообщения группы :', data);
-        // в store находим нужное первоначальное исходящее {текстовое сообщение} в котором свойство new меняем на false
-        updateMessageByUidForUser(data.object.chat_data.chat_key, data.object.uid, { status: 'read', new: false });
-      }
-
-      //5. Bходящее ws-сообщение read-status поступило получателю первоначального входящего текстового сообщения в обычтом счате
-      if (
-        data.action === 'change_status_read_message' &&
-        data.status === 'OK' &&
-        data.object.to_user.uid === currentUserIdRef.current
-      ) {
-        console.log('Подтверждение об изменении read-status входящего сообщения обычного чата :', data);
-        updateMessageByUidForUser(data.object.from_user.uid, data.object.uid, { status: 'read', new: false });
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-      // Входящее ws-сообщение read-status поступило получателю первоначального входящего текстового сообщения в группе
-      if (
-        data.action === 'change_status_read_message' &&
-        data.status === 'OK' &&
-        data.object.to_user.uid === userIdRef.current.replace('group_', '')
-      ) {
-        console.log('Подтверждение об изменении read-status входящего сообщения группы:', data);
-        updateMessageByUidForUser(data.object.chat_data.chat_key, data.object.uid, { status: 'read', new: false });
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-
-      //6.входящее ws-сообщение delete_message oб удалении входящего либо исходящего сообщения обычного чата
-      if (
-        data.action === 'delete_message' &&
-        data.status === 'OK' &&
-        !data.object.to_user.username.includes('group_')
-      ) {
-        console.log('Cообщение сервера об удалении входящего либо исходящего сообщения чата :', data);
-        // локально удаляем сообщение из store и сразу его отсутствие показываем в DOM
-        if (data.object.from_user.uid === currentUserIdRef.current) {
-          deleteMessageByUidForUser(data.object.to_user.uid, data.object.uid);
-        } else {
-          deleteMessageByUidForUser(data.object.from_user.uid, data.object.uid);
-        }
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-
-      //входящее ws-сообщение delete_message oб удалении входящего либо исходящего сообщения группы
-      if (data.action === 'delete_message' && data.status === 'OK' && data.object.to_user.username.includes('group_')) {
-        console.log('Cообщение сервера об удалении входящего либо исходящего сообщения группы:', data);
-        deleteMessageByUidForUser(data.object.to_user.username, data.object.uid);
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-
-      //  7. Поступило сообщение принявшему телефонный звонок абоненту о состоявшемся телефонном звонке ('new_call_message')
-      if (
-        data.action === 'new_call_message' &&
-        data.status === 'OK' &&
-        data.object.chat_type === 'chat' &&
-        data.object.to_user?.uid === currentUserIdRef.current
-      ) {
-        console.log('Поступило сообщение вызываемому абоненту о состоявшемся телефонном звонке:', data);
-        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
-        // (это id позвонившего лица)
-        const fromUserUid = data.object.from_user.uid;
-        const serverMessage = { ...data.object, status: 'sent' };
-        upsertMessageForUser(fromUserUid, serverMessage);
-        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
-      }
-      //Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке ('new_call_message')
-      if (
-        data.action === 'new_call_message' &&
-        data.status === 'OK' &&
-        data.object.chat_type === 'chat' &&
-        data.object.from_user?.uid === currentUserIdRef.current
-      ) {
-        console.log('Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке:', data);
-        // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.to_user.uid
-        // (это id получателя звонка)
-        const fromUserUid = data.object.to_user.uid;
-        const serverMessage = { ...data.object, status: 'sent' };
-        upsertMessageForUser(fromUserUid, serverMessage);
-        addChatInChatsListStore(translateMessageIntoChat(serverMessage));
-      }
-      //8. поступило от сервера событие pong
-      if (data.action === 'pong') {
-        console.log('Поступило сообщение от сервера "Pong"');
-        lastPongRef.current = Date.now();
         return;
       }
+      clearReconnectTimer();
 
-      if (data.action === 'offer_call' && data.status === 'OK') {
-        console.log('Входящий звонок от ' + data.object.from_user);
-        if (currentUserId !== data.object.from_user) {
-          const { first_name, last_name, avatar_url } = data.object.message_rtc.from_user;
-          setCallData({
-            contactFio: `${first_name} ${last_name}`,
-            avatarUrl: avatar_url,
-            messageRtcUid: data.object.message_rtc.uid,
-            offerSdp: data.object.offer_sdp,
-            fromUserUid: data.object.from_user,
-            isReceivingModalOpen: true,
-          });
-        }
-      }
+      // увеличиваем id инстанса
+      const myId = ++socketInstanceIdRef.current;
+      //перед каждым connect освежаем access
+      await refreshWsSession();
 
-      if (data.action === 'answer_call' && data.status === 'OK') {
-        console.log('Ответ на звонок от ' + data.object.from_user);
-        if (currentUserId === data.object.from_user) {
-          setCallData({ answerSdp: data.object.answer_sdp });
-          const requestUid = crypto.randomUUID();
-          sendCallStateUpdate({
-            action: 'call_state_update',
-            request_uid: requestUid,
-            object: {
-              from_user_uid: currentUserId,
-              to_user_uid: data.object.to_user_uid,
-              message_rtc_uid: messageRtcUid,
-              state: 'connected',
-              reason_code: null,
-            },
-          });
-        }
-      }
+      //подключение к ws-соединению
+      const socket = new WebSocket(wsUrl);
+      wsRef.current = socket;
 
-      if (data.action === 'ice_candidate' && data.status === 'OK') {
-        if (data.object.ice_candidate) {
-          addCandidate(data.object.ice_candidate);
-        }
-      }
+      socket.onopen = (): void => {
+        if (socketInstanceIdRef.current !== myId) return; // устаревший
+        console.log('WebSocket open');
+        reconnectAttemptRef.current = 0; // сброс backoff
+        // отправлем ping
+        startHeartbeat(socket);
+        // при новом открытии ws-cоединения поворно отправляем все ранее не отправленные сообщения (при наличии),
+        messageQueueRef.current.forEach((msg) => {
+          socket.send(JSON.stringify(msg));
+        });
+        messageQueueRef.current = [];
+      };
 
-      if (data.action === 'call_completion' && data.status === 'OK') {
-        console.log('Звонок завершен со статусом ' + data.object?.type_complete);
-        if (data.object?.type_complete === 'rejected') {
-          console.log('Звонок отклонен');
-          setState('rejected');
-          resetCall();
-        }
-        if (data.object?.type_complete === 'unreceived') {
-          console.log('Не отвечает');
-          setState('unreceived');
-          resetCall();
-        }
-        if (data.object?.type_complete === 'completed') {
-          console.log('Звонок завершен');
-          setState('end');
-          resetCall();
-        }
-        if (data.object?.type_complete === 'failed') {
-          setState('error');
-          resetCall();
-        }
-      }
-      //входящее ws-сообщение сервера подтверждающее создание группы/канала
-      if (data.action === 'create_chat' && data.status === 'OK') {
-        console.log('Подтверждение сервера об создании группы/канала:', data);
-        // Если сервер пришлёт подтверждение с request_uid,
-        if (data.request_uid) {
-          const result = {
-            peer: {
-              uid: data.object.chat_id,
-              username: data.object.chat_key,
-              nickname: data.object.name,
-              firstName: '',
-              lastName: '',
-              avatarUrl: data.object.avatar_master_url ?? data.object.avatar_webp_url ?? '',
-              avatarWebpUrl: data.object.avatar_master_url ?? '',
-              isBlocked: false,
-              isOnline: false,
-              isInContacts: false,
-              wasOnlineAt: 0,
-            },
-            chat: {
-              id: data.object.chat_id,
-              chatKey: data.object.chat_key,
-              chatType: data.object.chat_type,
-              name: data.object.name,
-              is_favorite: false,
-              notifications: true,
-              newMessageCount: 0,
-              lastActivityAt: 0,
-            },
-            messages: {},
-          };
-          if (data.object.created_by === currentUserIdRef.current) {
-            let text: string;
-            if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
-              text = `@@@ Канал создан`;
-            } else {
-              text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
-            }
-            // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
-            updateChatByUidStore(data.request_uid, result);
-            if (!stopRef.current) {
-              // после создания группы/чата от имени владельца отправляем сообщение всем подписчикам
-              sendMessage({ content: text, chatKey: data.object.chat_key });
-              stopRef.current = true;
-            }
-          } else {
-            // если участник группы/канала, то добавим в список чатов в store новый чат
-            addChatInChatsListStore(result);
+      socket.onclose = async (e): Promise<void> => {
+        if (socketInstanceIdRef.current !== myId) return; // устаревший
+        stopHeartbeat();
+        console.log('WebSocket close', e.code, e.reason);
+        // Ошибки 1006 часто при обрыве сети/таймауте
+        // Планируем reconnect
+        // 1006 чаще всего при 403 handshake
+        if (e.code === 1006) {
+          try {
+            await refreshWsSession();
+            reconnectTimeout.current = setTimeout(scheduleReconnect, 1000);
+          } catch {
+            console.log('Refresh failed, need relogin');
           }
         }
-        // Очистим таймаут подтверждения
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-      //входящее ws-сообщение сервера не подтверждающее создание группы/канала из-за возникшей ошибки
-      if (data.action === 'create_chat' && data.status === 'error') {
-        console.log('Cообщение сервера что при создании группы/канала возникла ошибка :', data);
-        // Если сервер прислал ошибку, удалим по request_uid из store заглушку стоящую в DOM на созданную группу/канал
-        deleteChatByUidStore(data.request_uid);
-        stopRef.current = true;
-        // Очистим таймаут подтверждения
-        pendingTimeouts.current.delete(data.request_uid);
-      }
-    };
+      };
+
+      socket.onerror = (err): void => {
+        // ВАЖНО: не закрываем вручную, пусть onclose сам решит
+        console.log('WebSocket Error', err);
+      };
+
+      socket.onmessage = (event: MessageEvent): void => {
+        if (socketInstanceIdRef.current !== myId) return;
+        const data = JSON.parse(event.data);
+        console.log(data);
+        //Cобытия:
+        // 1.Подтверждает отправленние созданного исходящего сообщения в обычный чат по request_uid
+        if (
+          data.action === 'create_text_message' &&
+          data.status === 'OK' &&
+          data.object.to_user?.uid === userIdRef.current
+        ) {
+          console.log('Подтверждение сервера об отправке исходящего сообщения в обычный чат) :', data);
+          // Если сервер пришлёт подтверждение с request_uid,
+          // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
+          if (data.request_uid) {
+            updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
+          }
+        }
+        // Подтверждает отправленние созданного исходящего сообщения в группу по request_uid
+        if (
+          data.action === 'create_text_message' &&
+          data.status === 'OK' &&
+          data.object.from_user.uid === currentUserIdRef.current &&
+          data.object.chat_key === userIdRef.current
+        ) {
+          console.log('Подтверждение сервера об отправке исходящего сообщения в группу) :', data);
+          // Если сервер пришлёт подтверждение с request_uid,
+          // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
+          if (data.request_uid) {
+            updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
+          }
+        }
+
+        // 2. Не подтверждает отправленние созданного исходящего сообщения по request_uid
+        if (data.action === 'create_text_message' && data.status === 'error') {
+          updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'failed' });
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+          console.error('Ошибка, исходящее сообщение не прошло):', data.error);
+        }
+
+        //  3. Поступило входящее c обычного чата сообщение
+        if (
+          data.action === 'create_text_message' &&
+          data.status === 'OK' &&
+          data.object.chat_type === 'chat' &&
+          data.object.to_user?.uid === currentUserIdRef.current
+        ) {
+          console.log('Получили входящее сообщение c обычного чата) :', data);
+          // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
+          // (это id лица отправивщего входящее сообщение)
+          const fromUserUid = data.object.from_user.uid;
+          const serverMessage = { ...data.object, status: 'sent' };
+          upsertMessageForUser(fromUserUid, serverMessage);
+          addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+        }
+        //  Поступило входящее сообщение c группы
+        if (
+          data.action === 'create_text_message' &&
+          data.status === 'OK' &&
+          (data.object.chat_type === 'public-group' || data.object.chat_type === 'private-group') &&
+          data.object.from_user?.uid !== currentUserIdRef.current
+        ) {
+          console.log('Получили входящее сообщение с группы) :', data);
+          // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
+          // (это id группы отправившей входящее сообщение)
+          const fromUserUid = data.object.chat_key;
+          const serverMessage = { ...data.object, status: 'sent' };
+          upsertMessageForUser(fromUserUid, serverMessage);
+          addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+        }
+
+        //4. входящее ws-сообщение read-status поступило отправителю первоначального исходящего текстового сообщения в обычном чате
+        if (
+          data.action === 'change_status_read_message' &&
+          data.status === 'OK' &&
+          data.object.from_user.uid === currentUserIdRef.current
+        ) {
+          console.log('Подтверждение об изменения read-status исходящего сообщения обычного чата :', data);
+          // в store находим нужное первоначальное исходящее {текстовое сообщение} в котором свойство new меняем на false
+          updateMessageByUidForUser(data.object.to_user.uid, data.object.uid, { status: 'read', new: false });
+        }
+        //Входящее ws-сообщение read-status поступило отправителю первоначального исходящего текстового сообщения в группе
+        if (
+          data.action === 'change_status_read_message' &&
+          data.status === 'OK' &&
+          data.object.from_user.uid === currentUserIdRef.current &&
+          data.object.chat_data.chat_key === userIdRef.current
+        ) {
+          console.log('Подтверждение об изменения read-status исходящего сообщения группы :', data);
+          // в store находим нужное первоначальное исходящее {текстовое сообщение} в котором свойство new меняем на false
+          updateMessageByUidForUser(data.object.chat_data.chat_key, data.object.uid, { status: 'read', new: false });
+        }
+
+        //5. Bходящее ws-сообщение read-status поступило получателю первоначального входящего текстового сообщения в обычтом счате
+        if (
+          data.action === 'change_status_read_message' &&
+          data.status === 'OK' &&
+          data.object.to_user.uid === currentUserIdRef.current
+        ) {
+          console.log('Подтверждение об изменении read-status входящего сообщения обычного чата :', data);
+          updateMessageByUidForUser(data.object.from_user.uid, data.object.uid, { status: 'read', new: false });
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        // Входящее ws-сообщение read-status поступило получателю первоначального входящего текстового сообщения в группе
+        if (
+          data.action === 'change_status_read_message' &&
+          data.status === 'OK' &&
+          data.object.to_user.uid === userIdRef.current.replace('group_', '')
+        ) {
+          console.log('Подтверждение об изменении read-status входящего сообщения группы:', data);
+          updateMessageByUidForUser(data.object.chat_data.chat_key, data.object.uid, { status: 'read', new: false });
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+
+        //6.входящее ws-сообщение delete_message oб удалении входящего либо исходящего сообщения обычного чата
+        if (
+          data.action === 'delete_message' &&
+          data.status === 'OK' &&
+          !data.object.to_user.username.includes('group_')
+        ) {
+          console.log('Cообщение сервера об удалении входящего либо исходящего сообщения чата :', data);
+          // локально удаляем сообщение из store и сразу его отсутствие показываем в DOM
+          if (data.object.from_user.uid === currentUserIdRef.current) {
+            deleteMessageByUidForUser(data.object.to_user.uid, data.object.uid);
+          } else {
+            deleteMessageByUidForUser(data.object.from_user.uid, data.object.uid);
+          }
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+
+        //входящее ws-сообщение delete_message oб удалении входящего либо исходящего сообщения группы
+        if (
+          data.action === 'delete_message' &&
+          data.status === 'OK' &&
+          data.object.to_user.username.includes('group_')
+        ) {
+          console.log('Cообщение сервера об удалении входящего либо исходящего сообщения группы:', data);
+          deleteMessageByUidForUser(data.object.to_user.username, data.object.uid);
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+
+        //  7. Поступило сообщение принявшему телефонный звонок абоненту о состоявшемся телефонном звонке ('new_call_message')
+        if (
+          data.action === 'new_call_message' &&
+          data.status === 'OK' &&
+          data.object.chat_type === 'chat' &&
+          data.object.to_user?.uid === currentUserIdRef.current
+        ) {
+          console.log('Поступило сообщение вызываемому абоненту о состоявшемся телефонном звонке:', data);
+          // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
+          // (это id позвонившего лица)
+          const fromUserUid = data.object.from_user.uid;
+          const serverMessage = { ...data.object, status: 'sent' };
+          upsertMessageForUser(fromUserUid, serverMessage);
+          addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+        }
+        //Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке ('new_call_message')
+        if (
+          data.action === 'new_call_message' &&
+          data.status === 'OK' &&
+          data.object.chat_type === 'chat' &&
+          data.object.from_user?.uid === currentUserIdRef.current
+        ) {
+          console.log('Поступило сообщение позвонившему абоненту о состоявшемся телефонном звонке:', data);
+          // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.to_user.uid
+          // (это id получателя звонка)
+          const fromUserUid = data.object.to_user.uid;
+          const serverMessage = { ...data.object, status: 'sent' };
+          upsertMessageForUser(fromUserUid, serverMessage);
+          addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+        }
+        //8. поступило от сервера событие pong
+        if (data.action === 'pong') {
+          console.log('Поступило сообщение от сервера "Pong"');
+          lastPongRef.current = Date.now();
+          return;
+        }
+
+        if (data.action === 'offer_call' && data.status === 'OK') {
+          console.log('Входящий звонок от ' + data.object.from_user);
+          if (currentUserId !== data.object.from_user) {
+            const { first_name, last_name, avatar_url } = data.object.message_rtc.from_user;
+            setCallData({
+              contactFio: `${first_name} ${last_name}`,
+              avatarUrl: avatar_url,
+              messageRtcUid: data.object.message_rtc.uid,
+              offerSdp: data.object.offer_sdp,
+              fromUserUid: data.object.from_user,
+              isReceivingModalOpen: true,
+            });
+          }
+        }
+
+        if (data.action === 'answer_call' && data.status === 'OK') {
+          console.log('Ответ на звонок от ' + data.object.from_user);
+          if (currentUserId === data.object.from_user) {
+            setCallData({ answerSdp: data.object.answer_sdp });
+            const requestUid = crypto.randomUUID();
+            sendCallStateUpdate({
+              action: 'call_state_update',
+              request_uid: requestUid,
+              object: {
+                from_user_uid: currentUserId,
+                to_user_uid: data.object.to_user_uid,
+                message_rtc_uid: messageRtcUid,
+                state: 'connected',
+                reason_code: null,
+              },
+            });
+          }
+        }
+
+        if (data.action === 'ice_candidate' && data.status === 'OK') {
+          if (data.object.ice_candidate) {
+            addCandidate(data.object.ice_candidate);
+          }
+        }
+
+        if (data.action === 'call_completion' && data.status === 'OK') {
+          console.log('Звонок завершен со статусом ' + data.object?.type_complete);
+          if (data.object?.type_complete === 'rejected') {
+            console.log('Звонок отклонен');
+            setState('rejected');
+            resetCall();
+          }
+          if (data.object?.type_complete === 'unreceived') {
+            console.log('Не отвечает');
+            setState('unreceived');
+            resetCall();
+          }
+          if (data.object?.type_complete === 'completed') {
+            console.log('Звонок завершен');
+            setState('end');
+            resetCall();
+          }
+          if (data.object?.type_complete === 'failed') {
+            setState('error');
+            resetCall();
+          }
+        }
+        //входящее ws-сообщение сервера подтверждающее создание группы/канала
+        if (data.action === 'create_chat' && data.status === 'OK') {
+          console.log('Подтверждение сервера об создании группы/канала:', data);
+          // Если сервер пришлёт подтверждение с request_uid,
+          if (data.request_uid) {
+            const result = {
+              peer: {
+                uid: data.object.chat_id,
+                username: data.object.chat_key,
+                nickname: data.object.name,
+                firstName: '',
+                lastName: '',
+                avatarUrl: data.object.avatar_master_url ?? data.object.avatar_webp_url ?? '',
+                avatarWebpUrl: data.object.avatar_master_url ?? '',
+                isBlocked: false,
+                isOnline: false,
+                isInContacts: false,
+                wasOnlineAt: 0,
+              },
+              chat: {
+                id: data.object.chat_id,
+                chatKey: data.object.chat_key,
+                chatType: data.object.chat_type,
+                name: data.object.name,
+                is_favorite: false,
+                notifications: true,
+                newMessageCount: 0,
+                lastActivityAt: 0,
+              },
+              messages: {},
+            };
+            if (data.object.created_by === currentUserIdRef.current) {
+              let text: string;
+              if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
+                text = `@@@ Канал создан`;
+              } else {
+                text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
+              }
+              // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
+              updateChatByUidStore(data.request_uid, result);
+              if (!stopRef.current) {
+                // после создания группы/чата от имени владельца отправляем сообщение всем подписчикам
+                sendMessage({ content: text, chatKey: data.object.chat_key });
+                stopRef.current = true;
+              }
+            } else {
+              // если участник группы/канала, то добавим в список чатов в store новый чат
+              addChatInChatsListStore(result);
+            }
+          }
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        //входящее ws-сообщение сервера не подтверждающее создание группы/канала из-за возникшей ошибки
+        if (data.action === 'create_chat' && data.status === 'error') {
+          console.log('Cообщение сервера что при создании группы/канала возникла ошибка :', data);
+          // Если сервер прислал ошибку, удалим по request_uid из store заглушку стоящую в DOM на созданную группу/канал
+          deleteChatByUidStore(data.request_uid);
+          stopRef.current = true;
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+      };
+    } catch (e) {}
   }, [
     wsUrl,
     addMessageForUser,
@@ -556,35 +566,27 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     deleteChatByUidStore,
   ]);
 
-  // чтобы scheduleReconnect мог вызывать connectWS
   useEffect(() => {
-    // подписки на offline/online
-    const onOnline = (): void => {
-      // при появлении сети — попытка подключения
-      reconnectAttemptRef.current = 0;
-      clearReconnectTimer();
-      connectWS();
-    };
-
-    const onOffline = (): void => {
-      // при offline — закрыть и не спамить reconnect-ом
-      clearReconnectTimer();
-      wsRef.current?.close();
-    };
-
-    window.addEventListener('online', onOnline);
-    window.addEventListener('offline', onOffline);
-    // старт
     connectWS();
+
+    // тихий refresh каждые 15 минут
+    const interval = setInterval(
+      () => {
+        refreshWsSession().catch(() => {});
+      },
+      15 * 60 * 1000,
+    );
+
     return (): void => {
-      isUnmountedRef.current = true;
-      //clearReconnectTimer();
-      window.removeEventListener('online', onOnline);
-      window.removeEventListener('offline', onOffline);
-      pendingTimeouts.current.forEach((id) => clearTimeout(id));
-      pendingTimeouts.current.clear();
+      clearInterval(interval);
+      // if (wsRef.current) {
+      //   wsRef.current.close();
+      // }
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+      }
     };
-  }, [connectWS]);
+  }, [wsUrl]);
 
   // Функция отправки сообщения
   const sendMessage = useCallback(
