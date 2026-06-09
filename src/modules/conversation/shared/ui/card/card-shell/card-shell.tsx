@@ -95,7 +95,7 @@ export const CardShell = ({
             src={
               result && result !== '/api/proxy'
                 ? result
-                : chatType === 'chat' || variant === 'globals'
+                : chatType === 'chat' || variant
                   ? URL_DEFAUIT_Avatar
                   : URL_DEFAUIT_Avatar_Croup
             }
