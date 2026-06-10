@@ -14,9 +14,10 @@ import styles from './invite-members-block.module.scss';
 type InviteMembersBlockProps = {
   wsUrl: string;
   currentUserId: string;
+  refreshUrl: string;
 };
 
-export const InviteMembersBlock = ({ wsUrl, currentUserId }: InviteMembersBlockProps): JSX.Element => {
+export const InviteMembersBlock = ({ wsUrl, currentUserId, refreshUrl }: InviteMembersBlockProps): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -35,7 +36,7 @@ export const InviteMembersBlock = ({ wsUrl, currentUserId }: InviteMembersBlockP
   const avatarUidStore = useNewGroupStore((s) => s.avatarUid);
   const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
   const avatarFileStore = useNewGroupStore((s) => s.avatarFile);
-  const { createGroupOrChannel } = useWebSocketChat(wsUrl, currentUserId);
+  const { createGroupOrChannel } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
   const exitSelectionMode = useContactsSelectionStore((s) => s.exitSelectionMode);
 
   // Устанавливаем режим
