@@ -51,7 +51,6 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
   let resultProfile;
 
   if (chatOrContact === 'chat') {
-    console.log('chat');
     resultProfile = {
       avatarUrl: chat?.peer.avatarUrl || '',
       firstName: chat?.peer.firstName || '',
@@ -62,7 +61,6 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
       status: getLastSeenLabel(chat?.peer.wasOnlineAt || null),
     };
   } else {
-    console.log('contact');
     resultProfile = {
       avatarUrl: profile?.avatar || profile?.avatarUrl || profile?.avatarWebp || profile?.avatarWebpUrl || '',
       firstName: profile?.firstName || '',
@@ -130,10 +128,9 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
       },
     });
   };
-  console.log(avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status);
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
   const result = `/api/proxy${removeDomain(avatarUrl)}`;
-  console.log('result', result);
+
   return (
     <>
       <div className={styles.wrapper}>
