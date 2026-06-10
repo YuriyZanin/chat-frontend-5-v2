@@ -566,9 +566,26 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     deleteChatByUidStore,
   ]);
 
+  // чтобы scheduleReconnect мог вызывать connectWS
   useEffect(() => {
-    connectWS();
+    // подписки на offline/online
+    const onOnline = (): void => {
+      // при появлении сети — попытка подключения
+      reconnectAttemptRef.current = 0;
+      clearReconnectTimer();
+      connectWS();
+    };
 
+    const onOffline = (): void => {
+      // при offline — закрыть и не спамить reconnect-ом
+      clearReconnectTimer();
+      wsRef.current?.close();
+    };
+
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    // старт
+    connectWS();
     // тихий refresh каждые 15 минут
     const interval = setInterval(
       () => {
@@ -576,17 +593,38 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       },
       15 * 60 * 1000,
     );
-
     return (): void => {
       clearInterval(interval);
-      // if (wsRef.current) {
-      //   wsRef.current.close();
-      // }
-      if (reconnectTimeout.current) {
-        clearTimeout(reconnectTimeout.current);
-      }
+      isUnmountedRef.current = true;
+      //clearReconnectTimer();
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+      pendingTimeouts.current.forEach((id) => clearTimeout(id));
+      pendingTimeouts.current.clear();
     };
   }, [wsUrl]);
+
+  // useEffect(() => {
+  //   connectWS();
+
+  //   // тихий refresh каждые 15 минут
+  //   const interval = setInterval(
+  //     () => {
+  //       refreshWsSession(refreshUrl).catch(() => {});
+  //     },
+  //     15 * 60 * 1000,
+  //   );
+
+  //   return (): void => {
+  //     clearInterval(interval);
+  //     // if (wsRef.current) {
+  //     //   wsRef.current.close();
+  //     // }
+  //     if (reconnectTimeout.current) {
+  //       clearTimeout(reconnectTimeout.current);
+  //     }
+  //   };
+  // }, [wsUrl]);
 
   // Функция отправки сообщения
   const sendMessage = useCallback(
