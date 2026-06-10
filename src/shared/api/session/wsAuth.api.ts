@@ -2,13 +2,13 @@
 
 let refreshPromise: Promise<void> | null = null;
 
-export const refreshWsSession = async (): Promise<void> => {
+export const refreshWsSession = async (refreshUrl: string): Promise<void> => {
   if (refreshPromise) {
     return refreshPromise; // ждём уже запущенный refresh
   }
 
   refreshPromise = (async (): Promise<void> => {
-    const res = await fetch('https://api.dev.chat.ktsf.ru/api/v1/auth/login/refresh/token/', {
+    const res = await fetch(refreshUrl, {
       method: 'POST',
       credentials: 'include',
     });

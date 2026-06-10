@@ -29,7 +29,7 @@ import ClipIcon from './icon/clip.svg';
 import MicIcon from './icon/mic.svg';
 import Submit from './icon/submit.svg';
 
-export const HeaderBottom = ({ wsUrl, currentUserId }: HeaderBottomProps): JSX.Element => {
+export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomProps): JSX.Element => {
   const [textInput, setTextInput] = useState<string>('');
   const repliedMessageStore = useRepliedMessageStore((s) => s.repliedMessage);
   const clearRepliedMessageStore = useRepliedMessageStore((s) => s.clearRepliedMessage);
@@ -41,7 +41,7 @@ export const HeaderBottom = ({ wsUrl, currentUserId }: HeaderBottomProps): JSX.E
   const selectedMessagesStore = useSelectedMessagesStore((s) => s.selectedMessages);
   const clearSelectedMessagesStore = useSelectedMessagesStore((s) => s.clearSelectedMessages);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const { sendMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
+  const { sendMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
   const userIdStore = useUserIdStore((s) => s.userId);
   const attachmentFilesStore = useAttachmentFilesStore((s) => s.attachmentFiles);
   const attachmentImagesStore = useAttachmentImagesStore((s) => s.attachmentImages);

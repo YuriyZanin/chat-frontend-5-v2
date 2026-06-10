@@ -6,7 +6,12 @@ import { MessagesList } from '../ui/messages-list/messages-list';
 import { useMessagesChatStore, useUserIdStore } from '../zustand-store/zustand-store';
 import { MessagesListScreenProps } from './messades-list-screen.props';
 import { useMessagesListScreen } from './use-messages-list-screen';
-export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesListScreenProps): JSX.Element => {
+export const MessagesListScreen = ({
+  user_uid,
+  wsUrl,
+  currentUserId,
+  refreshUrl,
+}: MessagesListScreenProps): JSX.Element => {
   const userIdStore = useUserIdStore((s) => s.userId);
   const setUserIdStore = useUserIdStore((s) => s.setUserId);
 
@@ -19,7 +24,7 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]) ?? [];
   const { messagesList, status, fetchNextPage, hasNextPage, isFetchingNextPage } = useMessagesListScreen(userUid);
 
-  const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
+  const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
 
   if ((status !== 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
     return (

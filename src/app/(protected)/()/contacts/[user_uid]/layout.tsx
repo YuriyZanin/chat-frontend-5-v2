@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { Suspense } from 'react';
 
 const BACKEND_WS = process.env.BACKEND_API_WS_URL!;
+const BACKEND_API = process.env.BACKEND_API_URL;
 
 export default async function MessagesLayout({
   children,
@@ -18,16 +19,18 @@ export default async function MessagesLayout({
     const user_uid = (await params).user_uid;
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access')?.value;
-    const wsUrl = `${BACKEND_WS}/ws/chat`;
     const payload = parseJwtToken(accessToken ?? '');
+    const wsUrl = `${BACKEND_WS}/ws/chat`;
+    const refreshUrl = `${BACKEND_API}/api/v1/auth/login/refresh/token/`;
+
     return (
       <main className={styles.wrapper}>
         <Suspense>
-          <HeaderTop wsUrl={wsUrl} user_uid={user_uid} currentUid={payload.user_id} />
+          <HeaderTop wsUrl={wsUrl} user_uid={user_uid} currentUid={payload.user_id} refreshUrl={refreshUrl} />
         </Suspense>
         {children}
         <Suspense>
-          <HeaderBottom wsUrl={wsUrl} currentUserId={payload.user_id} />
+          <HeaderBottom wsUrl={wsUrl} currentUserId={payload.user_id} refreshUrl={refreshUrl} />
         </Suspense>
       </main>
     );

@@ -93,7 +93,7 @@ type UseWebSocketChatReturn = {
   }) => void;
 };
 
-export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSocketChatReturn {
+export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUrl: string): UseWebSocketChatReturn {
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPongRef = useRef<number>(Date.now());
   // прописываем в компоненте актуальный user_uid открытого чата из store
@@ -206,7 +206,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
       // увеличиваем id инстанса
       const myId = ++socketInstanceIdRef.current;
       //перед каждым connect освежаем access
-      await refreshWsSession();
+      await refreshWsSession(refreshUrl);
 
       //подключение к ws-соединению
       const socket = new WebSocket(wsUrl);
@@ -234,7 +234,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         // 1006 чаще всего при 403 handshake
         if (e.code === 1006) {
           try {
-            await refreshWsSession();
+            await refreshWsSession(refreshUrl);
             reconnectTimeout.current = setTimeout(scheduleReconnect, 1000);
           } catch {
             console.log('Refresh failed, need relogin');
@@ -572,7 +572,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
     // тихий refresh каждые 15 минут
     const interval = setInterval(
       () => {
-        refreshWsSession().catch(() => {});
+        refreshWsSession(refreshUrl).catch(() => {});
       },
       15 * 60 * 1000,
     );
@@ -886,10 +886,10 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string): UseWebSo
         console.log('Sent create_chat request:', payload);
         //Устанавливаем таймаут ожидания подтверждения (5cek)
         const to = setTimeout(() => {
-          // Если за 5 cек не пришло сообщение-подтверждение от ws меняем в сообщении
+          // Если за 60 cек не пришло сообщение-подтверждение от ws меняем в сообщении
           console.log('Группа/канал не созданы');
           pendingTimeouts.current.delete(requestUid);
-        }, 5000);
+        }, 60000);
         pendingTimeouts.current.set(requestUid, to);
       } else {
         // Если ws-соединение по какой-то причине закрыто, тогда ставим это сообщение (payload) в очередь на отправку

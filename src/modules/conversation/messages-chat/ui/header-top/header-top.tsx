@@ -27,21 +27,13 @@ import { LeaveGroupModal } from '../header-top-buttons-block/leave-group-modal';
 import { SearchResultCard } from '../search-messages/search-result-card/search-result-card';
 import { SearchMessages } from '../search-messages/search/search-messages';
 import styles from './header-top.module.scss';
+import type { HeaderTopProps } from './header-top.props';
 import CallIcon from './icons/call-icon.svg';
 import SearchIcon from './icons/search-icon.svg';
-
 const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
 const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
-export const HeaderTop = ({
-  wsUrl,
-  user_uid,
-  currentUid,
-}: {
-  wsUrl: string;
-  user_uid: string;
-  currentUid: string;
-}): JSX.Element => {
+export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl }: HeaderTopProps): JSX.Element => {
   //хук для получения списка чатов
   const { chats } = useChatsScreen();
   //хук для получения списка участников опреденной группы/канала (по chat_key)
@@ -86,7 +78,7 @@ export const HeaderTop = ({
     }
   }, [closeButtonMenu, openButtonMenu, isBlocked, isInContacts, user_uid]);
   const { contacts } = useContactsScreen();
-  const { sendCallCompletion } = useWebSocketChat(wsUrl, currentUid);
+  const { sendCallCompletion } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   const handleCall = async (): Promise<void> => {
     if (!isCallModalOpen) {
