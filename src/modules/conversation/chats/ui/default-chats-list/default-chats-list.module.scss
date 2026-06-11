@@ -1,0 +1,44 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $gap: 2.4rem);
+  width: 100%;
+  height: 100%;
+}
+.image {
+  @include mixins.flex-box();
+  width: 20rem;
+  height: 20rem;
+  flex-shrink: 0;
+}
+.textBlock {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+  padding: 0rem 1.6rem;
+}
+.title {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  line-height: 1.3;
+  letter-spacing: 0.01;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.description {
+  @include mixins.flex-box($direction: column, $gap: 0.2rem);
+  width: 100%;
+  height: auto;
+}
+.text {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  line-height: 1.2;
+  letter-spacing: 0.01;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}

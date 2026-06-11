@@ -3,7 +3,7 @@
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { Chat } from 'modules/conversation/chats/entity/chat.entity';
 import { useDebouncedValue } from 'modules/conversation/shared/hooks';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useChatsQuery } from '../api/chat.query';
 import { mapChatFromApi } from '../model/chat';
 import type { ChatListApiResponse } from '../model/chat.api.schema';
@@ -57,40 +57,46 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
   const is_favorite = useChatsStore((s) => s.is_favorite);
   const setIsFavorite = useChatsStore((s) => s.setIsFavorite);
 
-  const debouncedOrdering = useDebouncedValue<string>(ordering, 300);
   const debouncedSearch = useDebouncedValue<string>(search, 300);
-
-  const { data: myChats, status, isFetchingNextPage, fetchNextPage, hasNextPage } = useChatsQuery();
+  const debouncedModalSearch = useDebouncedValue<string>(modalSearch, 300);
+  const normalizedSearch = debouncedSearch.trim().toLowerCase();
+  const normalizedModalSearch = debouncedModalSearch.trim().toLowerCase();
+  const {
+    data: myChats,
+    status,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useChatsQuery({ search: normalizedSearch });
   const chats = useMemo(() => myChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [], [myChats]);
-
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredChats = normalizedSearch
-    ? chats?.filter((c) => `${c.peer.firstName} ${c.peer.lastName}`.toLowerCase().includes(normalizedSearch))
-    : chats;
-
-  const sortedChats = filteredChats.sort((a, b) => {
-    if (a.chat.is_favorite !== b.chat.is_favorite) {
-      return a.chat.is_favorite ? -1 : 1;
-    }
-
-    const aCreatedAt = a.messages.lastMessage?.createdAt || 0;
-    const bCreatedAt = b.messages.lastMessage?.createdAt || 0;
-
-    return bCreatedAt - aCreatedAt;
-  });
-
-  const normalizedModalSearch = modalSearch.trim().toLowerCase();
-  const filteredModalChats = normalizedModalSearch
-    ? chats?.filter((c) => `${c.peer.firstName} ${c.peer.lastName}`.toLowerCase().includes(normalizedModalSearch))
-    : chats;
-
-  const sortedModalChats = filteredModalChats.sort((a, b) => {
-    const aCreatedAt = a.messages.lastMessage?.createdAt || 0;
-    const bCreatedAt = b.messages.lastMessage?.createdAt || 0;
-
-    return bCreatedAt - aCreatedAt;
-  });
-
+  const { data: myModalChats } = useChatsQuery({ search: normalizedModalSearch });
+  const modalChats = useMemo(
+    () => myModalChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [],
+    [myModalChats],
+  );
+  const filteredChats = useCallback(
+    (chats: Chat[], normalizedSearch: string): Chat[] => {
+      return normalizedSearch
+        ? chats?.filter((c) =>
+            `${c.peer.firstName} ${c.peer.lastName} ${c.peer.nickname}`.toLowerCase().includes(normalizedSearch),
+          )
+        : chats;
+    },
+    [chats, normalizedSearch, modalChats, normalizedModalSearch],
+  );
+  const sortedChats = useCallback(
+    (chats: Chat[]): Chat[] => {
+      return [...chats]?.sort((a, b) => {
+        if (a.chat.is_favorite !== b.chat.is_favorite) {
+          return a.chat.is_favorite ? -1 : 1;
+        }
+        const aCreatedAt = a.messages.lastMessage?.createdAt || 0;
+        const bCreatedAt = b.messages.lastMessage?.createdAt || 0;
+        return bCreatedAt - aCreatedAt;
+      });
+    },
+    [chats, modalChats],
+  );
   return {
     ordering,
     setOrdering,
@@ -107,8 +113,8 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
     setIsBlocked,
     is_favorite,
     setIsFavorite,
-    chats: sortedChats,
-    modalChats: sortedModalChats,
+    chats: sortedChats(filteredChats(chats, normalizedSearch)),
+    modalChats: sortedChats(filteredChats(modalChats, normalizedModalSearch)),
     status,
     isFetchingNextPage,
     fetchNextPage,
