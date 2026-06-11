@@ -2,7 +2,7 @@
 
 .wrapper {
   @include mixins.flex-box($direction: column, $justify: space-between);
-  height: 93.6rem;
+  height: 87rem;
   width: 100%;
   border: 0.033rem solid var(--border-layout);
   border-radius: 0.8rem;

@@ -3,7 +3,7 @@
 .container {
   @include mixins.flex-box(column, flex-start, center, 1.6rem);
   width: 36rem;
-  min-height: 93.6rem;
+  min-height: 87rem;
   border-radius: 8px;
   background: var(--surface-secondary);
   border: 1px solid var(--border-layout);
