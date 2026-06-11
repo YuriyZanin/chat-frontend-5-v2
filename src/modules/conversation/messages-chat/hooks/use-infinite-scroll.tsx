@@ -1,6 +1,7 @@
 'use client';
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ChatListApiResponse } from 'modules/conversation/chats/model/chat';
+import type { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { RefObject, useEffect, useRef } from 'react';
 import type { MessagesListApiResponse } from '../model/messages-list';
 type UseInfiniteScrollReturn = {
@@ -21,7 +22,12 @@ export const useInfiniteScroll = ({
   scrollType: 'down' | 'up';
   fetchNextPage: (
     options?: FetchNextPageOptions,
-  ) => Promise<InfiniteQueryObserverResult<InfiniteData<MessagesListApiResponse | ChatListApiResponse>, unknown>>;
+  ) => Promise<
+    InfiniteQueryObserverResult<
+      InfiniteData<MessagesListApiResponse | ChatListApiResponse | UserContactApiResponse>,
+      unknown
+    >
+  >;
 }): UseInfiniteScrollReturn => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);

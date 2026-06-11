@@ -3,7 +3,7 @@ import { InfiniteData, useInfiniteQuery, UseInfiniteQueryResult } from '@tanstac
 import { MessagesListApiResponse, MessagesListQuery } from '../model/messages-list';
 import { getMessagesList } from './messages-list.api';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
 
 export const useMessagesListQuery = (
   user_uid: string,
