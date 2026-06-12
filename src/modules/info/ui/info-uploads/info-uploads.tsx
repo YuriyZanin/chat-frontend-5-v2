@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
 import { LINKS } from 'modules/info/shared/utils/mock';
 import { JSX, ReactElement, useState } from 'react';
 import { FilesTab } from './files-tab';
@@ -19,32 +18,18 @@ export const InfoUploads = ({
   refreshUrl,
 }: InfoUploadsProps): JSX.Element => {
   const [activeTab, setActiveTab] = useState(0);
-  const imagesArray: ChatFilesListApi[] = [];
-  const filesArray: ChatFilesListApi[] = [];
-  const voicesArray: ChatFilesListApi[] = [];
 
-  if (filesList && filesList.length) {
-    filesList.forEach((file) => {
-      if (file.media_kind === 'image') {
-        imagesArray.push(file);
-      }
-      if (file.media_kind === 'file') {
-        filesArray.push(file);
-      }
-      if (file.media_kind === 'voice') {
-        voicesArray.push(file);
-      }
-    });
-  }
   const renderTab = (): ReactElement | null => {
     const tab = tabs[activeTab];
     switch (tab) {
       case 'Медиа':
-        return <MediaTab items={imagesArray} currentUid={currentUid} wsUrl={wsUrl} refreshUrl={refreshUrl} />;
+        return (
+          <MediaTab items={filesList.imageFileList} currentUid={currentUid} wsUrl={wsUrl} refreshUrl={refreshUrl} />
+        );
       case 'Файлы':
-        return <FilesTab items={filesArray} />;
+        return <FilesTab items={filesList.fileFileList} />;
       case 'Голосовые':
-        return <VoicesTab items={voicesArray} />;
+        return <VoicesTab items={filesList.voiceFileList} />;
       case 'Ссылки':
         return <LinksTab items={LINKS} />;
       case 'Участники':

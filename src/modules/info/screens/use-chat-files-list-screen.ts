@@ -7,8 +7,14 @@ type useChatFilesListScreenReturn = {
   filesList: ChatFilesListApi[] | undefined;
 };
 
-export const useChatFilesListScreen = (chatKey: string): useChatFilesListScreenReturn => {
-  const { data } = useChatFilesListQuery('', chatKey);
+export const useChatFilesListScreen = ({
+  query,
+  chatKey,
+}: {
+  query: string;
+  chatKey: string;
+}): useChatFilesListScreenReturn => {
+  const { data } = useChatFilesListQuery({ query, chatKey });
   const filesList = useMemo(() => data?.pages.flatMap((page) => page.results ?? []), [data]);
   return {
     filesList,

@@ -50,7 +50,10 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
   const { hasChanges } = useInfoEditGroupStore();
   const { sendMembers } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   const { data: profile, isLoading } = useInfoProfileQuery(uid);
-  const { filesList } = useChatFilesListScreen(uid);
+  // делаем сортировку на сервере filesList по mime-типaм для определенного (uid) чата/группы/канала
+  const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
+  const { filesList: fileFileList } = useChatFilesListScreen({ query: 'application', chatKey: uid });
+  const { filesList: voiceFileList } = useChatFilesListScreen({ query: 'audio', chatKey: uid });
 
   const { participants } = useParticipantsScreen(uid);
   const queryClient = useQueryClient();
@@ -205,7 +208,13 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <GroupPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} refreshUrl={refreshUrl} />,
+      <GroupPanel
+        uid={uid}
+        currentUid={currentUid}
+        wsUrl={wsUrl}
+        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        refreshUrl={refreshUrl}
+      />,
     );
   }
 
@@ -232,7 +241,13 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <ChannelPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} refreshUrl={refreshUrl} />,
+      <ChannelPanel
+        uid={uid}
+        currentUid={currentUid}
+        wsUrl={wsUrl}
+        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        refreshUrl={refreshUrl}
+      />,
     );
   }
 
@@ -244,7 +259,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
       isLoading={isLoading}
       currentUid={currentUid}
       wsUrl={wsUrl}
-      filesList={filesList}
+      filesList={{ imageFileList, fileFileList, voiceFileList }}
       refreshUrl={refreshUrl}
     />,
   );

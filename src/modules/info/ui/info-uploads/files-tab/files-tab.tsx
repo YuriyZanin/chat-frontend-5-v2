@@ -12,7 +12,7 @@ export const FilesTab = ({ items }: FilesTabProps): JSX.Element => {
   return (
     <div className={styles.container}>
       <ul className={styles.fileList}>
-        {items.map((item, index) => (
+        {items?.map((item, index) => (
           <li key={index} className={styles.listItem}>
             <CardFile item={item} />
           </li>

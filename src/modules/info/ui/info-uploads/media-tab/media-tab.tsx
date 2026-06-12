@@ -9,7 +9,7 @@ export const MediaTab = ({ items, currentUid, wsUrl, refreshUrl }: MediaTabProps
   const { sendDeleteMessage } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   return (
     <div className={styles.container}>
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <MediaCard key={index} item={item} sendDeleteMessage={sendDeleteMessage} />
       ))}
     </div>

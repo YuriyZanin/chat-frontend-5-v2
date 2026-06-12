@@ -288,18 +288,21 @@ export const useUpdateProfileAvatarQuery = (): UseMutationResult<GroupAvatarApiR
   });
 };
 
-export const useChatFilesListQuery = (
-  query: string,
-  chatKey: string,
-): UseInfiniteQueryResult<InfiniteData<PaginatedGroupChannelFileListApi>, unknown> => {
+export const useChatFilesListQuery = ({
+  query,
+  chatKey,
+}: {
+  query: string;
+  chatKey: string;
+}): UseInfiniteQueryResult<InfiniteData<PaginatedGroupChannelFileListApi>, unknown> => {
   return useInfiniteQuery<
     PaginatedGroupChannelFileListApi,
     unknown,
     InfiniteData<PaginatedGroupChannelFileListApi>,
-    ['chat', 'files-list', string],
+    ['chat', 'files-list', string, string],
     number
   >({
-    queryKey: ['chat', 'files-list', chatKey],
+    queryKey: ['chat', 'files-list', query, chatKey],
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       getChatFileList(
