@@ -158,8 +158,8 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
                 action: 'ice_candidate',
                 request_uid: requestUid,
                 object: {
-                  from_user_uid: fromUserUid,
-                  to_user_uid: currentUid,
+                  from_user_uid: currentUid,
+                  to_user_uid: fromUserUid,
                   ice_candidate: event.candidate.candidate,
                   message_rtc_uid: messageRtcUid,
                 },
@@ -251,6 +251,7 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
           // Создаем поток только с аудио
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
+            video: true,
           });
           localStreamRef.current = stream;
 
@@ -436,13 +437,15 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
         </button>
       </div>
       <div className={styles.info}>
-        <ImageUI
-          src={avatarUrl ?? URL_DEFAULT_AVATAR}
-          width={160}
-          height={160}
-          alt={contactFio}
-          className={styles.avatar}
-        />
+        {!hasRemoteVideo && (
+          <ImageUI
+            src={avatarUrl ?? URL_DEFAULT_AVATAR}
+            width={160}
+            height={160}
+            alt={contactFio}
+            className={styles.avatar}
+          />
+        )}
         <div className={styles.description}>
           <div className={styles.contact}>{contactFio}</div>
           <div className={styles.state}>

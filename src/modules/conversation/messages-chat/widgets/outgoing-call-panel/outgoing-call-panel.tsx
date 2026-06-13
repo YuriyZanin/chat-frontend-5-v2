@@ -74,6 +74,7 @@ export const OutgoingCallPanel = ({
       // Создаем поток только с аудио
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
+        video: true,
       });
       localStreamRef.current = stream;
 
@@ -235,7 +236,7 @@ export const OutgoingCallPanel = ({
     };
     setState('call');
     initCall();
-  }, [iceConfig]);
+  }, [isLoading]);
 
   useEffect(() => {
     // берем все кандидаты из буфера и добавляем их
@@ -435,6 +436,16 @@ export const OutgoingCallPanel = ({
     localIceCandidateBuffer.current = [];
     remoteStreamRef.current = null;
 
+    const localVideo = document.getElementById('local-video') as HTMLVideoElement;
+    const remoteVideo = document.getElementById('remote-video') as HTMLVideoElement;
+
+    if (localVideo) {
+      localVideo.srcObject = null;
+    }
+    if (remoteVideo) {
+      remoteVideo.srcObject = null;
+    }
+
     // Очистка таймера
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
@@ -467,6 +478,10 @@ export const OutgoingCallPanel = ({
       });
     });
   };
+
+  useEffect(() => {
+    sendBufferedLocalIceCandidates();
+  }, [messageRtcUid]);
 
   const URL_DEFAULT_AVATAR = '/images/profile/default.png';
 
