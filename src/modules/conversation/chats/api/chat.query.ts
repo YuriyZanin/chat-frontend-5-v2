@@ -11,21 +11,26 @@ import { clearChat, deleteChat, getChatList } from './chat.api';
 
 const PAGE_SIZE = 15;
 
-export const useChatsQuery = (): UseInfiniteQueryResult<InfiniteData<ChatListApiResponse>, unknown> => {
+export const useChatsQuery = ({
+  search,
+}: {
+  search: string;
+}): UseInfiniteQueryResult<InfiniteData<ChatListApiResponse>, unknown> => {
   return useInfiniteQuery<
     ChatListApiResponse,
     unknown,
     InfiniteData<ChatListApiResponse>,
-    ['chats', 'chat-list'],
+    ['chats', 'chat-list', string],
     number
   >({
-    queryKey: ['chats', 'chat-list'],
+    queryKey: ['chats', 'chat-list', search],
     initialPageParam: 1,
 
     queryFn: ({ pageParam }) =>
       getChatList({
         page: pageParam,
         page_size: PAGE_SIZE,
+        search,
       }),
 
     getNextPageParam: (lastPage) => {

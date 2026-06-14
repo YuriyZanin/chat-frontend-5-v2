@@ -28,7 +28,7 @@ import { SettingsPanel } from '../widgets/settings-panel';
 import { InfoScreenProps } from './info-screen.props';
 import { useChatFilesListScreen } from './use-chat-files-list-screen';
 import { useParticipantsScreen } from './use-participant-screen';
-export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Element => {
+export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenProps): JSX.Element => {
   const {
     openClearModal,
     setUid,
@@ -48,9 +48,12 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
   } = useInfoStore();
   const { clearQuery } = useInfoSearchStore();
   const { hasChanges } = useInfoEditGroupStore();
-  const { sendMembers } = useWebSocketChat(wsUrl, currentUid);
+  const { sendMembers } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   const { data: profile, isLoading } = useInfoProfileQuery(uid);
-  const { filesList } = useChatFilesListScreen(uid);
+  // делаем сортировку на сервере filesList по mime-типaм для определенного (uid) чата/группы/канала
+  const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
+  const { filesList: fileFileList } = useChatFilesListScreen({ query: 'application', chatKey: uid });
+  const { filesList: voiceFileList } = useChatFilesListScreen({ query: 'audio', chatKey: uid });
 
   const { participants } = useParticipantsScreen(uid);
   const queryClient = useQueryClient();
@@ -194,7 +197,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
     if (isGroupSettingsMode) {
       return renderWithLayout(
         <InfoHeader title="Настройки" backProps={{ icon: <BackArrowIcon />, onClick: handleSettingBack }} />,
-        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} />,
+        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} refreshUrl={refreshUrl} />,
       );
     }
 
@@ -205,7 +208,13 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <GroupPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />,
+      <GroupPanel
+        uid={uid}
+        currentUid={currentUid}
+        wsUrl={wsUrl}
+        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        refreshUrl={refreshUrl}
+      />,
     );
   }
 
@@ -221,7 +230,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
     if (isGroupSettingsMode) {
       return renderWithLayout(
         <InfoHeader title="Настройки" backProps={{ icon: <BackArrowIcon />, onClick: handleSettingBack }} />,
-        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} />,
+        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} refreshUrl={refreshUrl} />,
       );
     }
 
@@ -232,7 +241,13 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
         onClose={toggleInfoOpen}
         onSetting={participant?.isOwner ? enterSettingsMode : undefined}
       />,
-      <ChannelPanel uid={uid} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />,
+      <ChannelPanel
+        uid={uid}
+        currentUid={currentUid}
+        wsUrl={wsUrl}
+        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        refreshUrl={refreshUrl}
+      />,
     );
   }
 
@@ -244,7 +259,8 @@ export const InfoScreen = ({ uid, wsUrl, currentUid }: InfoScreenProps): JSX.Ele
       isLoading={isLoading}
       currentUid={currentUid}
       wsUrl={wsUrl}
-      filesList={filesList}
+      filesList={{ imageFileList, fileFileList, voiceFileList }}
+      refreshUrl={refreshUrl}
     />,
   );
 };

@@ -7,5 +7,10 @@ export type ContactPanelProps = {
   wsUrl: string;
   profile?: ProfileInfo;
   isLoading: boolean;
-  filesList: ChatFilesListApi[] | undefined;
+  filesList: {
+    imageFileList: ChatFilesListApi[] | undefined;
+    fileFileList: ChatFilesListApi[] | undefined;
+    voiceFileList: ChatFilesListApi[] | undefined;
+  };
+  refreshUrl: string;
 };

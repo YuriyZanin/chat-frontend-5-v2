@@ -56,6 +56,7 @@ export const IncomingMessagesCard = ({
         className={styles.wrapper}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
         ref={(el) => {
           register(el, message);
         }}

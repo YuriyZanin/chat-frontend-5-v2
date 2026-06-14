@@ -82,6 +82,7 @@ export const OutgoingAudioCard = ({
       <div
         className={styles.wrapper}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
         onMouseLeave={handleCloseMenu}
       >
         <ContextMenu
@@ -105,7 +106,10 @@ export const OutgoingAudioCard = ({
                 ) : isLoading ? (
                   <DeleteFileIcon className={styles.deleteFileIcon} />
                 ) : (
-                  <button onClick={handlePlayPause} className={styles.fileIcon}>
+                  <button
+                    onClick={!checkBoxsVisibleStore ? handlePlayPause : (): void => {}}
+                    className={styles.fileIcon}
+                  >
                     {isPlaying ? <AudioStopIcon /> : <AudioPlayIcon />}
                   </button>
                 )}

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { JSX, Suspense } from 'react';
 
 const BACKEND_WS = process.env.BACKEND_API_WS_URL!;
+const BACKEND_API = process.env.BACKEND_API_URL;
 
 export default async function InfoBlockPage({
   params,
@@ -13,12 +14,13 @@ export default async function InfoBlockPage({
   const user_uid = (await params).user_uid;
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('access')?.value;
-  const wsUrl = `${BACKEND_WS}/ws/chat`;
   const payload = parseJwtToken(accessToken ?? '');
+  const wsUrl = `${BACKEND_WS}/ws/chat`;
+  const refreshUrl = `${BACKEND_API}/api/v1/auth/login/refresh/token/`;
 
   return (
     <Suspense>
-      <InfoScreen uid={user_uid} wsUrl={wsUrl} currentUid={payload.user_id} />
+      <InfoScreen uid={user_uid} wsUrl={wsUrl} currentUid={payload.user_id} refreshUrl={refreshUrl} />
     </Suspense>
   );
 }

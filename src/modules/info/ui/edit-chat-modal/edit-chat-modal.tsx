@@ -10,13 +10,14 @@ type EditChatModalProps = {
   wsUrl: string;
   currentUid: string;
   chatKey: string;
+  refreshUrl: string;
 };
 
-export const EditChatModal = ({ wsUrl, currentUid, chatKey }: EditChatModalProps): JSX.Element | null => {
+export const EditChatModal = ({ wsUrl, currentUid, chatKey, refreshUrl }: EditChatModalProps): JSX.Element | null => {
   const { isEditChatModalOpen, closeEditChatModal, exitSettingsMode } = useInfoStore();
   const { resetGroup, avatarUid, name, description, chatType } = useInfoEditGroupStore();
   const queryClient = useQueryClient();
-  const { sendEditGroup } = useWebSocketChat(wsUrl, currentUid);
+  const { sendEditGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   if (!isEditChatModalOpen) return null;
 

@@ -22,15 +22,19 @@ export type GlobalContactApi = z.infer<typeof globalContactApiSchema>;
 
 const contactSchema = z.object({
   uid: z.string(),
-  username: z.string(),
-  nickname: z.string(),
+  username: z.string().max(250),
+  nickname: z
+    .string()
+    .min(6)
+    .max(32)
+    .regex(/^[a-z0-9._]+$/),
   first_name: z.string(),
   last_name: z.string(),
   phone: z.string(),
   avatar_webp_url: z.string(),
   avatar_small_url: z.string(),
   is_online: z.boolean(),
-  was_online_at: z.number().int(),
+  was_online_at: z.number().int().nullable(),
 });
 
 const apiResponseSchema = z.object({

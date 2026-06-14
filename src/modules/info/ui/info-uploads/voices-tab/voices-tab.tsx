@@ -10,7 +10,7 @@ import { VoiceProps, VoicesTabProps } from './voices-tab.props';
 export const VoicesTab = ({ items }: VoicesTabProps): JSX.Element => {
   return (
     <div className={styles.container}>
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <div key={index} className={styles.wrapper}>
           <VoiceCard item={item} />
         </div>

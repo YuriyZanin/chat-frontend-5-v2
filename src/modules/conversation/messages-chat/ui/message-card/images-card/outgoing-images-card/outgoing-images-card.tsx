@@ -59,6 +59,7 @@ export const OutgoingImagesCard = ({
         className={styles.wrapperBlock}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
       >
         <ContextMenu
           position={contextMenuPos}
@@ -76,7 +77,13 @@ export const OutgoingImagesCard = ({
 
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
-              <PreviewImageCard key={image.uid} image={image} message={message} sendDeleteMessage={sendDeleteMessage} />
+              <PreviewImageCard
+                key={image.uid}
+                image={image}
+                message={message}
+                sendDeleteMessage={sendDeleteMessage}
+                checkBoxsVisibleStore={checkBoxsVisibleStore}
+              />
             ))}
           </div>
           {message.content && message.content !== ' ' ? (
@@ -111,7 +118,12 @@ export const OutgoingImagesCard = ({
   );
 };
 
-const PreviewImageCard = ({ image, message, sendDeleteMessage }: PreviewImageCardProps): JSX.Element => {
+const PreviewImageCard = ({
+  image,
+  message,
+  sendDeleteMessage,
+  checkBoxsVisibleStore,
+}: PreviewImageCardProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const handleError = (): void => {
@@ -127,7 +139,7 @@ const PreviewImageCard = ({ image, message, sendDeleteMessage }: PreviewImageCar
     });
   };
   return (
-    <div className={styles.image} onClick={handleOpenImages}>
+    <div className={styles.image} onClick={!checkBoxsVisibleStore ? handleOpenImages : (): void => {}}>
       {isError ? (
         <PlugCard message={message} />
       ) : (

@@ -49,10 +49,11 @@ export const MessagesList = ({
   }, [messagesList, userIdStore, setMessagesForUser]);
 
   const { results, messagesLength } = useMemo(() => {
-    const messages = messagesByUser ?? [];
+    const messagesStore = messagesByUser ?? [];
+    // убираем дублирования сообщений если это явление имеется есть
+    const messages = Array.from(new Map(messagesStore.map((mg) => [mg.uid, mg])).values());
     return { results: handlerMessagesList(messages), messagesLength: messages.length };
   }, [messagesByUser]);
-
   // Соберём flat-список в порядке рендера
   const dateKeysInRenderOrder = Object.keys(results).reverse();
   const flatList: Array<{

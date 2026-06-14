@@ -27,6 +27,7 @@ export const CardShell = ({
   selected,
   selectAction,
   chatType,
+  variant,
 }: CardShellProps): JSX.Element => {
   const pathname = usePathname();
   const isActive = isModal ? selected : pathname === href || selected;
@@ -54,15 +55,17 @@ export const CardShell = ({
   const handleCloseMenu = (): void => {
     setContextMenuVisible(false);
   };
-
-  // создаем url для запроса картинки через наш прокси-сервер
   let result: string;
-  if (src?.includes('blob:')) {
+  if (variant === 'personal' || variant === undefined)
+    if (src?.includes('blob:')) {
+      // создаем url для запроса картинки через наш прокси-сервер
+      result = src;
+    } else {
+      result = `/api/proxy${removeDomain(src)}`;
+    }
+  else {
     result = src;
-  } else {
-    result = `/api/proxy${removeDomain(src)}`;
   }
-
   return (
     <div ref={cardRef} onContextMenu={handleContextMenu} onMouseLeave={handleCloseMenu}>
       {hasContextMenu && (
@@ -92,7 +95,7 @@ export const CardShell = ({
             src={
               result && result !== '/api/proxy'
                 ? result
-                : chatType === 'chat'
+                : chatType === 'chat' || variant
                   ? URL_DEFAUIT_Avatar
                   : URL_DEFAUIT_Avatar_Croup
             }
