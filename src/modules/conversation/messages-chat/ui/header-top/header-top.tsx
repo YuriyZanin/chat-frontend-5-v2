@@ -10,7 +10,6 @@ import { useParticipantsScreen } from 'modules/info/screens/use-participant-scre
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
-import { ImageUI } from 'shared/ui/image';
 
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
@@ -36,6 +35,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMediaQuery } from 'shared/hooks/use-media-query';
 import styles from './header-top.module.scss';
 
+import Image from 'next/image';
+import { formatParticipants } from '../../utils/format-messages';
 import type { HeaderTopProps } from './header-top.props';
 import BackIcon from './icons/back-icon.svg';
 import CallIcon from './icons/call-icon.svg';
@@ -80,7 +81,7 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
       status: getLastSeenLabel(profile?.wasOnlineAt || null),
     };
   }
-  // const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
+  const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
   const [searchMessagesVisible, setSearchMessagesVisible] = useState<boolean>(false);
 
   const {
@@ -100,17 +101,17 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
 
-  const {
-    avatarUrl = '',
-    firstName = '',
-    lastName = '',
-    nickname = '',
-    wasOnlineAt = null,
-    isBlocked = false,
-    isInContacts = false,
-  } = chat?.peer ?? {};
+  // const {
+  //   avatarUrl = '',
+  //   firstName = '',
+  //   lastName = '',
+  //   nickname = '',
+  //   wasOnlineAt = null,
+  //   isBlocked = false,
+  //   isInContacts = false,
+  // } = chat?.peer ?? {};
 
-  const status = getLastSeenLabel(wasOnlineAt);
+  // const status = getLastSeenLabel(wasOnlineAt);
 
   const searchIndicatorStore = useSearchIndicatorStore((s) => s.searchIndicator);
 
@@ -181,42 +182,32 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
             )}
 
             <div className={styles.image}>
-              <ImageUI
-                src={
-                  result !== '/api/proxy' ? result : isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar
-                }
+              <Image
+                src={imgSrc}
                 alt={firstName}
                 unoptimized
                 width={40}
                 height={40}
                 className={styles.image}
                 onClick={() => toggleInfoOpen()}
+                onError={() => {
+                  setImgSrc(defaultAvatar);
+                }}
               />
             </div>
-            {/* <ImageUI
-              src={result !== '/api/proxy' ? result : isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar}
-          <div className={styles.image}>
-            <Image
-              src={imgSrc}
-              alt={firstName}
-              unoptimized
-              width={40}
-              height={40}
-              className={styles.image}
-              onClick={handleOpenProfile}
-              onClick={() => toggleInfoOpen()}
-              onError={() => {
-                setImgSrc(defaultAvatar);
-              }}
-            /> */}
-
             {searchMessagesVisible ? (
               <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
             ) : (
               <div className={styles.info} onClick={() => toggleInfoOpen()}>
                 <span className={styles.name}>{isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}</span>
 
-                <span className={styles.status}>{status}</span>
+                {isGroupOrChannel ? (
+                  <span className={styles.group}>
+                    {formatParticipants(participants?.length ? participants?.length - 1 : 1)}
+                  </span>
+                ) : (
+                  <span className={styles.status}>{status}</span>
+                )}
               </div>
             )}
           </div>
