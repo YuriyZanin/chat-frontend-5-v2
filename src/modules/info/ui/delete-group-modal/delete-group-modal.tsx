@@ -11,11 +11,18 @@ type DeleteGroupModalProps = {
   currentUid: string;
   chatKey: string;
   name: string;
+  refreshUrl: string;
 };
 
-export const DeleteGroupModal = ({ wsUrl, currentUid, chatKey, name }: DeleteGroupModalProps): JSX.Element | null => {
+export const DeleteGroupModal = ({
+  wsUrl,
+  currentUid,
+  chatKey,
+  name,
+  refreshUrl,
+}: DeleteGroupModalProps): JSX.Element | null => {
   const { isDeleteGroupModalOpen, closeDeleteGroupModal, closeInfoScreen } = useInfoStore();
-  const { sendDeleteGroup } = useWebSocketChat(wsUrl, currentUid);
+  const { sendDeleteGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
   const queryClient = useQueryClient();
   const isGroup = chatKey.startsWith('group');

@@ -66,6 +66,7 @@ export const IncomingImagesCard = ({
         className={styles.wrapperBlock}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
         ref={(el) => {
           register(el, message);
         }}
@@ -103,7 +104,11 @@ export const IncomingImagesCard = ({
           </div>
           <div className={clsx(styles.previewImages, styles[`previewImages--${fileList.length}`])}>
             {fileList.map((image) => (
-              <div key={image.uid} className={styles.image} onClick={handleOpenImages}>
+              <div
+                key={image.uid}
+                className={styles.image}
+                onClick={!checkBoxsVisibleStore ? handleOpenImages : (): void => {}}
+              >
                 <Image src={image.file_webp_url} alt={image.download_name} width={500} height={376} />
               </div>
             ))}

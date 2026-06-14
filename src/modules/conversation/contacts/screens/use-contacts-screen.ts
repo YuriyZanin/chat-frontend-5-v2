@@ -1,7 +1,9 @@
 'use client';
 
+import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { useContactsQuery, useSearchUsersQuery } from 'modules/conversation/contacts/api';
 import { Contact } from 'modules/conversation/contacts/entity';
+import type { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { mapContactFromApi } from 'modules/conversation/contacts/model/contact';
 import { useSearchStore } from 'modules/conversation/contacts/model/search';
 import { useDebouncedValue } from 'modules/conversation/shared/hooks';
@@ -13,6 +15,12 @@ type UseContactsScreenReturn = {
   clearQuery: () => void;
   contacts: Contact[] | undefined;
   globals: Contact[] | undefined;
+  status: string;
+  fetchNextPage: (
+    options?: FetchNextPageOptions,
+  ) => Promise<InfiniteQueryObserverResult<InfiniteData<UserContactApiResponse>, unknown>>;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
 };
 
 export const useContactsScreen = (): UseContactsScreenReturn => {
@@ -22,7 +30,7 @@ export const useContactsScreen = (): UseContactsScreenReturn => {
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  const { data: myContacts } = useContactsQuery();
+  const { data: myContacts, status, isFetchingNextPage, fetchNextPage, hasNextPage } = useContactsQuery();
   const { data: globals } = useSearchUsersQuery(debouncedQuery);
 
   const contacts = useMemo(
@@ -40,8 +48,11 @@ export const useContactsScreen = (): UseContactsScreenReturn => {
     query,
     setQuery,
     clearQuery,
-
     contacts: filteredContacts,
-    globals: globals,
+    globals,
+    status,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
   };
 };

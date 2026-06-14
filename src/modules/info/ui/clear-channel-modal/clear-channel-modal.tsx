@@ -11,15 +11,17 @@ export const ClearChannelModal = ({
   currentUid,
   chatKey,
   name,
+  refreshUrl,
 }: {
   wsUrl: string;
   currentUid: string;
   chatKey: string;
   name: string;
+  refreshUrl: string;
 }): JSX.Element | null => {
   const { isClearModalOpen, closeClearModal } = useInfoStore();
   const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
-  const { sendClearGroup } = useWebSocketChat(wsUrl, currentUid);
+  const { sendClearGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   const queryClient = useQueryClient();
 
   const sendAndInvalidate = (): void => {

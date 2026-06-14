@@ -20,6 +20,7 @@ type OutgoingCallPanelProps = {
   user_uid: string;
   wsUrl: string;
   currentUid: string;
+  refreshUrl: string;
 };
 
 export const OutgoingCallPanel = ({
@@ -28,6 +29,7 @@ export const OutgoingCallPanel = ({
   user_uid,
   wsUrl,
   currentUid,
+  refreshUrl,
 }: OutgoingCallPanelProps): JSX.Element | null => {
   const {
     isFullScreen,
@@ -48,7 +50,7 @@ export const OutgoingCallPanel = ({
     resetCall,
   } = useCallsStore();
   const { data: iceConfig, isLoading } = useIceServersQuery();
-  const { sendOfferCall, sendIceCandidate, sendCallCompletion } = useWebSocketChat(wsUrl, currentUid);
+  const { sendOfferCall, sendIceCandidate, sendCallCompletion } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   const localStreamRef = useRef<MediaStream | undefined>(undefined);
   const remoteStreamRef = useRef<MediaStream | null>(null);
@@ -72,6 +74,7 @@ export const OutgoingCallPanel = ({
       // Создаем поток только с аудио
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
+        video: true,
       });
       localStreamRef.current = stream;
 
@@ -233,7 +236,7 @@ export const OutgoingCallPanel = ({
     };
     setState('call');
     initCall();
-  }, [iceConfig]);
+  }, [isLoading]);
 
   useEffect(() => {
     // берем все кандидаты из буфера и добавляем их
@@ -433,6 +436,16 @@ export const OutgoingCallPanel = ({
     localIceCandidateBuffer.current = [];
     remoteStreamRef.current = null;
 
+    const localVideo = document.getElementById('local-video') as HTMLVideoElement;
+    const remoteVideo = document.getElementById('remote-video') as HTMLVideoElement;
+
+    if (localVideo) {
+      localVideo.srcObject = null;
+    }
+    if (remoteVideo) {
+      remoteVideo.srcObject = null;
+    }
+
     // Очистка таймера
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
@@ -465,6 +478,10 @@ export const OutgoingCallPanel = ({
       });
     });
   };
+
+  useEffect(() => {
+    sendBufferedLocalIceCandidates();
+  }, [messageRtcUid]);
 
   const URL_DEFAULT_AVATAR = '/images/profile/default.png';
 

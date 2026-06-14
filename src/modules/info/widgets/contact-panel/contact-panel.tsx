@@ -27,6 +27,7 @@ export const ContactPanel = ({
   profile,
   isLoading,
   filesList,
+  refreshUrl,
 }: ContactPanelProps): JSX.Element => {
   const { mutate: addToContact } = useAddContactQuery();
   const { openAddModal } = useChatsStore();
@@ -74,12 +75,23 @@ export const ContactPanel = ({
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          <InfoUploads tabs={tabs} currentUid={currentUid} wsUrl={wsUrl} filesList={filesList} />
+          <InfoUploads
+            tabs={tabs}
+            currentUid={currentUid}
+            wsUrl={wsUrl}
+            filesList={filesList}
+            refreshUrl={refreshUrl}
+          />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />
           <ClearChatModal />
-          <FrowardProfileModal wsUrl={wsUrl} currentUid={currentUid} nickname={nickname ?? ''} />
+          <FrowardProfileModal
+            wsUrl={wsUrl}
+            currentUid={currentUid}
+            nickname={nickname ?? ''}
+            refreshUrl={refreshUrl}
+          />
         </>
       )}
     </>

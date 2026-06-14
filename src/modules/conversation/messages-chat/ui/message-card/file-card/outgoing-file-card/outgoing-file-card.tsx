@@ -92,6 +92,7 @@ export const OutgoingFileCard = ({
         className={styles.wrapper}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
       >
         <ContextMenu
           position={contextMenuPos}
@@ -117,7 +118,10 @@ export const OutgoingFileCard = ({
                       <DeleteFileIcon />
                     </button>
                   ) : (
-                    <button onClick={handleDownloadMessageFileClick} className={styles.fileIcon}>
+                    <button
+                      onClick={!checkBoxsVisibleStore ? handleDownloadMessageFileClick : (): void => {}}
+                      className={styles.fileIcon}
+                    >
                       <Image
                         key={
                           message.files_list.length
@@ -144,7 +148,7 @@ export const OutgoingFileCard = ({
                     <DeleteFileIcon />
                   </button>
                 ) : (
-                  <button onClick={handleDownloadMessageFileClick}>
+                  <button onClick={!checkBoxsVisibleStore ? handleDownloadMessageFileClick : (): void => {}}>
                     <FileIcon />
                   </button>
                 )}

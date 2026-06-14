@@ -54,6 +54,7 @@ export const OutgoingPhoneCallCard = ({
         className={styles.wrapper}
         onContextMenu={!checkBoxsVisibleStore ? handleContextMenu : (): void => {}}
         onMouseLeave={handleCloseMenu}
+        onClick={checkBoxsVisibleStore ? handleCheckBoxClick : (): void => {}}
       >
         <ContextMenu
           position={contextMenuPos}

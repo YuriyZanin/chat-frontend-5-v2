@@ -10,12 +10,19 @@ type LeaveGroupModalProps = {
   chatKey: string;
   currentUid: string;
   name: string;
+  refreshUrl: string;
 };
 
-export const LeaveGroupModal = ({ wsUrl, chatKey, currentUid, name }: LeaveGroupModalProps): JSX.Element | null => {
+export const LeaveGroupModal = ({
+  wsUrl,
+  chatKey,
+  currentUid,
+  name,
+  refreshUrl,
+}: LeaveGroupModalProps): JSX.Element | null => {
   const queryClient = useQueryClient();
   const { isLeaveGroupModalOpen, closeLeaveGroupModal } = useHeaderButtonsModalStore();
-  const { sendLeaveGroup } = useWebSocketChat(wsUrl, currentUid);
+  const { sendLeaveGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   if (!isLeaveGroupModalOpen) return null;
 

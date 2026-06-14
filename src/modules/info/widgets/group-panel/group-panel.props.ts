@@ -4,5 +4,10 @@ export type GroupPanelProps = {
   uid: string;
   currentUid: string;
   wsUrl: string;
-  filesList: ChatFilesListApi[] | undefined;
+  filesList: {
+    imageFileList: ChatFilesListApi[] | undefined;
+    fileFileList: ChatFilesListApi[] | undefined;
+    voiceFileList: ChatFilesListApi[] | undefined;
+  };
+  refreshUrl: string;
 };

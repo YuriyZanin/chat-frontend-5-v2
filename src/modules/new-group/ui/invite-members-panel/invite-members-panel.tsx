@@ -10,7 +10,7 @@ export const InviteMembersPanel = ({ contacts }: { contacts?: Contact[] }): JSX.
     <div>
       <ul>
         {contacts?.map((contact) => (
-          <ContactCardSelectable key={contact.uid} {...contact} />
+          <ContactCardSelectable key={contact.uid} contact={contact} />
         ))}
       </ul>
     </div>

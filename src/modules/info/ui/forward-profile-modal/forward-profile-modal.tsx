@@ -10,11 +10,17 @@ type ForwardProfileModalProps = {
   wsUrl: string;
   currentUid: string;
   nickname: string;
+  refreshUrl: string;
 };
 
-export const FrowardProfileModal = ({ wsUrl, currentUid, nickname }: ForwardProfileModalProps): JSX.Element | null => {
+export const FrowardProfileModal = ({
+  wsUrl,
+  currentUid,
+  nickname,
+  refreshUrl,
+}: ForwardProfileModalProps): JSX.Element | null => {
   const { uid, isForwardModalOpen, closeForwardModal } = useInfoStore();
-  const { sendProfile } = useWebSocketChat(wsUrl, currentUid);
+  const { sendProfile } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   const handleForward = (toUid: string): void => {
     if (toUid) {

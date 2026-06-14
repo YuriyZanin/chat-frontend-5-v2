@@ -6,7 +6,12 @@ import { MessagesList } from '../ui/messages-list/messages-list';
 import { useMessagesChatStore, useUserIdStore } from '../zustand-store/zustand-store';
 import { MessagesListScreenProps } from './messades-list-screen.props';
 import { useMessagesListScreen } from './use-messages-list-screen';
-export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesListScreenProps): JSX.Element => {
+export const MessagesListScreen = ({
+  user_uid,
+  wsUrl,
+  currentUserId,
+  refreshUrl,
+}: MessagesListScreenProps): JSX.Element => {
   const userIdStore = useUserIdStore((s) => s.userId);
   const setUserIdStore = useUserIdStore((s) => s.setUserId);
 
@@ -19,9 +24,9 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]) ?? [];
   const { messagesList, status, fetchNextPage, hasNextPage, isFetchingNextPage } = useMessagesListScreen(userUid);
 
-  const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId);
+  const { sendChangeStatusReadMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
 
-  if ((status === 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
+  if ((status !== 'success' && messagesByUser.length > 0) || (status === 'success' && messagesList.length > 0)) {
     return (
       <MessagesList
         messagesList={messagesList}
@@ -35,34 +40,30 @@ export const MessagesListScreen = ({ user_uid, wsUrl, currentUserId }: MessagesL
       />
     );
   } else {
-    if (status === 'success' && messagesByUser.length === 0) {
-      if (parts[0] === 'group') {
-        return (
-          <DefaultMessagesPage
-            url={'/images/messages-chats/default-img-group.svg'}
-            topText={'Вы создали группу'}
-            bottomText={''}
-          />
-        );
-      }
-      if (parts[0] === 'channel') {
-        return (
-          <DefaultMessagesPage
-            url={'/images/messages-chats/default-img-channel.svg'}
-            topText={'Вы создали канал'}
-            bottomText={'Добавьте публикацию'}
-          />
-        );
-      }
+    if (parts[0] === 'group') {
       return (
         <DefaultMessagesPage
-          url={'/images/messages-chats/default-img.svg'}
-          topText={'Сообщений пока нет'}
-          bottomText={'Напишите первым :)'}
+          url={'/images/messages-chats/default-img-group.svg'}
+          topText={'Вы создали группу'}
+          bottomText={''}
         />
       );
-    } else {
-      return <></>;
     }
+    if (parts[0] === 'channel') {
+      return (
+        <DefaultMessagesPage
+          url={'/images/messages-chats/default-img-channel.svg'}
+          topText={'Вы создали канал'}
+          bottomText={'Добавьте публикацию'}
+        />
+      );
+    }
+    return (
+      <DefaultMessagesPage
+        url={'/images/messages-chats/default-img.svg'}
+        topText={'Сообщений пока нет'}
+        bottomText={'Напишите первым :)'}
+      />
+    );
   }
 };

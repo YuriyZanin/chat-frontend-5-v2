@@ -23,4 +23,5 @@ export type CardShellProps = {
   selected?: boolean;
   isModal?: boolean;
   chatType?: ChatType;
+  variant?: 'personal' | 'globals';
 };

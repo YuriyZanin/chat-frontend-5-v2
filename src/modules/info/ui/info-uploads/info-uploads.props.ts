@@ -5,7 +5,12 @@ export type InfoUploadsProps = {
   chatKey?: string;
   wsUrl: string;
   tabs: string[];
-  filesList: ChatFilesListApi[] | undefined;
+  filesList: {
+    imageFileList: ChatFilesListApi[] | undefined;
+    fileFileList: ChatFilesListApi[] | undefined;
+    voiceFileList: ChatFilesListApi[] | undefined;
+  };
+  refreshUrl: string;
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

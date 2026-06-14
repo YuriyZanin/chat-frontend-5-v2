@@ -10,12 +10,18 @@ type DeleteMemberModalProps = {
   wsUrl: string;
   chatKey: string;
   currentUid: string;
+  refreshUrl: string;
 };
 
-export const DeleteMemberModal = ({ wsUrl, chatKey, currentUid }: DeleteMemberModalProps): JSX.Element | null => {
+export const DeleteMemberModal = ({
+  wsUrl,
+  chatKey,
+  currentUid,
+  refreshUrl,
+}: DeleteMemberModalProps): JSX.Element | null => {
   const { isDeleteParticipantModalOpen, uidToDelete, closeDeleteParticipantModal } = useInfoStore();
   const queryClient = useQueryClient();
-  const { sendMembers } = useWebSocketChat(wsUrl, currentUid);
+  const { sendMembers } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   const { participants } = useParticipantsScreen(chatKey);
   const { firstName, lastName } = participants?.find((p) => p.uid === uidToDelete) ?? {};

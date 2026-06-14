@@ -6,7 +6,13 @@ import { CardSelection } from './card-selection';
 import styles from './contact-card.module.scss';
 import { ContactCardProps } from './contact-card.props';
 
-export const ContactCard = ({ contact, selected, selectionMode, onSelectHandler }: ContactCardProps): JSX.Element => {
+export const ContactCard = ({
+  contact,
+  selected,
+  selectionMode,
+  onSelectHandler,
+  variant,
+}: ContactCardProps): JSX.Element => {
   const { uid, chatId, fullName, nickname, avatarUrl, wasOnlineAt } = contact;
   const status = getLastSeenLabel(wasOnlineAt);
 
@@ -25,6 +31,7 @@ export const ContactCard = ({ contact, selected, selectionMode, onSelectHandler 
       imageOptions={{ src: avatarUrl, alt: fullName, classNames: { root: styles.imageWrapper } }}
       selected={selected}
       selectAction={handleClick}
+      variant={variant}
     >
       <div className={styles.card}>
         <div className={styles.info}>

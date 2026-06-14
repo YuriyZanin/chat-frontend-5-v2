@@ -2,9 +2,10 @@ import type { RestMessageApi } from 'modules/conversation/messages-chat/model/me
 import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
 
 export type MediaTabProps = {
-  items: ChatFilesListApi[];
+  items: ChatFilesListApi[] | undefined;
   currentUid: string;
   wsUrl: string;
+  refreshUrl: string;
 };
 
 export type MediaProps = {

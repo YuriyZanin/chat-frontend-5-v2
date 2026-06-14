@@ -19,6 +19,7 @@ export type PreviewImageCardProps = {
     message: RestMessageApi & { status?: 'pending' | 'sent' | 'failed' | 'read' },
     selected?: boolean,
   ) => void;
+  checkBoxsVisibleStore: boolean | null;
 };
 
 export type PlugCardProps = {

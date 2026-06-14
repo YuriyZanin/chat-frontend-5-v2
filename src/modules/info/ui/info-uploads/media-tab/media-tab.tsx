@@ -5,11 +5,11 @@ import { JSX } from 'react';
 import { ImageUI } from 'shared/ui';
 import styles from './media-tab.module.scss';
 import { MediaProps, MediaTabProps } from './media-tab.props';
-export const MediaTab = ({ items, currentUid, wsUrl }: MediaTabProps): JSX.Element => {
-  const { sendDeleteMessage } = useWebSocketChat(wsUrl, currentUid);
+export const MediaTab = ({ items, currentUid, wsUrl, refreshUrl }: MediaTabProps): JSX.Element => {
+  const { sendDeleteMessage } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
   return (
     <div className={styles.container}>
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <MediaCard key={index} item={item} sendDeleteMessage={sendDeleteMessage} />
       ))}
     </div>

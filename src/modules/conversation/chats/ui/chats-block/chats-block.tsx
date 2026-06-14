@@ -11,13 +11,12 @@ import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useChatsScreen } from '../../screens/use-chats-screen';
 import { useChatsListStore } from '../../zustand-store-chats-list/zustand-store-chats-list';
 import { AddContactModal } from '../add-contact-modal';
+import { DefaultChatsList } from '../default-chats-list/default-chats-list';
 import { DeleteChatModal } from '../delete-chat-modal';
 import classes from './chat-block.module.scss';
 import CreateChannelIcon from './icons/CreateChannelIcon.svg';
 import CreateGroupIcon from './icons/CreateGroupIcon.svg';
 import CreateGropOrChannelIcon from './icons/CreateGroupOrChannelIcon.svg';
-
-// const chats = mockChatListApiResponse.results.map((r) => mapChatFromApi(r));
 
 export const ChatsBlock = (): JSX.Element => {
   const {
@@ -45,8 +44,10 @@ export const ChatsBlock = (): JSX.Element => {
   // при изменении массива chats незамедлительнол изменения вносим в store
 
   useEffect(() => {
+    if (!chats) return;
     setChatsListStore(chats);
-  }, [chats, setChatsListStore]);
+  }, [chats]);
+
   const router = useRouter();
   const contactMenuItems: DropdownItem[] = [
     {
@@ -87,26 +88,25 @@ export const ChatsBlock = (): JSX.Element => {
         footer={<DeleteSelectedContactsButton />}
         wrapperRef={wrapperRef}
       >
-        {status === 'success' && chatsListStore && chatsListStore.length > 0 && (
-          <>
-            <ul>
-              {chatsListStore?.map((chat, index) => {
-                const isSentinel = index === triggerIndex;
-                return (
-                  <div
-                    key={chat.peer.uid}
-                    ref={(el) => {
-                      if (isSentinel) sentinelRef.current = el;
-                    }}
-                  >
-                    <ChatCard peer={chat.peer} chat={chat.chat} messages={chat.messages} />
-                  </div>
-                );
-              })}
-            </ul>
-          </>
+        {status === 'success' && chatsListStore && chatsListStore.length > 0 ? (
+          <ul>
+            {chatsListStore?.map((chat, index) => {
+              const isSentinel = index === triggerIndex;
+              return (
+                <div
+                  key={chat.peer.uid}
+                  ref={(el) => {
+                    if (isSentinel) sentinelRef.current = el;
+                  }}
+                >
+                  <ChatCard peer={chat.peer} chat={chat.chat} messages={chat.messages} />
+                </div>
+              );
+            })}
+          </ul>
+        ) : (
+          status === 'success' && <DefaultChatsList />
         )}
-
         {/*<ConversationEmptyState variant={'chats'} />*/}
       </ConversationLayout>
       <DeleteChatModal />

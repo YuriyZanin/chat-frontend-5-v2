@@ -89,7 +89,7 @@ export const AlertOpenImages = ({
     handleDownloadMessageFileClick();
   };
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
-  const result = `/api/proxy${removeDomain((message.files_list[0].file_protected_url || message.files_list[0].file_webp_url) ?? '')}`;
+  const result = `/api/proxy${removeDomain((message?.files_list[indexImage]?.file_protected_url || message?.files_list[indexImage]?.file_webp_url) ?? '')}`;
   return (
     <div className={styles.wrapper}>
       <div className={styles.headerTop}>
