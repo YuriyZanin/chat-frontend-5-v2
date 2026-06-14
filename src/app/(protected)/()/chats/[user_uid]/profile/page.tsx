@@ -6,6 +6,7 @@ import { parseJwtToken } from 'modules/conversation/messages-chat/utils/parse-jw
 import { InfoScreen } from 'modules/info/screens';
 
 const BACKEND_WS = process.env.BACKEND_API_WS_URL!;
+const BACKEND_API = process.env.BACKEND_API_URL;
 
 export default async function MobileProfilePage({
   params,
@@ -22,9 +23,11 @@ export default async function MobileProfilePage({
 
   const wsUrl = `${BACKEND_WS}/ws/chat`;
 
+  const refreshUrl = `${BACKEND_API}/api/v1/auth/login/refresh/token/`;
+
   return (
     <Suspense>
-      <InfoScreen uid={user_uid} wsUrl={wsUrl} currentUid={payload.user_id} />
+      <InfoScreen uid={user_uid} wsUrl={wsUrl} currentUid={payload.user_id} refreshUrl={refreshUrl} />
     </Suspense>
   );
 }
