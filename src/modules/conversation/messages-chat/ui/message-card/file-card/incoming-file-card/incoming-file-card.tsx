@@ -132,8 +132,8 @@ export const IncomingFileCard = ({
                       }
                       src={
                         message.files_list.length
-                          ? message.files_list[0].file_webp_url
-                          : message.forwarded_messages[0].files_list[0].file_webp_url
+                          ? message.files_list[0].file_webp_url || ''
+                          : message.forwarded_messages[0].files_list[0].file_webp_url || ''
                       }
                       alt={
                         message.files_list.length

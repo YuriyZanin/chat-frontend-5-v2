@@ -109,7 +109,7 @@ export const IncomingImagesCard = ({
                 className={styles.image}
                 onClick={!checkBoxsVisibleStore ? handleOpenImages : (): void => {}}
               >
-                <Image src={image.file_webp_url} alt={image.download_name} width={500} height={376} />
+                <Image src={image.file_webp_url || ''} alt={image.download_name} width={500} height={376} />
               </div>
             ))}
           </div>

@@ -144,7 +144,7 @@ const PreviewImageCard = ({
         <PlugCard message={message} />
       ) : (
         <Image
-          src={image.file_webp_url}
+          src={image.file_webp_url || ''}
           alt={image.download_name}
           width={500}
           height={376}

@@ -58,7 +58,7 @@ export const IncomingAudioCard = ({
   // хук для прослушивания аудиосообщения
   const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(
     message.uid,
-    audioUrl,
+    audioUrl || '',
   );
 
   return (

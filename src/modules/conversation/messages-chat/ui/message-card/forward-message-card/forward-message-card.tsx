@@ -42,7 +42,8 @@ export const ForwardMessageCard = ({
                 }
                 src={`/api/proxy${removeDomain(
                   forwardMessageStore?.files_list[0]?.file_webp_url ||
-                    forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.file_webp_url,
+                    forwardMessageStore?.forwarded_messages[0]?.files_list[0]?.file_webp_url ||
+                    '',
                 )}`}
                 unoptimized
                 alt={
