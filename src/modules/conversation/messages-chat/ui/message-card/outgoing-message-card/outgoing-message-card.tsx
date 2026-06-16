@@ -14,7 +14,6 @@ import { MessageCheckBox } from '../message-checkbox/message-checkbox';
 import { ReplyCard } from '../reply-card/reply-card';
 import styles from './outgoing-message-card.module.scss';
 import { OutgoingMessagesCardProps } from './outgoing-message-card.props';
-
 export const OutgoingMessagesCard = ({
   message,
   sendDeleteMessage,

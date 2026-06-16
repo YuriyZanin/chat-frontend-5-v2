@@ -80,7 +80,6 @@
   overflow: hidden;
 }
 .messageText {
-  @include mixins.flex-box($justify: start);
   width: 100%;
   height: auto;
   max-width: 43.2rem;

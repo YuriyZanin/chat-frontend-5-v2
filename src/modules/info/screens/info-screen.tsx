@@ -27,6 +27,7 @@ import { GroupPanel } from '../widgets/group-panel';
 import { SettingsPanel } from '../widgets/settings-panel';
 import { InfoScreenProps } from './info-screen.props';
 import { useChatFilesListScreen } from './use-chat-files-list-screen';
+import { useChatLinksListScreen } from './use-chat-links-list-screen';
 import { useParticipantsScreen } from './use-participant-screen';
 export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenProps): JSX.Element => {
   const {
@@ -54,7 +55,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
   const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
   const { filesList: fileFileList } = useChatFilesListScreen({ query: 'application', chatKey: uid });
   const { filesList: voiceFileList } = useChatFilesListScreen({ query: 'audio', chatKey: uid });
-
+  const { linksList } = useChatLinksListScreen({ query: '', chatKey: uid });
   const { participants } = useParticipantsScreen(uid);
   const queryClient = useQueryClient();
 
@@ -212,7 +213,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
         uid={uid}
         currentUid={currentUid}
         wsUrl={wsUrl}
-        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
         refreshUrl={refreshUrl}
       />,
     );
@@ -245,7 +246,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
         uid={uid}
         currentUid={currentUid}
         wsUrl={wsUrl}
-        filesList={{ imageFileList, fileFileList, voiceFileList }}
+        filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
         refreshUrl={refreshUrl}
       />,
     );
@@ -259,7 +260,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
       isLoading={isLoading}
       currentUid={currentUid}
       wsUrl={wsUrl}
-      filesList={{ imageFileList, fileFileList, voiceFileList }}
+      filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
       refreshUrl={refreshUrl}
     />,
   );
