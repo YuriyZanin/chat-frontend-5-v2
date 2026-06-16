@@ -30,6 +30,7 @@ export const SelectChatModal: React.FC<SelectChatModalProps> = ({
   };
 
   const handleSelectClick = (toUid: string, fullName: string): void => {
+    console.log('toUid: ', toUid);
     onSelect(toUid);
     clearSelected();
     onClose();

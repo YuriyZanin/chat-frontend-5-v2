@@ -786,7 +786,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         if (hasGroup || hasChannel) {
           payloadMessage.object.chat_key = userIdRef.current;
         } else {
-          payloadMessage.object.to_user_uid = userIdRef.current;
+          payloadMessage.object.to_user_uid = toUserUid ? toUserUid : userIdRef.current;
         }
       }
       if (repliedMessage) {
