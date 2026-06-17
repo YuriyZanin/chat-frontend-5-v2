@@ -44,6 +44,7 @@ type InfoState = {
   exitSelectionMode: () => void;
   toggleSelection: (id: string) => void;
   clearSelection: () => void;
+  setIsInfoOpen: (isInfoOpen: boolean) => void;
 };
 
 export const useInfoStore = create<InfoState>((set, get) => ({
@@ -72,6 +73,7 @@ export const useInfoStore = create<InfoState>((set, get) => ({
     const state = get();
     set({ isInfoOpen: !state.isInfoOpen });
   },
+  setIsInfoOpen: (isInfoOpen: boolean): void => set({ isInfoOpen }),
   closeInfoScreen: (): void => set({ isInfoOpen: false }),
   openBlockModal: (): void => set({ isBlockModalOpen: true }),
   closeBlockModal: (): void => set({ isBlockModalOpen: false }),

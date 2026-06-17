@@ -2,6 +2,7 @@
 import { useSearchUsersQuery } from 'modules/conversation/contacts/api';
 import { getMessageTimeOrDate } from 'modules/conversation/messages-chat/lib/get-message-time';
 import type { MessageLinkApi } from 'modules/info/model/info.api.schema';
+import { useInfoStore } from 'modules/info/model/info.store';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useRouter } from 'next/navigation';
 import { JSX } from 'react';
@@ -47,8 +48,10 @@ export const LinksTab = ({ items }: LinksTabProps): JSX.Element => {
 const LinksCars = ({ item, router }: { item: MessageLinkApi; router: AppRouterInstance }): JSX.Element => {
   const nickname = item.url && item.url.split('/').pop();
   const { data: userProfile } = useSearchUsersQuery(nickname ?? '');
+  const { setIsInfoOpen } = useInfoStore();
   const handleContactProfile = (): void => {
     router.push(`/contacts/${userProfile?.length ? userProfile[0].uid : ''}`);
+    setIsInfoOpen(true);
   };
   return (
     <>

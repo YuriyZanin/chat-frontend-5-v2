@@ -766,7 +766,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       }
 
       // записываем в store и показываем локально сразу в DOM созданное клиентом сообщение (tempMessage)
-      addMessageForUser(chatKey ? chatKey : userIdRef.current, tempMessage);
+      addMessageForUser(chatKey ? chatKey : toUserUid ? toUserUid : userIdRef.current, tempMessage);
 
       // Отправляем через WS созданное клиентом сообщение (payloadMessage) (если соединение есть)
       const payloadMessage: CreateTextMessageAPI = {

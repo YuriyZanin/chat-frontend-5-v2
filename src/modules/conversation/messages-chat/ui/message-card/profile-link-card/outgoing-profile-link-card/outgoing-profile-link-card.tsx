@@ -47,14 +47,15 @@ export const OutgoingProfileLinkCard = ({
   const nickname = message.content && message.content.split('/').pop();
   const { data: userProfile } = useSearchUsersQuery(nickname ?? '');
   const router = useRouter();
+  const { setIsInfoOpen } = useInfoStore();
 
   const handleSendMessages = (): void => {
     router.push(`/contacts/${userProfile?.length ? userProfile[0].uid : ''}`);
+    setIsInfoOpen(false);
   };
-  const { toggleInfoOpen } = useInfoStore();
   const handleContactProfile = (): void => {
     router.push(`/contacts/${userProfile?.length ? userProfile[0].uid : ''}`);
-    toggleInfoOpen();
+    setIsInfoOpen(true);
   };
 
   const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';

@@ -2,7 +2,6 @@ import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-soc
 import { useInfoStore } from 'modules/info/model/info.store';
 import { JSX } from 'react';
 import { SelectChatModal } from 'shared/ui/select-chat-modal/select-chat-modal';
-
 type ForwardProfileModalProps = {
   wsUrl: string;
   currentUid: string;
@@ -18,10 +17,14 @@ export const FrowardProfileModal = ({
 }: ForwardProfileModalProps): JSX.Element | null => {
   const { uid, isForwardModalOpen, closeForwardModal } = useInfoStore();
   const { sendMessage } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
-
   const handleForward = (toUid: string): void => {
-    if (toUid) {
-      const baseUrl = window.location.origin;
+    const baseUrl = window.location.origin;
+    if (toUid.includes('group') || toUid.includes('channel')) {
+      sendMessage({
+        content: ` ${baseUrl}/${nickname}`,
+        chatKey: toUid,
+      });
+    } else {
       sendMessage({
         content: ` ${baseUrl}/${nickname}`,
         toUserUid: toUid,
