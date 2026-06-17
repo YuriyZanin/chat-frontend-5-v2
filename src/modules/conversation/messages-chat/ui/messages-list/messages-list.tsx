@@ -75,6 +75,29 @@ export const MessagesList = ({
   );
   // хук ws + hook для определения прочтения видимости
   const { register } = useIntersectionRead(sendChangeStatusReadMessage);
+
+  // Состояние для отслеживания положения скролла
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  // Эффект для отслеживания позиции скролла
+  useEffect(() => {
+    const container = wrapperRef.current;
+    if (!container) return;
+
+    const handleScroll = (): void => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      // Проверяем, находится ли пользователь внизу (с допуском в 10px)
+      const atBottom = scrollHeight - scrollTop - clientHeight < 10;
+      setIsAtBottom(atBottom);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    // Вызываем сразу, чтобы установить начальное состояние
+    handleScroll();
+
+    return (): void => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   // Эффект прокрутки к targetIndex (если есть)
   useEffect(() => {
     if (targetIndex === -1) return;
@@ -394,7 +417,7 @@ export const MessagesList = ({
             )}
         </div>
       ))}
-      {wrapperRef.current && wrapperRef.current.scrollHeight > wrapperRef.current.clientHeight && (
+      {wrapperRef.current && wrapperRef.current.scrollHeight > wrapperRef.current.clientHeight && !isAtBottom && (
         <button
           style={{
             position: 'fixed',
