@@ -14,8 +14,6 @@
   width: 100%;
   height: 6rem;
   border-bottom: 0.1rem solid var(--surface-disabled);
-  border-top-left-radius: 0.8rem;
-  border-top-right-radius: 0.8rem;
   padding-left: 1.6rem;
   padding-right: 1.6rem;
   overflow: hidden;
@@ -46,10 +44,18 @@
 }
 
 .name {
+  width: 56.4rem;
   height: 2.2rem;
   font-size: 1.8rem;
   font-weight: 500;
   color: var(--text-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &.infoOpen {
+    width: 18rem;
+  }
 }
 
 .status {

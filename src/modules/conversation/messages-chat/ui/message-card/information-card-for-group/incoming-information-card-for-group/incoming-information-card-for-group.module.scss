@@ -15,15 +15,16 @@
   background-color: var(--brand-dark-60);
 }
 .text {
-  @include mixins.flex-box();
   width: 100%;
   height: auto;
   line-height: 1.2;
   font-size: 1.2rem;
   letter-spacing: 0;
   font-weight: 500;
-  text-align: right;
+  text-align: center;
   font-style: medium;
   color: var(--text-inverse);
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
