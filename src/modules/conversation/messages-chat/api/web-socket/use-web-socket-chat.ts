@@ -55,12 +55,16 @@ type UseWebSocketChatReturn = {
     forwardMessage,
     file,
     images,
+    chatKey,
+    toUserUid,
   }: {
     content: string;
     repliedMessage?: RestMessageApi | null | undefined;
     forwardMessage?: RestMessageApi | null | undefined;
     file?: Attachment | null | undefined;
     images?: Attachment[] | null | undefined;
+    chatKey?: string;
+    toUserUid?: string;
   }) => void;
   sendProfile: (payload: CreateTextMessageAPI) => void;
   sendMembers: (payload: AddOrRemoveMembersRequestAPI) => void;
@@ -626,28 +630,6 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     };
   }, [wsUrl]);
 
-  // useEffect(() => {
-  //   connectWS();
-
-  //   // тихий refresh каждые 15 минут
-  //   const interval = setInterval(
-  //     () => {
-  //       refreshWsSession(refreshUrl).catch(() => {});
-  //     },
-  //     15 * 60 * 1000,
-  //   );
-
-  //   return (): void => {
-  //     clearInterval(interval);
-  //     // if (wsRef.current) {
-  //     //   wsRef.current.close();
-  //     // }
-  //     if (reconnectTimeout.current) {
-  //       clearTimeout(reconnectTimeout.current);
-  //     }
-  //   };
-  // }, [wsUrl]);
-
   // Функция отправки сообщения
   const sendMessage = useCallback(
     async ({
@@ -657,6 +639,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       file,
       images,
       chatKey,
+      toUserUid,
     }: {
       content: string;
       repliedMessage?: RestMessageApi | null | undefined;
@@ -664,6 +647,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       file?: Attachment | null | undefined;
       images?: Attachment[] | null | undefined;
       chatKey?: string;
+      toUserUid?: string;
     }): Promise<void> => {
       if (
         !content?.trim() &&
@@ -685,17 +669,21 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         uid: requestUid,
         from_user: {
           uid: currentUserIdRef.current,
+          is_deleted: false,
           username: '',
           nickname: '',
-          avatar_url: '',
           avatar_webp_url: '',
+          avatar_small_url: '',
+          avatar_master_url: '',
         },
         to_user: {
-          uid: hasGroup || hasChannel ? '' : userIdRef.current,
+          uid: hasGroup || hasChannel ? '' : toUserUid ? toUserUid : userIdRef.current,
+          is_deleted: false,
           username: '',
           nickname: '',
-          avatar_url: '',
           avatar_webp_url: '',
+          avatar_small_url: '',
+          avatar_master_url: '',
         },
         content,
         replied_messages: [],
@@ -736,7 +724,6 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           {
             id: forwardMessage.id,
             uid: forwardMessage.uid,
-            is_deleted: false,
             from_user: forwardMessage.from_user.uid,
             first_name: forwardMessage.from_user.first_name ?? '',
             last_name: forwardMessage.from_user.last_name ?? '',
@@ -779,7 +766,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       }
 
       // записываем в store и показываем локально сразу в DOM созданное клиентом сообщение (tempMessage)
-      addMessageForUser(chatKey ? chatKey : userIdRef.current, tempMessage);
+      addMessageForUser(chatKey ? chatKey : toUserUid ? toUserUid : userIdRef.current, tempMessage);
 
       // Отправляем через WS созданное клиентом сообщение (payloadMessage) (если соединение есть)
       const payloadMessage: CreateTextMessageAPI = {
@@ -799,7 +786,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         if (hasGroup || hasChannel) {
           payloadMessage.object.chat_key = userIdRef.current;
         } else {
-          payloadMessage.object.to_user_uid = userIdRef.current;
+          payloadMessage.object.to_user_uid = toUserUid ? toUserUid : userIdRef.current;
         }
       }
       if (repliedMessage) {

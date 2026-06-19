@@ -28,7 +28,7 @@ export const useDownloadMessageFile = (files: RestMessageFileApi[]): UseDownload
       if (!files.length) throw new Error('Файл не найден');
       for (const file of files) {
         // создаем url для запроса файла через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
-        const proxyUrl = `/api/proxy${removeDomain(file.file_protected_url)}`;
+        const proxyUrl = `/api/proxy${removeDomain(file.file_protected_url || file.file_webp_url || '')}`;
         const response = await fetch(proxyUrl, {
           method: 'GET',
           signal: controller.signal,

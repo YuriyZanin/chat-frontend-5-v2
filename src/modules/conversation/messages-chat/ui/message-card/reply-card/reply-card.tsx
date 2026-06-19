@@ -22,7 +22,7 @@ export const ReplyCard = ({ message, isIncomingMessage }: ReplyCardProps): JSX.E
             ) ? (
             <Image
               key={message?.replied_messages[0].files_list[0].uid}
-              src={message?.replied_messages[0].files_list[0].file_webp_url}
+              src={message?.replied_messages[0].files_list[0].file_webp_url || ''}
               alt={message?.replied_messages[0].files_list[0].download_name}
               width={37}
               height={37}

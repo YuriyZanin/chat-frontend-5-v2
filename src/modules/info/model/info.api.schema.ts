@@ -1,5 +1,5 @@
 import { chatApiSchema } from 'modules/conversation/chats/model/chat.api.schema';
-import { z } from 'zod';
+import { number, z } from 'zod';
 
 export const infoApiSchema = z.object({
   uid: z.string(),
@@ -195,8 +195,8 @@ export const ParticipantApiSchema = z.object({
 
 export const PaginatedResponseSchema = z.object({
   count: z.number(),
-  next: z.string().optional(),
-  previous: z.string().optional(),
+  next: z.string().nullable().optional(),
+  previous: z.string().nullable().optional(),
 });
 
 export const ParticipantResponseSchema = PaginatedResponseSchema.extend({
@@ -273,5 +273,30 @@ export const PaginatedGroupChannelFileListShema = PaginatedResponseSchema.extend
 });
 
 export type FilesSeachQueryApi = z.infer<typeof SearchQuerySchema>;
+export type LinksSearchQueryApi = z.infer<typeof SearchQuerySchema>;
 export type PaginatedGroupChannelFileListApi = z.infer<typeof PaginatedGroupChannelFileListShema>;
 export type ChatFilesListApi = z.infer<typeof GroupChannelFileSchema>;
+
+export const MessageLinkSchema = z.object({
+  url: z.string(),
+  title: z.string(),
+  from_user: z.object({
+    first_name: z.string(),
+    last_name: z.string(),
+  }),
+  message_id: z.number(),
+  forwarded_in: z.array(
+    z.object({
+      id: z.number(),
+      uid: z.string(),
+      from_user: z.string(),
+    }),
+  ),
+  created_at: number(),
+  updated_at: number(),
+});
+export const PaginatedMessageLinkListSchema = PaginatedResponseSchema.extend({
+  results: z.array(MessageLinkSchema),
+});
+export type MessageLinkApi = z.infer<typeof MessageLinkSchema>;
+export type PaginatedMessageLinkListApi = z.infer<typeof PaginatedMessageLinkListSchema>;

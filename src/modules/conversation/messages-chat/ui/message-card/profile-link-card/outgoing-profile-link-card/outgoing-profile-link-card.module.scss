@@ -1,0 +1,154 @@
+@use 'shared/styles/03_mixins' as mixins;
+.block {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.2rem;
+}
+.blockSelected {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+  background-color: var(--surface-disabled);
+  margin-bottom: 1.2rem;
+}
+.blockSelected:hover {
+  background-color: var(--surface-disabled);
+}
+.block:hover {
+  background-color: var(--surface-disabled);
+}
+.wrapper {
+  @include mixins.flex-box($justify: end, $gap: 1rem);
+  width: 100%;
+  height: auto;
+  padding-left: 4.8rem;
+  padding-right: 1.6rem;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.item {
+  @include mixins.flex-box($direction: column, $align: start, $gap: 0.6rem);
+  max-width: 50rem;
+  height: auto;
+  padding: 1rem 1.2rem;
+  border-top-left-radius: 1.6rem;
+  border-top-right-radius: 1.6rem;
+  border-bottom-right-radius: 0.4rem;
+  border-bottom-left-radius: 1.6rem;
+  background-color: var(--surfase-message-card);
+  overflow: hidden;
+  @container (max-width: 360px) {
+    .item {
+      max-width: 26rem;
+    }
+  }
+}
+.replyMessage {
+  @include mixins.flex-box($align: start, $gap: 0.4rem);
+  width: 100%;
+  height: auto;
+  border-radius: 0.4rem;
+  border-left: 0.4rem solid var(--brand-secondary);
+  padding: 0.4rem 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+.avatar {
+  @include mixins.flex-box();
+  width: 3.7rem;
+  height: 3.7rem;
+  flex-shrink: 0;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+.textBlock {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+}
+.nameBlock {
+  @include mixins.flex-box($direction: column, $gap: 0.2rem);
+  width: 100%;
+  height: auto;
+}
+.name {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  font-style: bold;
+  line-height: 1.3;
+  font-size: 1.4rem;
+  letter-spacing: 0;
+  font-weight: 700;
+  color: var(--brand-primary);
+  overflow: hidden;
+}
+.nickname {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.join {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+  color: var(--brand-primary);
+  cursor: pointer;
+  overflow: hidden;
+}
+.message {
+  @include mixins.flex-box($align: end, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+}
+.messageText {
+  width: 100%;
+  height: auto;
+  max-width: 41.4rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: #007aff;
+  cursor: pointer;
+  overflow: hidden;
+}
+.messageSentTime {
+  @include mixins.flex-box($gap: 0.2rem);
+  width: 5.6rem;
+  height: 1.8rem;
+}
+.messageTime {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 1.7rem;
+  line-height: 1.2;
+  font-size: 1.4rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  justify-content: right;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.messageChatIcons {
+  @include mixins.flex-box();
+  width: 1.8rem;
+  height: 1.8rem;
+}

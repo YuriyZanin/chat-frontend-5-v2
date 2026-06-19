@@ -2,13 +2,14 @@
 
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
+import { useFileSizeText } from 'modules/conversation/messages-chat/hooks/use-file-size-text';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
 import {
   useIsDeletedFileStore,
   useSelectedMessagesStore,
 } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import Image from 'next/image';
-import { JSX, useEffect } from 'react';
+import { JSX, useEffect, useMemo } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { ForvardCard } from '../../forward-card/forward-card';
 import CheckOneIcon from '../../icons/check-one.svg';
@@ -21,6 +22,7 @@ import DeleteFileIcon from '../icons/delete-file-icon.svg';
 import FileIcon from '../icons/file-icon.svg';
 import styles from './outgoing-file-card.module.scss';
 import { OutgoingFileCardProps } from './outgoing-file-card.props';
+
 export const OutgoingFileCard = ({
   message,
   sendDeleteMessage,
@@ -62,6 +64,13 @@ export const OutgoingFileCard = ({
       message.forwarded_messages[0].files_list[0].download_name.toLowerCase().includes(word.toLowerCase()),
     );
   }
+  // получаем из сообщения (message) url где находится файл
+  const fileForSize = useMemo(() => {
+    const f = message.files_list.length ? message.files_list[0] : message.forwarded_messages[0].files_list[0];
+    return f.file_protected_url || f.file_webp_url || null;
+  }, [message]);
+  //хук для асинхронного получения размера файла по url
+  const { fileSizeText } = useFileSizeText({ url: fileForSize });
   // мгновенно скрывает в DOM карточку файла, отправку которого отменил пользователь
   const isDeletedFileStore = useIsDeletedFileStore((s) => s.isDeletedFile);
   const setIsDeletedFileStore = useIsDeletedFileStore((s) => s.setIsDeletedFile);
@@ -81,8 +90,7 @@ export const OutgoingFileCard = ({
   //хук для загрузки файла находящегося в сообщении
   const { handleDownloadMessageFileClick, handleStopDownloadMessageFileClick, isDownloading } =
     useDownloadMessageFile(files);
-  // получить размер файла
-  //const sizeFile = formatBytes(message);
+
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
@@ -130,8 +138,8 @@ export const OutgoingFileCard = ({
                         }
                         src={
                           message.files_list.length
-                            ? message.files_list[0].file_webp_url
-                            : message.forwarded_messages[0].files_list[0].file_webp_url
+                            ? message.files_list[0].file_webp_url || ''
+                            : message.forwarded_messages[0].files_list[0].file_webp_url || ''
                         }
                         alt={
                           message.files_list.length
@@ -165,7 +173,7 @@ export const OutgoingFileCard = ({
                   />
                 </div>
                 <div className={styles.fileSizeAndMessageTimeBlock}>
-                  <div className={styles.fileSize}>5.2 MB</div>
+                  <div className={styles.fileSize}>{fileSizeText}</div>
                   <div className={styles.messageTimeAndChatIcons}>
                     <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
                     <div className={styles.messageChatIcons}>

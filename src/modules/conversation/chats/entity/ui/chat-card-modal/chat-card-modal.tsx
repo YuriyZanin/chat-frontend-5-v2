@@ -9,9 +9,9 @@ import { ChatCardModalProps } from './chat-card-modal.props';
 export const ChatCardModal = ({ chat, onSelectHandler }: ChatCardModalProps): JSX.Element => {
   const { selected, setSelected } = useChatsStore();
   const { firstName, lastName, uid, nickname, avatarUrl, wasOnlineAt } = chat.peer;
-  const { id } = chat.chat;
+  const { id, name, chatKey, chatType } = chat.chat;
 
-  const fullName = `${firstName} ${lastName}`;
+  const fullName = chatType === 'chat' ? `${firstName} ${lastName}` : name;
   const status = getLastSeenLabel(wasOnlineAt);
   const isSelected = !!selected && selected === id;
 
@@ -25,7 +25,7 @@ export const ChatCardModal = ({ chat, onSelectHandler }: ChatCardModalProps): JS
     <CardShell
       chatId={id}
       nickname={nickname}
-      href={`/chats/${uid}`}
+      href={`/chats/${chatType === 'chat' ? uid : chatKey}`}
       imageOptions={{ src: avatarUrl, alt: fullName, classNames: { root: styles.imageWrapper } }}
       selectAction={handleClick}
       selected={isSelected}

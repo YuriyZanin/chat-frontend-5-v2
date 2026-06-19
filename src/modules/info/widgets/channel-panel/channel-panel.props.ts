@@ -1,5 +1,4 @@
-import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
-
+import type { ChatFilesListApi, MessageLinkApi } from 'modules/info/model/info.api.schema';
 export type ChannelPanelProps = {
   uid: string;
   currentUid: string;
@@ -8,6 +7,7 @@ export type ChannelPanelProps = {
     imageFileList: ChatFilesListApi[] | undefined;
     fileFileList: ChatFilesListApi[] | undefined;
     voiceFileList: ChatFilesListApi[] | undefined;
+    linksList: MessageLinkApi[] | undefined;
   };
   refreshUrl: string;
 };

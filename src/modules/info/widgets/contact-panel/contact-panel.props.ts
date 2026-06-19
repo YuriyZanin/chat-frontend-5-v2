@@ -1,6 +1,5 @@
 import type { ProfileInfo } from 'modules/info/entity/info.entity';
-import type { ChatFilesListApi } from 'modules/info/model/info.api.schema';
-
+import type { ChatFilesListApi, MessageLinkApi } from 'modules/info/model/info.api.schema';
 export type ContactPanelProps = {
   uid: string;
   currentUid: string;
@@ -11,6 +10,7 @@ export type ContactPanelProps = {
     imageFileList: ChatFilesListApi[] | undefined;
     fileFileList: ChatFilesListApi[] | undefined;
     voiceFileList: ChatFilesListApi[] | undefined;
+    linksList: MessageLinkApi[] | undefined;
   };
   refreshUrl: string;
 };
