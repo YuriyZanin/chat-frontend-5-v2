@@ -2,12 +2,14 @@
   position: relative;
 
   .imageLabel {
+    width: 100%;
     position: absolute;
     padding: 0 14.66px 0 14.66px;
     bottom: 10px;
     z-index: 2;
 
     .name {
+      width: 100%;
       font-weight: 500;
       font-style: Medium;
       font-size: 24px;

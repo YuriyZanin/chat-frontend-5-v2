@@ -30,6 +30,14 @@
   overflow: hidden;
 }
 
+.main {
+  max-width: 74.4rem;
+
+  &.open {
+    max-width: 36rem;
+  }
+}
+
 .info {
   max-width: 36rem;
 
