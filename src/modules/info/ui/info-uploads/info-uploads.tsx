@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { LINKS } from 'modules/info/shared/utils/mock';
 import { JSX, ReactElement, useState } from 'react';
 import { FilesTab } from './files-tab';
 import styles from './info-uploads.module.scss';
@@ -31,7 +30,7 @@ export const InfoUploads = ({
       case 'Голосовые':
         return <VoicesTab items={filesList.voiceFileList} />;
       case 'Ссылки':
-        return <LinksTab items={LINKS} />;
+        return <LinksTab items={filesList.linksList} />;
       case 'Участники':
         return <ParticipantsTab currentUid={currentUid} chatKey={chatKey || ''} />;
       case 'Подписчики':

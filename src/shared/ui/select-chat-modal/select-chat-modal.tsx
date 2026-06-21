@@ -22,7 +22,6 @@ export const SelectChatModal: React.FC<SelectChatModalProps> = ({
   const { modalChats, modalSearch, setModalSearch } = useChatsScreen();
   const { setIcon, setTitle, openPopup } = useNotificationStore();
   const { clearSelected } = useChatsStore();
-
   const handleBackdropClick = (e: React.MouseEvent): void => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -57,7 +56,12 @@ export const SelectChatModal: React.FC<SelectChatModalProps> = ({
                 <ChatCardModal
                   key={c.peer.uid}
                   chat={c}
-                  onSelectHandler={() => handleSelectClick(c.peer.uid, `${c.peer.firstName} ${c.peer.lastName}`)}
+                  onSelectHandler={() =>
+                    handleSelectClick(
+                      c.chat.chatType === 'chat' ? c.peer.uid : c.chat.chatKey,
+                      c.chat.chatType === 'chat' ? `${c.peer.firstName} ${c.peer.lastName}` : c.chat.name,
+                    )
+                  }
                 />
               ))}
             </ul>

@@ -56,6 +56,75 @@
   }
 }
 
+.replyMessage {
+  @include mixins.flex-box($align: start, $gap: 0.4rem);
+  width: 100%;
+  height: auto;
+  border-radius: 0.4rem;
+  border-left: 0.4rem solid var(--brand-secondary);
+  padding: 0.4rem 1rem;
+  background-color: var(--barnd-violet-super-light);
+  overflow: hidden;
+}
+.avatar {
+  @include mixins.flex-box();
+  width: 3.7rem;
+  height: 3.7rem;
+  flex-shrink: 0;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+.textBlock {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+}
+.nameBlock {
+  @include mixins.flex-box($direction: column, $gap: 0.2rem);
+  width: 100%;
+  height: auto;
+}
+.name {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  font-style: bold;
+  line-height: 1.3;
+  font-size: 1.4rem;
+  letter-spacing: 0;
+  font-weight: 700;
+  color: var(--brand-primary);
+  overflow: hidden;
+}
+.nickname {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.join {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+  color: var(--brand-primary);
+  cursor: pointer;
+  overflow: hidden;
+}
+
 .message {
   @include mixins.flex-box($align: end, $gap: 0.8rem);
   width: 100%;
@@ -87,7 +156,8 @@
   font-size: 1.6rem;
   letter-spacing: 0;
   font-weight: 400;
-  color: var(--text-primary);
+  color: #007aff;
+  cursor: pointer;
   overflow: hidden;
 }
 .messageSentTime {
@@ -98,84 +168,6 @@
 .messageTime {
   @include mixins.flex-box();
   width: 3.6rem;
-  height: 1.7rem;
-  line-height: 1.2;
-  font-size: 1.4rem;
-  letter-spacing: 0.01;
-  font-weight: 400;
-  color: var(--text-secondary);
-  overflow: hidden;
-}
-
-.forwardWeb {
-  @include mixins.flex-box($direction: column, $gap: 0.2rem);
-  width: 100%;
-  height: 3.7rem;
-}
-.forward {
-  width: 100%;
-  height: 1.7rem;
-  line-height: 1.2;
-  font-size: 1.4rem;
-  letter-spacing: 0.01;
-  font-weight: 400;
-  color: var(--brand-secondary);
-  overflow: hidden;
-}
-.forwardFrom {
-  @include mixins.flex-box($justify: start, $gap: 0.4rem);
-  width: 100%;
-  height: 1.8rem;
-}
-.avatarWeb {
-  size: 1.8rem 1.8rem;
-  width: 1.8rem;
-  height: 1.8rem;
-}
-.name {
-  width: 100%;
-  height: 1.8rem;
-  font-style: bold;
-  line-height: 1.3;
-  font-size: 1.4rem;
-  letter-spacing: 0;
-  font-weight: 700;
-  color: var(--brand-primary);
-  overflow: hidden;
-}
-.replyMessageWeb {
-  @include mixins.flex-box($gap: 0.4rem);
-  width: 100%;
-  height: 4.5rem;
-  max-width: 47.6rem;
-  border-radius: 0.4rem;
-  border-left: 0.4rem solid var(--brand-secondary);
-  padding: 0.4rem 1rem;
-  background-color: var(--text-inverse);
-}
-.img {
-  width: 3.7rem;
-  height: 3.7rem;
-  border-radius: 0.4rem;
-}
-.text {
-  @include mixins.flex-box($direction: column, $gap: 0.2rem);
-  width: 100%;
-  height: 3.6rem;
-}
-.textName {
-  width: 100%;
-  height: 1.7rem;
-  font-style: medium;
-  line-height: 1.2;
-  font-size: 1.4rem;
-  letter-spacing: 0;
-  font-weight: 500;
-  color: var(--brand-primary);
-  overflow: hidden;
-}
-.media {
-  width: 100%;
   height: 1.7rem;
   line-height: 1.2;
   font-size: 1.4rem;

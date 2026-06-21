@@ -13,6 +13,7 @@ import { UserContactApiResponse } from 'modules/conversation/contacts/model/cont
 import { ContactSchemaApi } from 'modules/conversation/contacts/model/contact/search-contact.api.schema';
 import { blockUser, getProfileInfoById, mapInfoProfileFromApi } from '.';
 import { GroupInfo, ProfileInfo } from '../entity/info.entity';
+import type { PaginatedMessageLinkListApi } from '../model/info.api.schema';
 import {
   BlockProfileApiResponse,
   ChatPost,
@@ -30,6 +31,7 @@ import {
   editChat,
   generateInvite,
   getChatFileList,
+  getChatLinksList,
   getGroupOrChannel,
   getParticipantList,
   getUserForAddList,
@@ -306,6 +308,39 @@ export const useChatFilesListQuery = ({
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       getChatFileList(
+        {
+          page: pageParam,
+          page_size: 50,
+          search: query,
+        },
+        chatKey,
+      ),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.next) return undefined;
+      const url = new URL(lastPage.next, 'http://localhost');
+      return Number(url.searchParams.get('page'));
+    },
+  });
+};
+
+export const useChatLinksListQuery = ({
+  query,
+  chatKey,
+}: {
+  query: string;
+  chatKey: string;
+}): UseInfiniteQueryResult<InfiniteData<PaginatedMessageLinkListApi>, unknown> => {
+  return useInfiniteQuery<
+    PaginatedMessageLinkListApi,
+    unknown,
+    InfiniteData<PaginatedMessageLinkListApi>,
+    ['chat', 'files-list', string, string],
+    number
+  >({
+    queryKey: ['chat', 'files-list', query, chatKey],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      getChatLinksList(
         {
           page: pageParam,
           page_size: 50,

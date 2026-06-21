@@ -1,6 +1,10 @@
 import { UserContactApiResponse } from 'modules/conversation/contacts/model/contact';
 import { apiFetch } from 'shared/api';
-import type { FilesSeachQueryApi, PaginatedGroupChannelFileListApi } from '../model/info.api.schema';
+import type {
+  FilesSeachQueryApi,
+  LinksSearchQueryApi,
+  PaginatedGroupChannelFileListApi,
+} from '../model/info.api.schema';
 import {
   BlockProfileApiResponse,
   ChatPost,
@@ -11,6 +15,7 @@ import {
   InviteLinkApiResponse,
   InviteSettingsPost,
   NewContact,
+  PaginatedMessageLinkListApi,
   ParticipantApiResponse,
   ParticipantQuery,
   UserForAddApiResponse,
@@ -134,13 +139,33 @@ export const getChatFileList = (
   chatKey: string,
 ): Promise<PaginatedGroupChannelFileListApi> => {
   const searchParams = new URLSearchParams();
-
+  const parts = chatKey.split('_');
+  const userUid = parts.length > 1 ? parts[1] : parts[0];
   if (params.page) searchParams.set('page', String(params.page));
   if (params.page_size) searchParams.set('page_size', String(params.page_size));
   if (params.search) searchParams.set('search', params.search);
 
   return apiFetch<PaginatedGroupChannelFileListApi>(
-    `/api/proxy/api/v1/chat/message/files/${chatKey}/?${searchParams.toString()}`,
+    `/api/proxy/api/v1/chat/message/files/${userUid}/?${searchParams.toString()}`,
+    {
+      method: 'GET',
+    },
+  );
+};
+
+export const getChatLinksList = (
+  params: LinksSearchQueryApi,
+  chatKey: string,
+): Promise<PaginatedMessageLinkListApi> => {
+  const searchParams = new URLSearchParams();
+  const parts = chatKey.split('_');
+  const userUid = parts.length > 1 ? parts[1] : parts[0];
+  if (params.page) searchParams.set('page', String(params.page));
+  if (params.page_size) searchParams.set('page_size', String(params.page_size));
+  if (params.search) searchParams.set('search', params.search);
+
+  return apiFetch<PaginatedMessageLinkListApi>(
+    `/api/proxy/api/v1/chat/message/links/${userUid}/?${searchParams.toString()}`,
     {
       method: 'GET',
     },

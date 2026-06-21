@@ -14,7 +14,7 @@ export const ProtectedLayout = ({ nav, list, main, info }: ProtectedLayoutProps)
         <div className={styles.mainGrid}>
           <aside className={styles.nav}>{nav}</aside>
           <aside className={styles.list}>{list}</aside>
-          <main className={styles.main}>{main}</main>
+          <main className={clsx(styles.main, { [styles.open]: isInfoOpen })}>{main}</main>
         </div>
         {isInfoOpen && <div className={clsx(styles.info, { [styles.open]: isInfoOpen })}>{info}</div>}
       </div>

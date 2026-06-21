@@ -1,34 +1,30 @@
 'use client';
-
-import { useAudioPlayer } from 'modules/conversation/messages-chat/hooks/use-audio-player';
+import { useSearchUsersQuery } from 'modules/conversation/contacts/api';
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
-import { formatTime } from 'modules/conversation/messages-chat/utils/format-cecond';
 import {
   useSelectedMessagesStore,
   useUserIdStore,
 } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { useInfoStore } from 'modules/info/model/info.store';
 import Image from 'next/image';
-import { JSX } from 'react';
+import { useRouter } from 'next/navigation';
+import { JSX, useState } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
-import { HighlightedFileName } from '../../file-card/highlighted-file-name/highlighted-file-name';
-import DeleteFileIcon from '../../file-card/icons/delete-file-icon.svg';
+import { HighlightedMessage } from '../../../search-messages/highlighted-message/highlighted-message';
 import { ForvardCard } from '../../forward-card/forward-card';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
-import { ReplyCard } from '../../reply-card/reply-card';
-import AudioPlayIcon from '../icon/audio-play.svg';
-import AudioStopIcon from '../icon/audio-stop.svg';
-import styles from './incoming-audio-card.module.scss';
-import { IncomingAudioCardProps } from './incoming-audio-card.props';
+import styles from './incoming-profile-link-card.module.scss';
+import type { IncomingProfileLinkCardProps } from './incoming-profile-link-card.props';
 
-export const IncomingAudioCard = ({
+export const IncomingProfileLinkCard = ({
   message,
+  register,
   sendDeleteMessage,
   search,
-  register,
   isHighlighted,
   currentUserId,
-}: IncomingAudioCardProps): JSX.Element => {
+}: IncomingProfileLinkCardProps): JSX.Element => {
   //размеры контекстного окна
   const menuWidth = 250;
   const menuHeight = 220;
@@ -47,19 +43,28 @@ export const IncomingAudioCard = ({
   } = useContextMenu({ menuWidth, menuHeight, sendDeleteMessage, message, showCheckBox });
   // показывать компоненты <MessageCheckBox/> в DOM либо нет
   const checkBoxsVisibleStore = useSelectedMessagesStore((s) => s.checkBoxsVisible);
+
   // прописываем в компоненте актуальный user_uid открытого чата из store
   const userId = useUserIdStore((s) => s.userId);
   // выясняем это простой чат либо группа (если true то группа)
   const hasGroup = userId.includes('group_');
-  // находим url voice-сообщения
-  const audioUrl = message.files_list.length
-    ? message.files_list[0].file_protected_url
-    : message.forwarded_messages[0]?.files_list[0]?.file_protected_url;
-  // хук для прослушивания аудиосообщения
-  const { handlePlayPause, currentTime, totalDuration, waveformRef, isPlaying, isLoading } = useAudioPlayer(
-    message.uid,
-    audioUrl || '',
-  );
+  const nickname = message.content && message.content.split('/').pop();
+  const { data: userProfile } = useSearchUsersQuery(nickname ?? '');
+  const router = useRouter();
+  const { setIsInfoOpen } = useInfoStore();
+
+  const handleSendMessages = (): void => {
+    router.push(`/contacts/${userProfile?.length ? userProfile[0].uid : ''}`);
+    setIsInfoOpen(false);
+  };
+  const handleContactProfile = (): void => {
+    router.push(`/contacts/${userProfile?.length ? userProfile[0].uid : ''}`);
+    setIsInfoOpen(true);
+  };
+
+  const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
+  // создаем состояние которое динамически заменить картинку аватара на дефолтную в случае ошибки при её загрузке
+  const [imgSrc, setImgSrc] = useState(userProfile?.length ? userProfile[0].avatarUrl : URL_DEFAUIT_Avatar);
 
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
@@ -99,38 +104,42 @@ export const IncomingAudioCard = ({
           </div>
         )}
         <div className={styles.item}>
-          {hasGroup && (
-            <div className={styles.name}> {`${message.from_user.first_name} ${message.from_user.last_name}`}</div>
-          )}
-          {message.replied_messages.length > 0 && <ReplyCard message={message} isIncomingMessage={false} />}
-          {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
-          <div className={styles.contentBlock}>
-            <div className={styles.fileIcon}>
-              {isLoading ? (
-                <DeleteFileIcon className={styles.deleteFileIcon} />
-              ) : (
-                <button onClick={!checkBoxsVisibleStore ? handlePlayPause : (): void => {}} className={styles.fileIcon}>
-                  {isPlaying ? <AudioStopIcon /> : <AudioPlayIcon />}
-                </button>
-              )}
-            </div>
-            <div className={styles.fileInfo}>
-              <div className={styles.fileName}>
-                <HighlightedFileName
-                  fileName={
-                    message.files_list.length
-                      ? message.files_list[0].download_name
-                      : message.forwarded_messages[0].files_list[0].download_name
-                  }
-                  search={search}
+          <div className={styles.box}>
+            {hasGroup && (
+              <div className={styles.name}> {`${message.from_user.first_name} ${message.from_user.last_name}`}</div>
+            )}
+            {message.forwarded_messages.length > 0 && <ForvardCard message={message} currentUserId={currentUserId} />}
+            <div className={styles.replyMessage}>
+              <div className={styles.avatar}>
+                <Image
+                  src={imgSrc}
+                  alt={userProfile?.length ? `${userProfile[0].firstName} ${userProfile[0].lastName}` : ''}
+                  unoptimized
+                  width={37}
+                  height={37}
+                  onError={() => {
+                    setImgSrc(URL_DEFAUIT_Avatar);
+                  }}
                 />
               </div>
-              <div className={styles.voiceLine} ref={waveformRef} />
-              <div className={styles.fileSizeAndMessageTimeBlock}>
-                <div className={styles.fileSize}>
-                  {currentTime ? formatTime(currentTime) : formatTime(totalDuration)}
+              <div className={styles.textBlock}>
+                <div className={styles.nameBlock}>
+                  <div className={styles.name}>
+                    {userProfile?.length ? `${userProfile[0].firstName} ${userProfile[0].lastName}` : ''}
+                  </div>
+                  <div className={styles.nickname}>{`@${nickname}`}</div>
                 </div>
-                <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
+                <div className={styles.join} onClick={handleSendMessages}>
+                  Отправить сообщение
+                </div>
+              </div>
+            </div>
+            <div className={styles.message}>
+              <span className={styles.messageText} onClick={handleContactProfile}>
+                <HighlightedMessage text={message.content ?? ''} search={search} />
+              </span>
+              <div className={styles.messageSentTime}>
+                <div className={styles.messageTime}> {getMessageTime(message.created_at)} </div>
               </div>
             </div>
           </div>

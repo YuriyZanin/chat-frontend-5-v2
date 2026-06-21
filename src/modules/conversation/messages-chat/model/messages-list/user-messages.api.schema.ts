@@ -2,12 +2,13 @@ import { z } from 'zod';
 
 export const messagesPaginatedResponseSchema = z.object({
   count: z.number(),
-  next: z.string().optional(),
-  previous: z.string().optional(),
+  next: z.string().nullable().optional(),
+  previous: z.string().nullable().optional(),
 });
 
 export const messagesUserApiSchema = z.object({
   uid: z.string(),
+  is_deleted: z.boolean(),
   username: z.string().max(250),
   nickname: z
     .string()
@@ -16,8 +17,9 @@ export const messagesUserApiSchema = z.object({
     .regex(/^[a-z0-9._]{6,32}$/),
   first_name: z.string().max(150).optional(),
   last_name: z.string().max(150).optional(),
-  avatar_url: z.string(),
   avatar_webp_url: z.string(),
+  avatar_small_url: z.string(),
+  avatar_master_url: z.string(),
 });
 
 export const restMessageFileApiSchema = z.object({
@@ -25,10 +27,10 @@ export const restMessageFileApiSchema = z.object({
   uid: z.string(),
   download_name: z.string(),
   media_kind: z.string(),
-  file_protected_url: z.string(),
-  file_webp_url: z.string(),
-  file_small_url: z.string(),
-  file_type: z.string().max(128).optional(),
+  file_protected_url: z.string().nullable(),
+  file_webp_url: z.string().nullable(),
+  file_small_url: z.string().nullable(),
+  file_type: z.string().max(128).nullable().optional(),
   created_at: z.number(),
   updated_at: z.number(),
 });
@@ -45,8 +47,15 @@ export const restFlatMessageApiSchema = z.object({
   files_list: z.array(restMessageFileApiSchema),
 });
 
-export const restFlatForwardedMessageApiSchema = restFlatMessageApiSchema.extend({
+export const restFlatForwardedMessageApiSchema = z.object({
+  id: z.number(),
+  uid: z.string(),
+  from_user: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
   avatar_webp_url: z.string(),
+  content: z.string().max(4096).optional(),
+  files_list: z.array(restMessageFileApiSchema),
 });
 
 export const messageRTCApiSchema = z.object({
@@ -72,7 +81,7 @@ export const restMessageApiSchema = z.object({
   chat_id: z.number(),
   chat_key: z.string(),
   chat_type: z.enum(['chat', 'public-group', 'private-group', 'public-channel', 'private-channel']),
-  message_rtc: messageRTCApiSchema.optional(),
+  message_rtc: messageRTCApiSchema.nullable(),
 });
 export type RestMessageApi = z.infer<typeof restMessageApiSchema>;
 

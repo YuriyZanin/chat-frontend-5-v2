@@ -1,5 +1,5 @@
 'use client';
-
+import clsx from 'clsx';
 import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
@@ -93,9 +93,7 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
     toggleCallsOpen,
     toggleIncomingModalOpen,
   } = useCallsStore();
-
-  const { toggleInfoOpen } = useInfoStore();
-
+  const { isInfoOpen, toggleInfoOpen } = useInfoStore();
   const { isModalOpen } = useNotificationStore();
 
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
@@ -199,8 +197,9 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
               <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
             ) : (
               <div className={styles.info} onClick={() => toggleInfoOpen()}>
-                <span className={styles.name}>{isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}</span>
-
+                <span className={clsx(styles.name, { [styles.infoOpen]: isInfoOpen })}>
+                  {isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}
+                </span>
                 {isGroupOrChannel ? (
                   <span className={styles.group}>
                     {formatParticipants(participants?.length ? participants?.length - 1 : 1)}

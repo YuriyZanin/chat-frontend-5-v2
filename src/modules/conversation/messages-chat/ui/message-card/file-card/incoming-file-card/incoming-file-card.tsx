@@ -2,13 +2,14 @@
 
 import { useContextMenu } from 'modules/conversation/messages-chat/hooks/use-context-menu';
 import { useDownloadMessageFile } from 'modules/conversation/messages-chat/hooks/use-download-message-file';
+import { useFileSizeText } from 'modules/conversation/messages-chat/hooks/use-file-size-text';
 import { getMessageTime } from 'modules/conversation/messages-chat/lib/get-message-time';
 import {
   useSelectedMessagesStore,
   useUserIdStore,
 } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import Image from 'next/image';
-import { JSX } from 'react';
+import { JSX, useMemo } from 'react';
 import { ContextMenu } from '../../../context-menu/context-menu';
 import { ForvardCard } from '../../forward-card/forward-card';
 import { MessageCheckBox } from '../../message-checkbox/message-checkbox';
@@ -67,8 +68,14 @@ export const IncomingFileCard = ({
   const userId = useUserIdStore((s) => s.userId);
   // выясняем это простой чат либо группа (если true то группа)
   const hasGroup = userId.includes('group_');
-  // получить размер файла
-  //const sizeFile = formatBytes(message);
+  // получаем из сообщения (message) url где находится файл
+  const fileForSize = useMemo(() => {
+    const f = message.files_list.length ? message.files_list[0] : message.forwarded_messages[0].files_list[0];
+    return f.file_protected_url || f.file_webp_url || null;
+  }, [message]);
+  //хук для асинхронного получения размера файла по url
+  const { fileSizeText } = useFileSizeText({ url: fileForSize });
+
   return (
     <div className={(checkBoxsVisibleStore && has) || isHighlighted ? styles.blockSelected : styles.block}>
       {checkBoxsVisibleStore && (
@@ -132,8 +139,8 @@ export const IncomingFileCard = ({
                       }
                       src={
                         message.files_list.length
-                          ? message.files_list[0].file_webp_url
-                          : message.forwarded_messages[0].files_list[0].file_webp_url
+                          ? message.files_list[0].file_webp_url || ''
+                          : message.forwarded_messages[0].files_list[0].file_webp_url || ''
                       }
                       alt={
                         message.files_list.length
@@ -167,7 +174,7 @@ export const IncomingFileCard = ({
                 />
               </div>
               <div className={styles.fileSizeAndMessageTimeBlock}>
-                <div className={styles.fileSize}>5.2 MB</div>
+                <div className={styles.fileSize}>{fileSizeText}</div>
                 <div className={styles.messageTime}>{getMessageTime(message.created_at)}</div>
               </div>
             </div>

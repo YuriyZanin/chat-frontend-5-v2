@@ -14,9 +14,29 @@ type ChatsListState = {
 export const useChatsListStore = create<ChatsListState>((set) => ({
   chatsList: null,
   setChatsList: (chatsList: Chat[]): void =>
-    set({
-      chatsList,
+    set((s) => {
+      const prev = s.chatsList ?? [];
+      const seen = new Set();
+      const result = [];
+      for (const chat of prev) {
+        const uid = chat.peer.uid;
+        if (!seen.has(uid)) {
+          seen.add(uid);
+          result.push(chat);
+        }
+      }
+      for (const chat of chatsList) {
+        const uid = chat.peer.uid;
+        if (!seen.has(uid)) {
+          seen.add(uid);
+          result.push(chat);
+        }
+      }
+      return {
+        chatsList: result,
+      };
     }),
+
   clearChatsList: (): void =>
     set({
       chatsList: null,
