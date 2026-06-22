@@ -4,7 +4,7 @@ import { CallAnimation } from 'modules/conversation/shared/ui/call-animation';
 import { JSX, useEffect, useRef } from 'react';
 import { ImageUI } from 'shared/ui';
 import { useIceServersQuery } from '../../api';
-import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { getDurationTime } from '../../lib/get-duration-time';
 import CallActiveIcon from '../../shared/icons/call-active.svg';
 import CallEndIcon from '../../shared/icons/close.svg';
@@ -18,18 +18,14 @@ type OutgoingCallPanelProps = {
   avatarUrl?: string;
   contact: string;
   user_uid: string;
-  wsUrl: string;
   currentUid: string;
-  refreshUrl: string;
 };
 
 export const OutgoingCallPanel = ({
   avatarUrl,
   contact,
   user_uid,
-  wsUrl,
   currentUid,
-  refreshUrl,
 }: OutgoingCallPanelProps): JSX.Element | null => {
   const {
     isFullScreen,
@@ -50,7 +46,6 @@ export const OutgoingCallPanel = ({
     resetCall,
   } = useCallsStore();
   const { data: iceConfig, isLoading } = useIceServersQuery();
-  const { sendOfferCall, sendIceCandidate, sendCallCompletion } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
 
   const localStreamRef = useRef<MediaStream | undefined>(undefined);
   const remoteStreamRef = useRef<MediaStream | null>(null);
@@ -63,7 +58,11 @@ export const OutgoingCallPanel = ({
   const callStartTimeRef = useRef<number | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   useEffect(() => {
+    if (webSocketChatSrore === null) return;
+    const { sendOfferCall, sendIceCandidate } = webSocketChatSrore;
     if (isLoading) return;
 
     const initCall = async (): Promise<void> => {
@@ -400,6 +399,8 @@ export const OutgoingCallPanel = ({
 
   const handleEndCall = (): void => {
     try {
+      if (webSocketChatSrore === null) return;
+      const { sendCallCompletion } = webSocketChatSrore;
       const requestUid = crypto.randomUUID();
       sendCallCompletion({
         action: 'call_completion',
@@ -463,7 +464,8 @@ export const OutgoingCallPanel = ({
 
   const sendBufferedLocalIceCandidates = (): void => {
     if (!messageRtcUid || !localIceCandidateBuffer.current.length) return;
-
+    if (webSocketChatSrore === null) return;
+    const { sendIceCandidate } = webSocketChatSrore;
     localIceCandidateBuffer.current.forEach((candidate) => {
       const requestUid = crypto.randomUUID();
       sendIceCandidate({

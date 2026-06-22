@@ -270,7 +270,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           // Если сервер пришлёт подтверждение с request_uid,
           // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
           if (data.request_uid) {
-            updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
+            updateMessageByUidForUser(data.object.to_user.uid, data.request_uid, { status: 'sent', ...data.object });
             // Очистим таймаут подтверждения
             pendingTimeouts.current.delete(data.request_uid);
           }
@@ -615,7 +615,8 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     // тихий refresh каждые 15 минут
     const interval = setInterval(
       () => {
-        refreshWsSession(refreshUrl).catch(() => {});
+        //перед каждым connect освежаем access
+        refreshWsSession(refreshUrl);
       },
       15 * 60 * 1000,
     );

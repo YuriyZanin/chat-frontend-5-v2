@@ -8,23 +8,14 @@ import { MediaTab } from './media-tab';
 import { ParticipantsTab } from './participants-tab';
 import { VoicesTab } from './voices-tab';
 
-export const InfoUploads = ({
-  tabs,
-  chatKey,
-  currentUid,
-  wsUrl,
-  filesList,
-  refreshUrl,
-}: InfoUploadsProps): JSX.Element => {
+export const InfoUploads = ({ tabs, chatKey, currentUid, filesList }: InfoUploadsProps): JSX.Element => {
   const [activeTab, setActiveTab] = useState(0);
 
   const renderTab = (): ReactElement | null => {
     const tab = tabs[activeTab];
     switch (tab) {
       case 'Медиа':
-        return (
-          <MediaTab items={filesList.imageFileList} currentUid={currentUid} wsUrl={wsUrl} refreshUrl={refreshUrl} />
-        );
+        return <MediaTab items={filesList.imageFileList} />;
       case 'Файлы':
         return <FilesTab items={filesList.fileFileList} />;
       case 'Голосовые':

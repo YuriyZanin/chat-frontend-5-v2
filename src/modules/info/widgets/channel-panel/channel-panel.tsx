@@ -14,13 +14,7 @@ import type { ChannelPanelProps } from './channel-panel.props';
 
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
-export const ChannelPanel = ({
-  uid,
-  currentUid,
-  wsUrl,
-  filesList,
-  refreshUrl,
-}: ChannelPanelProps): JSX.Element | null => {
+export const ChannelPanel = ({ uid, currentUid, filesList }: ChannelPanelProps): JSX.Element | null => {
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
@@ -47,18 +41,11 @@ export const ChannelPanel = ({
           <InfoNotification chatId={profile?.id} />
           {profile?.description && <InfoSummary description={profile?.description} />}
           <InfoSummary inviteLinkChannel={link?.invite_link} chatKey={uid} />
-          <InfoUploads
-            tabs={tabs}
-            currentUid={currentUid}
-            wsUrl={wsUrl}
-            chatKey={uid}
-            filesList={filesList}
-            refreshUrl={refreshUrl}
-          />
-          <ClearChannelModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} name={name} refreshUrl={refreshUrl} />
-          <DeleteMemberModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} refreshUrl={refreshUrl} />
-          <LeaveChannelModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} refreshUrl={refreshUrl} />
-          <DeleteGroupModal wsUrl={wsUrl} chatKey={uid} currentUid={currentUid} name={name} refreshUrl={refreshUrl} />
+          <InfoUploads tabs={tabs} currentUid={currentUid} chatKey={uid} filesList={filesList} />
+          <ClearChannelModal chatKey={uid} name={name} />
+          <DeleteMemberModal chatKey={uid} />
+          <LeaveChannelModal chatKey={uid} name={name} />
+          <DeleteGroupModal chatKey={uid} name={name} />
         </>
       )}
     </>

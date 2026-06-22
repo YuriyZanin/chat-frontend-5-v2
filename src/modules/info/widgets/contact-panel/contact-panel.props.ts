@@ -3,7 +3,6 @@ import type { ChatFilesListApi, MessageLinkApi } from 'modules/info/model/info.a
 export type ContactPanelProps = {
   uid: string;
   currentUid: string;
-  wsUrl: string;
   profile?: ProfileInfo;
   isLoading: boolean;
   filesList: {
@@ -12,5 +11,4 @@ export type ContactPanelProps = {
     voiceFileList: ChatFilesListApi[] | undefined;
     linksList: MessageLinkApi[] | undefined;
   };
-  refreshUrl: string;
 };

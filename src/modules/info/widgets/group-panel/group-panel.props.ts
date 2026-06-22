@@ -2,12 +2,11 @@ import type { ChatFilesListApi, MessageLinkApi } from 'modules/info/model/info.a
 export type GroupPanelProps = {
   uid: string;
   currentUid: string;
-  wsUrl: string;
+
   filesList: {
     imageFileList: ChatFilesListApi[] | undefined;
     fileFileList: ChatFilesListApi[] | undefined;
     voiceFileList: ChatFilesListApi[] | undefined;
     linksList: MessageLinkApi[] | undefined;
   };
-  refreshUrl: string;
 };

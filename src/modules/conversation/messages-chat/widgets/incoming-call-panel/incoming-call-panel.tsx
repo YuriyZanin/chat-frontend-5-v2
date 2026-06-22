@@ -1,9 +1,10 @@
+'use client';
 import clsx from 'clsx';
 import { CallAnimation } from 'modules/conversation/shared/ui/call-animation';
 import { JSX, useEffect, useRef } from 'react';
 import { ImageUI } from 'shared/ui';
 import { useIceServersQuery } from '../../api';
-import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { getDurationTime } from '../../lib/get-duration-time';
 import { useCallsStore } from '../../model/calls';
 import CallActiveIcon from '../../shared/icons/call-active.svg';
@@ -15,12 +16,10 @@ import VideoIcon from '../../shared/icons/video.svg';
 import styles from './incoming-call-panel.module.scss';
 
 type IncomingCallPanelProps = {
-  wsUrl: string;
   currentUid: string;
-  refreshUrl: string;
 };
 
-export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCallPanelProps): JSX.Element | null => {
+export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.Element | null => {
   const {
     isFullScreen,
     isSound,
@@ -42,11 +41,6 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
     resetCall,
   } = useCallsStore();
 
-  const { sendOfferCall, sendIceCandidate, sendCallCompletion, sendAnswerCall } = useWebSocketChat(
-    wsUrl,
-    currentUid,
-    refreshUrl,
-  );
   const { data: iceConfig, isLoading } = useIceServersQuery();
 
   const URL_DEFAULT_AVATAR = '/images/profile/default.png';
@@ -78,7 +72,11 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
     }
   }, [setDuration, state]);
 
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   useEffect(() => {
+    if (webSocketChatSrore === null) return;
+    const { sendOfferCall, sendIceCandidate, sendAnswerCall } = webSocketChatSrore;
     if (!isLoading) {
       const initPeerConnection = async (): Promise<RTCPeerConnection | null> => {
         console.log('Инициализация PeerConnection');
@@ -378,6 +376,8 @@ export const IncomingCallPanel = ({ wsUrl, currentUid, refreshUrl }: IncomingCal
 
   const handleEndCall = (): void => {
     try {
+      if (webSocketChatSrore === null) return;
+      const { sendCallCompletion } = webSocketChatSrore;
       const requestUid = crypto.randomUUID();
       sendCallCompletion({
         action: 'call_completion',

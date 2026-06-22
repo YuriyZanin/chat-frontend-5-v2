@@ -5,4 +5,7 @@ export type ProtectedLayoutProps = {
   list: ReactNode;
   main: ReactNode;
   info: ReactNode;
+  wsUrl: string;
+  currentUserId: string;
+  refreshUrl: string;
 };
