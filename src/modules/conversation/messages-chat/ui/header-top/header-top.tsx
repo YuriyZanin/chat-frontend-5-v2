@@ -12,7 +12,7 @@ import Image from 'next/image';
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
-import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { formatParticipants } from '../../utils/format-messages';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
 import { OutgoingCallPanel } from '../../widgets/outgoing-call-panel';
@@ -32,11 +32,10 @@ import styles from './header-top.module.scss';
 import type { HeaderTopProps } from './header-top.props';
 import CallIcon from './icons/call-icon.svg';
 import SearchIcon from './icons/search-icon.svg';
-
 const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
 const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
-export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrContact }: HeaderTopProps): JSX.Element => {
+export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProps): JSX.Element => {
   //хук для получения списка чатов
   const { chats } = useChatsScreen();
   //хук для получения списка участников опреденной группы/канала (по chat_key)
@@ -98,7 +97,16 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
     }
   }, [closeButtonMenu, openButtonMenu, isBlocked, isInContacts, user_uid]);
   const { contacts } = useContactsScreen();
-  const { sendCallCompletion } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+
+  const defaultAvatar = isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar;
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(avatarUrl)}`;
+  // создаем состояние которое динамически заменить картинку аватара на дефолтную в случае ошибки при её загрузке
+  const [imgSrc, setImgSrc] = useState(result !== '/api/proxy' ? result : defaultAvatar);
+
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+  if (webSocketChatSrore === null) return <></>;
+  const { sendCallCompletion } = webSocketChatSrore;
 
   const handleCall = async (): Promise<void> => {
     if (!isCallModalOpen) {
@@ -129,11 +137,7 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
       },
     });
   };
-  const defaultAvatar = isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar;
-  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
-  const result = `/api/proxy${removeDomain(avatarUrl)}`;
-  // создаем состояние которое динамически заменить картинку аватара на дефолтную в случае ошибки при её загрузке
-  const [imgSrc, setImgSrc] = useState(result !== '/api/proxy' ? result : defaultAvatar);
+
   return (
     <>
       <div className={styles.wrapper}>
@@ -185,8 +189,6 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
         )}
         {!contacts?.some((c) => c.uid === user_uid) && (
           <HeaderTopButtonsBlock
-            wsUrl={wsUrl}
-            nickname={nickname ?? ''}
             currentUid={currentUid}
             chatKey={user_uid}
             isBlocked={isBlocked}
@@ -196,15 +198,7 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
         {isModalOpen && <NotificationModal />}
         {isBlockModalOpen && <BlockModal />}
         {isAddModalOpen && <AddModal fullName={`${firstName} ${lastName}`} />}
-        {isLeaveGroupModalOpen && (
-          <LeaveGroupModal
-            wsUrl={wsUrl}
-            chatKey={user_uid}
-            currentUid={currentUid}
-            name={nickname}
-            refreshUrl={refreshUrl}
-          />
-        )}
+        {isLeaveGroupModalOpen && <LeaveGroupModal chatKey={user_uid} name={nickname} />}
       </div>
       {isReceivingModalOpen && <ReceivingCallPanel onReject={handleRejectCall} onAccept={toggleIncomingModalOpen} />}
       {isCallModalOpen && (
@@ -212,12 +206,10 @@ export const HeaderTop = ({ wsUrl, user_uid, currentUid, refreshUrl, chatOrConta
           avatarUrl={avatarUrl}
           contact={`${firstName} ${lastName}`}
           user_uid={user_uid}
-          wsUrl={wsUrl}
           currentUid={currentUid}
-          refreshUrl={refreshUrl}
         />
       )}
-      {isIncomingModalOpen && <IncomingCallPanel wsUrl={wsUrl} currentUid={currentUid} refreshUrl={refreshUrl} />}
+      {isIncomingModalOpen && <IncomingCallPanel currentUid={currentUid} />}
     </>
   );
 };

@@ -1,30 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { ClearGroupRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX } from 'react';
 import { Modal } from 'shared/ui';
 
-export const ClearChannelModal = ({
-  wsUrl,
-  currentUid,
-  chatKey,
-  name,
-  refreshUrl,
-}: {
-  wsUrl: string;
-  currentUid: string;
-  chatKey: string;
-  name: string;
-  refreshUrl: string;
-}): JSX.Element | null => {
+export const ClearChannelModal = ({ chatKey, name }: { chatKey: string; name: string }): JSX.Element | null => {
   const { isClearModalOpen, closeClearModal } = useInfoStore();
   const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
-  const { sendClearGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
   const queryClient = useQueryClient();
 
   const sendAndInvalidate = (): void => {
+    if (webSocketChatSrore === null) return;
+    const { sendClearGroup } = webSocketChatSrore;
     const requestUid = crypto.randomUUID();
     const payload: ClearGroupRequestAPI = {
       action: 'clear_group_messages',

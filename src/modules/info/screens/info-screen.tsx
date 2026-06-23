@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { JSX, useEffect } from 'react';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useInfoProfileQuery } from '../api';
@@ -29,7 +29,8 @@ import { InfoScreenProps } from './info-screen.props';
 import { useChatFilesListScreen } from './use-chat-files-list-screen';
 import { useChatLinksListScreen } from './use-chat-links-list-screen';
 import { useParticipantsScreen } from './use-participant-screen';
-export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenProps): JSX.Element => {
+
+export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element => {
   const {
     openClearModal,
     setUid,
@@ -49,7 +50,9 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
   } = useInfoStore();
   const { clearQuery } = useInfoSearchStore();
   const { hasChanges } = useInfoEditGroupStore();
-  const { sendMembers } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   const { data: profile, isLoading } = useInfoProfileQuery(uid);
   // делаем сортировку на сервере filesList по mime-типaм для определенного (uid) чата/группы/канала
   const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
@@ -156,6 +159,8 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
   };
 
   const handleAddMembers = (): void => {
+    if (webSocketChatSrore === null) return;
+    const { sendMembers } = webSocketChatSrore;
     if (selectedIds) {
       const requestUid = crypto.randomUUID();
       const payload: AddOrRemoveMembersRequestAPI = {
@@ -198,7 +203,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
     if (isGroupSettingsMode) {
       return renderWithLayout(
         <InfoHeader title="Настройки" backProps={{ icon: <BackArrowIcon />, onClick: handleSettingBack }} />,
-        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} refreshUrl={refreshUrl} />,
+        <SettingsPanel uid={uid} />,
       );
     }
 
@@ -212,9 +217,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
       <GroupPanel
         uid={uid}
         currentUid={currentUid}
-        wsUrl={wsUrl}
         filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
-        refreshUrl={refreshUrl}
       />,
     );
   }
@@ -231,7 +234,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
     if (isGroupSettingsMode) {
       return renderWithLayout(
         <InfoHeader title="Настройки" backProps={{ icon: <BackArrowIcon />, onClick: handleSettingBack }} />,
-        <SettingsPanel uid={uid} wsUrl={wsUrl} currentUid={currentUid} refreshUrl={refreshUrl} />,
+        <SettingsPanel uid={uid} />,
       );
     }
 
@@ -245,9 +248,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
       <ChannelPanel
         uid={uid}
         currentUid={currentUid}
-        wsUrl={wsUrl}
         filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
-        refreshUrl={refreshUrl}
       />,
     );
   }
@@ -259,9 +260,7 @@ export const InfoScreen = ({ uid, wsUrl, currentUid, refreshUrl }: InfoScreenPro
       profile={profile}
       isLoading={isLoading}
       currentUid={currentUid}
-      wsUrl={wsUrl}
       filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
-      refreshUrl={refreshUrl}
     />,
   );
 };

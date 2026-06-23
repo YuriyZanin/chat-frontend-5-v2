@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useGenerateInviteLinkQuery, useGroupOrChanelQuery } from 'modules/info/api/info.query';
 import { ChatType } from 'modules/info/entity/info.entity';
 import { useInfoEditGroupStore } from 'modules/info/model/info.edit-group.store';
@@ -14,24 +14,15 @@ import { InfoGroupTypeSelect } from 'modules/info/ui/info-group-type-select';
 import { InfoNotification } from 'modules/info/ui/info-notification';
 import { JSX, useEffect } from 'react';
 
-export const SettingsPanel = ({
-  uid,
-  wsUrl,
-  currentUid,
-  refreshUrl,
-}: {
-  uid: string;
-  wsUrl: string;
-  currentUid: string;
-  refreshUrl: string;
-}): JSX.Element | null => {
+export const SettingsPanel = ({ uid }: { uid: string }): JSX.Element | null => {
   const { data: profile, isLoading } = useGroupOrChanelQuery(uid);
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
   const { setGroupData, resetGroup, avatarUid, name, description, chatType, hasChanges } = useInfoEditGroupStore();
   const { isGroupSettingsMode } = useInfoStore();
-  const { sendEditGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -58,6 +49,8 @@ export const SettingsPanel = ({
   }, [name, description, chatType, avatarUid, profile]);
 
   const handleSave = async (): Promise<void> => {
+    if (webSocketChatSrore === null) return;
+    const { sendEditGroup } = webSocketChatSrore;
     setGroupData({ isSaving: true });
     try {
       const requestUid = crypto.randomUUID();
@@ -97,7 +90,7 @@ export const SettingsPanel = ({
           <InfoGroupTypeSelect chatType={profile?.chatType as ChatType} />
           <InfoGroupInviteLink inviteLink={link?.invite_link ?? ''} chatKey={uid} />
           <InfoGroupSettingsSaveButton label={'Сохранить'} onClick={handleSave} disabled={!hasChanges} />
-          <EditChatModal wsUrl={wsUrl} currentUid={currentUid} chatKey={uid} refreshUrl={refreshUrl} />
+          <EditChatModal chatKey={uid} />
         </>
       )}
     </>

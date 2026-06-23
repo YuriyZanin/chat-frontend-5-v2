@@ -3,9 +3,6 @@ import { parseJwtToken } from 'modules/conversation/messages-chat/utils/parse-jw
 import { cookies } from 'next/headers';
 import { JSX, Suspense } from 'react';
 
-const BACKEND_WS = process.env.BACKEND_API_WS_URL!;
-const BACKEND_API = process.env.BACKEND_API_URL;
-
 export default async function MessagesPage({
   params,
 }: {
@@ -16,17 +13,11 @@ export default async function MessagesPage({
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access')?.value;
     const payload = parseJwtToken(accessToken ?? '');
-    const wsUrl = `${BACKEND_WS}/ws/chat`;
-    const refreshUrl = `${BACKEND_API}/api/v1/auth/login/refresh/token/`;
+
     return (
       <>
         <Suspense>
-          <MessagesListScreen
-            user_uid={user_uid}
-            wsUrl={wsUrl}
-            currentUserId={payload.user_id}
-            refreshUrl={refreshUrl}
-          />
+          <MessagesListScreen user_uid={user_uid} currentUserId={payload.user_id} />
         </Suspense>
       </>
     );

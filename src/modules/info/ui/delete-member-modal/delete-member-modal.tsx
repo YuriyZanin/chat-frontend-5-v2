@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { AddOrRemoveMembersRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
@@ -7,21 +7,14 @@ import { JSX } from 'react';
 import { Modal } from 'shared/ui';
 
 type DeleteMemberModalProps = {
-  wsUrl: string;
   chatKey: string;
-  currentUid: string;
-  refreshUrl: string;
 };
 
-export const DeleteMemberModal = ({
-  wsUrl,
-  chatKey,
-  currentUid,
-  refreshUrl,
-}: DeleteMemberModalProps): JSX.Element | null => {
+export const DeleteMemberModal = ({ chatKey }: DeleteMemberModalProps): JSX.Element | null => {
   const { isDeleteParticipantModalOpen, uidToDelete, closeDeleteParticipantModal } = useInfoStore();
   const queryClient = useQueryClient();
-  const { sendMembers } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
 
   const { participants } = useParticipantsScreen(chatKey);
   const { firstName, lastName } = participants?.find((p) => p.uid === uidToDelete) ?? {};
@@ -29,6 +22,8 @@ export const DeleteMemberModal = ({
   if (!isDeleteParticipantModalOpen) return null;
 
   const handleDelete = (): void => {
+    if (webSocketChatSrore === null) return;
+    const { sendMembers } = webSocketChatSrore;
     if (uidToDelete) {
       const requestUid = crypto.randomUUID();
       const payload: AddOrRemoveMembersRequestAPI = {

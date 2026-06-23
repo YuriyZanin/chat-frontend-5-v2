@@ -1,32 +1,25 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { LeaveGroupRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import { JSX } from 'react';
 import { Modal } from 'shared/ui';
 
 type LeaveGroupModalProps = {
-  wsUrl: string;
   chatKey: string;
-  currentUid: string;
   name: string;
-  refreshUrl: string;
 };
 
-export const LeaveChannelModal = ({
-  wsUrl,
-  chatKey,
-  currentUid,
-  name,
-  refreshUrl,
-}: LeaveGroupModalProps): JSX.Element | null => {
+export const LeaveChannelModal = ({ chatKey, name }: LeaveGroupModalProps): JSX.Element | null => {
   const queryClient = useQueryClient();
   const { isLeaveGroupModalOpen, closeLeaveGroupModal } = useInfoStore();
-  const { sendLeaveGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
 
   if (!isLeaveGroupModalOpen) return null;
 
   const handleLeaveChannel = (): void => {
+    if (webSocketChatSrore === null) return;
+    const { sendLeaveGroup } = webSocketChatSrore;
     const requestUid = crypto.randomUUID();
     const payload: LeaveGroupRequestAPI = {
       action: 'leave_chat',

@@ -1,1 +1,1 @@
-export type HeaderBottomProps = { wsUrl: string; currentUserId: string; refreshUrl: string };
+export type HeaderBottomProps = { currentUserId: string };
