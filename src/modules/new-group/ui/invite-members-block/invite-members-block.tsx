@@ -2,7 +2,7 @@
 
 import { useContactsSelectionStore } from 'modules/conversation/contacts/features/contacts-selection';
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { ConversationLayout, SearchInput } from 'modules/conversation/shared/ui';
 import { useNewGroupStore } from 'modules/new-group/model/new-group-store';
 import Image from 'next/image';
@@ -11,13 +11,8 @@ import { JSX, useEffect } from 'react';
 import { ButtonUI } from 'shared/ui';
 import { InviteMembersPanel } from '../invite-members-panel';
 import styles from './invite-members-block.module.scss';
-type InviteMembersBlockProps = {
-  wsUrl: string;
-  currentUserId: string;
-  refreshUrl: string;
-};
 
-export const InviteMembersBlock = ({ wsUrl, currentUserId, refreshUrl }: InviteMembersBlockProps): JSX.Element => {
+export const InviteMembersBlock = (): JSX.Element => {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -36,7 +31,8 @@ export const InviteMembersBlock = ({ wsUrl, currentUserId, refreshUrl }: InviteM
   const avatarUidStore = useNewGroupStore((s) => s.avatarUid);
   const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
   const avatarFileStore = useNewGroupStore((s) => s.avatarFile);
-  const { createGroupOrChannel } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   const exitSelectionMode = useContactsSelectionStore((s) => s.exitSelectionMode);
 
   // Устанавливаем режим
@@ -54,6 +50,8 @@ export const InviteMembersBlock = ({ wsUrl, currentUserId, refreshUrl }: InviteM
   const buttonLabel = 'Создать';
 
   const handleCreate = async (): Promise<void> => {
+    if (webSocketChatSrore === null) return;
+    const { createGroupOrChannel } = webSocketChatSrore;
     if (!nameStore.trim()) {
       alert(`Введите название ${modeStore === 'group' ? 'группы' : 'канала'}`);
       router.push(backPath);

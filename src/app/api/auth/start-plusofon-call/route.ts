@@ -29,6 +29,7 @@ export async function POST(req: Request): Promise<Response> {
     console.log('[start-plusofon-call] Backend response statusText:', res.statusText);
 
     const data = await res.json();
+
     console.log('[start-plusofon-call] Backend response data:', data);
 
     // 201 - успешное создание сессии
@@ -36,12 +37,15 @@ export async function POST(req: Request): Promise<Response> {
       console.log('[start-plusofon-call] Session created successfully');
       return Response.json(
         {
-          session_uid: data.session_uid,
-          session_secret: data.session_secret,
+          verification_id: data.verification_id,
+          verification_secret: data.verification_secret,
           call_number: data.call_number,
           expires_at: data.expires_at,
           poll_interval_seconds: data.poll_interval_seconds,
           attempt_number: data.attempt_number,
+          block_duration_seconds: data.block_duration_seconds,
+          block_created_at: data.block_created_at,
+          session_uid: data.session_uid,
         },
         { status: 201 },
       );

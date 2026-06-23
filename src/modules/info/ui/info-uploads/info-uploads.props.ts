@@ -3,7 +3,6 @@ import { ChatFilesListApi } from 'modules/info/model/info.api.schema';
 export type InfoUploadsProps = {
   currentUid: string;
   chatKey?: string;
-  wsUrl: string;
   tabs: string[];
   filesList: {
     imageFileList: ChatFilesListApi[] | undefined;
@@ -11,7 +10,6 @@ export type InfoUploadsProps = {
     voiceFileList: ChatFilesListApi[] | undefined;
     linksList: MessageLinkApi[] | undefined;
   };
-  refreshUrl: string;
 };
 
 type TabContentType = 'media' | 'files' | 'voices' | 'links' | 'members' | 'subscribers';

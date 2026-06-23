@@ -20,15 +20,7 @@ import type { ContactPanelProps } from './contact-panel.props';
 
 const URL_DEFAUIT_Avatar = '/images/profile/default.png';
 
-export const ContactPanel = ({
-  uid,
-  currentUid,
-  wsUrl,
-  profile,
-  isLoading,
-  filesList,
-  refreshUrl,
-}: ContactPanelProps): JSX.Element => {
+export const ContactPanel = ({ uid, currentUid, profile, isLoading, filesList }: ContactPanelProps): JSX.Element => {
   const { mutate: addToContact } = useAddContactQuery();
   const { openAddModal } = useChatsStore();
   const { openUnblockModal } = useInfoStore();
@@ -75,23 +67,12 @@ export const ContactPanel = ({
             <ActionButton icon={<AddIcon />} label={'Добавить в контакты'} onClick={handleAddContact} />
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
-          <InfoUploads
-            tabs={tabs}
-            currentUid={currentUid}
-            wsUrl={wsUrl}
-            filesList={filesList}
-            refreshUrl={refreshUrl}
-          />
+          <InfoUploads tabs={tabs} currentUid={currentUid} filesList={filesList} />
           <AddContactModal />
           <BlockContactModal />
           <UnblockContactModal />
           <ClearChatModal />
-          <FrowardProfileModal
-            wsUrl={wsUrl}
-            currentUid={currentUid}
-            nickname={nickname ?? ''}
-            refreshUrl={refreshUrl}
-          />
+          <FrowardProfileModal nickname={nickname ?? ''} />
         </>
       )}
     </>

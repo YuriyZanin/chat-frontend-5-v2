@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { DeleteGroupRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
@@ -7,22 +7,15 @@ import { JSX } from 'react';
 import { Modal } from 'shared/ui';
 
 type DeleteGroupModalProps = {
-  wsUrl: string;
-  currentUid: string;
   chatKey: string;
   name: string;
-  refreshUrl: string;
 };
 
-export const DeleteGroupModal = ({
-  wsUrl,
-  currentUid,
-  chatKey,
-  name,
-  refreshUrl,
-}: DeleteGroupModalProps): JSX.Element | null => {
+export const DeleteGroupModal = ({ chatKey, name }: DeleteGroupModalProps): JSX.Element | null => {
   const { isDeleteGroupModalOpen, closeDeleteGroupModal, closeInfoScreen } = useInfoStore();
-  const { sendDeleteGroup } = useWebSocketChat(wsUrl, currentUid, refreshUrl);
+
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+
   const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
   const queryClient = useQueryClient();
   const isGroup = chatKey.startsWith('group');
@@ -30,6 +23,8 @@ export const DeleteGroupModal = ({
   if (!isDeleteGroupModalOpen) return null;
 
   const sendAndRefetch = (): void => {
+    if (webSocketChatSrore === null) return;
+    const { sendDeleteGroup } = webSocketChatSrore;
     const requestUid = crypto.randomUUID();
     const payload: DeleteGroupRequestAPI = {
       action: 'delete_chat',

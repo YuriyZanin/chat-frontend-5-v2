@@ -1,13 +1,59 @@
 'use client';
 import clsx from 'clsx';
+import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { JSX } from 'react';
 import styles from './protected-layout.module.scss';
 import { ProtectedLayoutProps } from './protected-layout.props';
 
-export const ProtectedLayout = ({ nav, list, main, info }: ProtectedLayoutProps): JSX.Element => {
+export const ProtectedLayout = ({
+  nav,
+  list,
+  main,
+  info,
+  wsUrl,
+  currentUserId,
+  refreshUrl,
+}: ProtectedLayoutProps): JSX.Element => {
   const { isInfoOpen } = useInfoStore();
-
+  // подключаем ws-соединение
+  const {
+    sendMessage,
+    sendProfile,
+    sendChangeStatusReadMessage,
+    sendDeleteMessage,
+    sendMembers,
+    sendLeaveGroup,
+    sendDeleteGroup,
+    sendEditGroup,
+    sendClearGroup,
+    sendAnswerCall,
+    sendCallCompletion,
+    sendCallStateUpdate,
+    sendIceCandidate,
+    sendOfferCall,
+    createGroupOrChannel,
+  } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
+  // все полученные функции для работы с ws-соединения записываем в store чтобы использовать их в любом месте программы
+  const setWebSocketChatStore = useWebSocketChatStore((s) => s.setWebSocketChat);
+  setWebSocketChatStore({
+    sendMessage,
+    sendProfile,
+    sendChangeStatusReadMessage,
+    sendDeleteMessage,
+    sendMembers,
+    sendLeaveGroup,
+    sendDeleteGroup,
+    sendEditGroup,
+    sendClearGroup,
+    sendAnswerCall,
+    sendCallCompletion,
+    sendCallStateUpdate,
+    sendIceCandidate,
+    sendOfferCall,
+    createGroupOrChannel,
+  });
   return (
     <div className={styles.root}>
       <div className={styles.shell}>

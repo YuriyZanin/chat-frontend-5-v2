@@ -223,7 +223,7 @@ export const usePhoneStepPlusofon = ({
             console.log('[usePhoneStepPlusofon] Session started successfully:', data);
             setCallNumber(data.call_number);
             setSessionUid(data.session_uid);
-            setSessionSecret(data.session_secret);
+            setSessionSecret(data.verification_secret);
             setIsCallModalOpen(true);
             setStatusMessage('');
           },
@@ -266,8 +266,8 @@ export const usePhoneStepPlusofon = ({
 
       checkStatus(
         {
-          session_uid: sessionUid,
-          session_secret: sessionSecret,
+          verification_id: sessionUid,
+          verification_secret: sessionSecret,
         },
         {
           onSuccess: (statusData) => {
@@ -281,8 +281,8 @@ export const usePhoneStepPlusofon = ({
               if (!tokensReceivedRef.current && !isAuthCompletedRef.current) {
                 getTokens(
                   {
-                    session_uid: sessionUid,
-                    session_secret: sessionSecret,
+                    verification_id: sessionUid,
+                    verification_secret: sessionSecret,
                   },
                   {
                     onSuccess: (tokenData) => {

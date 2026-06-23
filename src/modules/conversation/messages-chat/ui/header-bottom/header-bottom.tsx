@@ -1,7 +1,7 @@
 'use client';
 import clsx from 'clsx';
 import { JSX, useEffect, useRef, useState } from 'react';
-import { useWebSocketChat } from '../../api/web-socket/use-web-socket-chat';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { useAlert } from '../../hooks/use-alert';
 import {
   useAttachmentFilesStore,
@@ -29,7 +29,7 @@ import ClipIcon from './icon/clip.svg';
 import MicIcon from './icon/mic.svg';
 import Submit from './icon/submit.svg';
 
-export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomProps): JSX.Element => {
+export const HeaderBottom = ({ currentUserId }: HeaderBottomProps): JSX.Element => {
   const [textInput, setTextInput] = useState<string>('');
   const repliedMessageStore = useRepliedMessageStore((s) => s.repliedMessage);
   const clearRepliedMessageStore = useRepliedMessageStore((s) => s.clearRepliedMessage);
@@ -41,7 +41,7 @@ export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomP
   const selectedMessagesStore = useSelectedMessagesStore((s) => s.selectedMessages);
   const clearSelectedMessagesStore = useSelectedMessagesStore((s) => s.clearSelectedMessages);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  const { sendMessage, sendDeleteMessage } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
+
   const userIdStore = useUserIdStore((s) => s.userId);
   const attachmentFilesStore = useAttachmentFilesStore((s) => s.attachmentFiles);
   const attachmentImagesStore = useAttachmentImagesStore((s) => s.attachmentImages);
@@ -88,6 +88,15 @@ export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomP
     setCheckBoxsVisibleStore(false);
   }, [userIdStore]);
 
+  // xyk для открытия модального окна с алертом
+  const { confirm } = useAlert();
+  //состояние для записи аудиосообщения
+  const [isRecordingMessage, setIsRecordingMessage] = useState<boolean>(false);
+
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+  if (webSocketChatSrore === null) return <></>;
+  const { sendMessage, sendDeleteMessage } = webSocketChatSrore;
+
   const handleSubmitForm = (form: React.FormEvent<HTMLFormElement>): void => {
     form.preventDefault();
     sendMessage({ content: textInput, repliedMessage: repliedMessageStore });
@@ -126,8 +135,6 @@ export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomP
   const handleCloseMenu = (): void => {
     setContextMenuVisible(false);
   };
-  // xyk для открытия модального окна с алертом
-  const { confirm } = useAlert();
   // блок вызова модального окна с обработчиком для отправки сообщения и вложенных файлов
   const handleAttachmentFilesClick = async (): Promise<void> => {
     const ok = await confirm({
@@ -204,8 +211,6 @@ export const HeaderBottom = ({ wsUrl, currentUserId, refreshUrl }: HeaderBottomP
     }
   };
 
-  //состояние для записи аудиосообщения
-  const [isRecordingMessage, setIsRecordingMessage] = useState<boolean>(false);
   return (
     <div className={styles.block}>
       {checkBoxsVisibleStore ? (

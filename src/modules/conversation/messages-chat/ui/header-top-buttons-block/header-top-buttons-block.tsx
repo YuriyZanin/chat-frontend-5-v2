@@ -8,15 +8,11 @@ import { useHeaderButtonsModalStore } from '../../zustand-store/zustand-store';
 import styles from './header-top-buttons-block.module.scss';
 import CloseIcon from './icon/close.svg';
 export const HeaderTopButtonsBlock = ({
-  wsUrl,
-  nickname,
   currentUid,
   chatKey,
   isInContact,
   isBlocked,
 }: {
-  wsUrl: string;
-  nickname: string;
   currentUid: string;
   chatKey: string;
   isInContact: boolean;

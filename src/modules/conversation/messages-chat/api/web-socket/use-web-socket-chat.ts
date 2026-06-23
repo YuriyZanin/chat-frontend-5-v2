@@ -270,7 +270,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           // Если сервер пришлёт подтверждение с request_uid,
           // заменим заклушку стоящую в DOM на присланное сервером сообщение и его статус отметим как sent
           if (data.request_uid) {
-            updateMessageByUidForUser(userIdRef.current, data.request_uid, { status: 'sent', ...data.object });
+            updateMessageByUidForUser(data.object.to_user.uid, data.request_uid, { status: 'sent', ...data.object });
             // Очистим таймаут подтверждения
             pendingTimeouts.current.delete(data.request_uid);
           }
@@ -612,12 +612,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     window.addEventListener('offline', onOffline);
     // старт
     connectWS();
-    // тихий refresh каждые 15 минут
+    // тихий refresh каждые 8 минут (т.к. время жизни access-tokin 10 минут )
     const interval = setInterval(
       () => {
+        //перед каждым connect освежаем access
         refreshWsSession(refreshUrl).catch(() => {});
       },
-      15 * 60 * 1000,
+      8 * 60 * 1000,
     );
     return (): void => {
       clearInterval(interval);
