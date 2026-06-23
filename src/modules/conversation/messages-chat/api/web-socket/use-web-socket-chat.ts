@@ -612,13 +612,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     window.addEventListener('offline', onOffline);
     // старт
     connectWS();
-    // тихий refresh каждые 15 минут
+    // тихий refresh каждые 8 минут (т.к. время жизни access-tokin 10 минут )
     const interval = setInterval(
       () => {
         //перед каждым connect освежаем access
         refreshWsSession(refreshUrl).catch(() => {});
       },
-      1 * 60 * 1000,
+      8 * 60 * 1000,
     );
     return (): void => {
       clearInterval(interval);

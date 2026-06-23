@@ -35,6 +35,6 @@ export const setAuthCookies = (response: NextResponse, tokens: Tokens): NextResp
  */
 export const clearAuthCookies = (response: NextResponse): NextResponse => {
   response.cookies.delete('access');
-  //response.cookies.delete('refresh');
+  response.cookies.delete('refresh');
   return response;
 };
