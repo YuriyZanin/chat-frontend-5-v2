@@ -206,6 +206,7 @@ export const route = async (req: NextRequest, path: string[]): Promise<NextRespo
   if (/\.\w{2,4}\/$/i.test(targetUrl)) {
     targetUrl = targetUrl.slice(0, -1);
   }
+
   const makeBackendRequest = async (token?: string, body?: BodyInit | null): Promise<Response> => {
     const headers = prepareRequestHeaders(req, token, body);
     return fetch(targetUrl, {

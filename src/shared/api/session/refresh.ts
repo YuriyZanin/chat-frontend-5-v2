@@ -29,6 +29,7 @@ const refreshTokens = async (refreshToken: string): Promise<Tokens> => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ refresh: refreshToken }),
+    credentials: 'include',
   });
 
   if (response.status === 401) {
