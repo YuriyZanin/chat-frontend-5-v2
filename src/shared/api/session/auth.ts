@@ -27,7 +27,6 @@ export const setAuthCookies = (response: NextResponse, tokens: Tokens): NextResp
     ...COOKIE_CONFIG,
     maxAge: REFRESH_TOKEN_MAX_AGE,
   });
-
   return response;
 };
 
