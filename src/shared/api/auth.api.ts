@@ -40,12 +40,15 @@ export type PlusofonStartPayload = {
 };
 
 export type PlusofonStartResponse = {
-  session_uid: string;
-  session_secret: string;
+  verification_id: string;
+  verification_secret: string;
   call_number: string;
-  expires_at: string;
+  expires_at: number;
   poll_interval_seconds: number;
   attempt_number: number;
+  block_duration_seconds: number | null;
+  block_created_at: number | null;
+  session_uid: string;
 };
 
 export const plusofonStart = (data: PlusofonStartPayload): Promise<PlusofonStartResponse> => {
@@ -57,12 +60,12 @@ export const plusofonStart = (data: PlusofonStartPayload): Promise<PlusofonStart
 
 // 2. Проверка статуса (новый endpoint)
 export type PlusofonStatusPayload = {
-  session_uid: string;
-  session_secret: string;
+  verification_secret: string;
+  verification_id: string;
 };
 
 export type PlusofonStatusResponse = {
-  session_uid: string;
+  verification_id: string;
   status: 'pending' | 'verified' | 'expired' | 'failed' | 'consumed';
   expires_at: string;
   verified_at: string | null;
@@ -72,7 +75,7 @@ export type PlusofonStatusResponse = {
 };
 
 export const plusofonStatus = (data: PlusofonStatusPayload): Promise<PlusofonStatusResponse> => {
-  return apiFetch<PlusofonStatusResponse>('/api/auth/plusofon-status', {
+  return apiFetch<PlusofonStatusResponse>(`/api/auth/plusofon-status`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -80,21 +83,23 @@ export const plusofonStatus = (data: PlusofonStatusPayload): Promise<PlusofonSta
 
 // 3. Получение токенов (аналог getAuthToken)
 export type PlusofonTokenPayload = {
-  session_uid: string;
-  session_secret: string;
+  verification_id: string;
+  verification_secret: string;
 };
 
 export type PlusofonTokenResponse = {
+  refresh: string;
+  access: string;
   is_filled: boolean;
 };
 
 export const plusofonGetToken = async (data: PlusofonTokenPayload): Promise<PlusofonTokenResponse> => {
   const res = await fetch(
-    `https://api.dev.chat.ktsf.ru/api/v1/auth/providers/plusofon/flash-call/claim/${data.session_uid}/`,
+    `https://api.dev.chat.ktsf.ru/api/v1/auth/providers/plusofon/flash-call/claim/${data.verification_id}/`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_secret: data.session_secret }),
+      body: JSON.stringify({ verification_secret: data.verification_secret }),
       credentials: 'include',
     },
   );
@@ -115,7 +120,7 @@ export const plusofonFullAuth = async (
   try {
     // Шаг 1: Старт сессии
     const startData = await plusofonStart({ phone_number: phoneNumber });
-    const { session_uid, session_secret, poll_interval_seconds } = startData;
+    const { verification_id, verification_secret, poll_interval_seconds } = startData;
 
     // Шаг 2: Polling статуса
     let isVerified = false;
@@ -125,7 +130,10 @@ export const plusofonFullAuth = async (
     while (!isVerified && attempts < maxAttempts) {
       await new Promise((resolve) => setTimeout(resolve, poll_interval_seconds * 1000));
 
-      const statusData = await plusofonStatus({ session_uid, session_secret });
+      const statusData = await plusofonStatus({
+        verification_secret,
+        verification_id,
+      });
       onStatusChange?.(statusData);
 
       if (statusData.status === 'verified') {
@@ -151,7 +159,7 @@ export const plusofonFullAuth = async (
     }
 
     // Шаг 3: Получение токенов
-    const tokenData = await plusofonGetToken({ session_uid, session_secret });
+    const tokenData = await plusofonGetToken({ verification_id, verification_secret });
 
     return {
       success: true,
