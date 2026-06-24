@@ -10,13 +10,34 @@ export type AdaptiveLayoutProps = {
   list: ReactNode;
   main: ReactNode;
   info: ReactNode;
+  wsUrl: string;
+  currentUserId: string;
+  refreshUrl: string;
 };
-export const AdaptiveLayout = ({ nav, list, main, info }: AdaptiveLayoutProps): JSX.Element => {
+export const AdaptiveLayout = ({
+  nav,
+  list,
+  main,
+  info,
+  wsUrl,
+  currentUserId,
+  refreshUrl,
+}: AdaptiveLayoutProps): JSX.Element => {
   const isMobile = useMediaQuery('(max-width: 410px)');
 
   if (isMobile) {
     return <MobileLayout>{main}</MobileLayout>;
   }
 
-  return <ProtectedLayout nav={nav} list={list} main={main} info={info} />;
+  return (
+    <ProtectedLayout
+      nav={nav}
+      list={list}
+      main={main}
+      info={info}
+      wsUrl={wsUrl}
+      currentUserId={currentUserId}
+      refreshUrl={refreshUrl}
+    />
+  );
 };
