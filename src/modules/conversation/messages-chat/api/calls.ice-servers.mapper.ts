@@ -7,8 +7,8 @@ export const mapCallConfigFromApi = (api: IceServersApiResponse): CallConfig => 
   const iceServers: IceServer[] = ice_servers.map((s) => {
     return {
       urls: s.urls,
-      username: s.username ?? undefined,
-      credential: s.credential ?? undefined,
+      username: s.username,
+      credential: s.credential,
     };
   });
 

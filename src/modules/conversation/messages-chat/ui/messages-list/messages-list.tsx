@@ -316,14 +316,16 @@ export const MessagesList = ({
                             currentUserId={currentUserId}
                           />
                         )
-                      ) : message.message_rtc && !message.content ? (
+                      ) : message.message_rtc && message.content === ' ' ? (
                         <OutgoingPhoneCallCard
                           message={message}
                           sendDeleteMessage={sendDeleteMessage}
                           search={searchMessagesStore}
                           isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                           currentUserId={currentUserId}
-                          status="Исходящий звонок"
+                          status={
+                            message.message_rtc?.status === 'unreceived' ? 'Отменённый звонок' : 'Исходящий звонок'
+                          }
                         />
                       ) : message.content && message.content.split(' ')[0] === '@@@' ? (
                         <OutgoingInformationForGroupCard message={message} />
@@ -380,7 +382,7 @@ export const MessagesList = ({
                           currentUserId={currentUserId}
                         />
                       )
-                    ) : message.message_rtc && !message.content ? (
+                    ) : message.message_rtc && message.content === ' ' ? (
                       <IncomingPhoneCallCard
                         message={message}
                         register={register}
@@ -388,7 +390,7 @@ export const MessagesList = ({
                         search={searchMessagesStore}
                         isHighlighted={isSearchMatch && message.uid === targetSearchUid}
                         currentUserId={currentUserId}
-                        status="Входящий звонок"
+                        status={message.message_rtc?.status === 'unreceived' ? 'Пропущенный звонок' : 'Входящий звонок'}
                       />
                     ) : message.content && message.content.split(' ')[0] === '@@@' ? (
                       <IncomingInformationForGroupCard message={message} register={register} />

@@ -5,7 +5,7 @@ import { mapCallConfigFromApi } from './calls.ice-servers.mapper';
 
 export const useIceServersQuery = (ordering?: string): UseQueryResult<CallConfig> => {
   return useQuery({
-    queryKey: ['calls', 'ice-servers'],
+    queryKey: ['calls', 'ice-servers', ordering],
 
     queryFn: async ({ signal }) => {
       return await getIceServers(ordering, { signal });
