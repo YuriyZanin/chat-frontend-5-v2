@@ -71,7 +71,7 @@ export const ContactPanel = ({ uid, currentUid, profile, isLoading, filesList }:
           <InfoUploads tabs={tabs} currentUid={currentUid} filesList={filesList} />
           <AddContactModal fullName={`${firstName} ${lastName}`} />
           <BlockContactModal />
-          <UnblockContactModal />
+          <UnblockContactModal uid={uid} fullName={`${firstName} ${lastName}`} />
           <ClearChatModal />
           <FrowardProfileModal nickname={nickname ?? ''} />
         </>
