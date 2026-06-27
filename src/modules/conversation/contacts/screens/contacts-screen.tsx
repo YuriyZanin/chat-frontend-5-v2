@@ -22,6 +22,8 @@ export const ContactsScreen = (): JSX.Element => {
     scrollType: 'down',
   });
 
+  const hasGlobals = globals && globals?.length >= 1;
+
   const renderWithLayout = (content: JSX.Element): JSX.Element => (
     <>
       <ConversationLayout
@@ -46,7 +48,7 @@ export const ContactsScreen = (): JSX.Element => {
   return renderWithLayout(
     <>
       <ContactsPanel variant="personal" contacts={contacts} sentinelRef={sentinelRef} />
-      {globals && <ContactsPanel variant="globals" contacts={globals} />}
+      {hasGlobals && <ContactsPanel variant="globals" contacts={globals} />}
     </>,
   );
 };
