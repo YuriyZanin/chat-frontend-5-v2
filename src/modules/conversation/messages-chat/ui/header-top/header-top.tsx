@@ -7,10 +7,12 @@ import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/ca
 import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
+import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import Image from 'next/image';
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
+import { ButtonUI } from 'shared/ui';
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { formatParticipants } from '../../utils/format-messages';
@@ -83,7 +85,8 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
     toggleCallsOpen,
     toggleIncomingModalOpen,
   } = useCallsStore();
-  const { isInfoOpen, toggleInfoOpen } = useInfoStore();
+  const { isInfoOpen, isUnblockModalOpen, toggleInfoOpen, openUnblockModal } = useInfoStore();
+  // const { openUnblockModal } = useInfoStore((s) => s.openUnblockModal);
   const { isModalOpen } = useNotificationStore();
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
@@ -138,6 +141,10 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
     });
   };
 
+  const handleUnblockUser = (): void => {
+    openUnblockModal();
+  };
+
   return (
     <>
       <div className={styles.wrapper}>
@@ -160,7 +167,14 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             <SearchMessages setSearchMessagesVisible={setSearchMessagesVisible} />
           ) : (
             <>
-              <div className={styles.info} onClick={() => toggleInfoOpen()}>
+              <div
+                className={clsx(
+                  styles.info,
+                  { [styles.blockButton]: isBlocked && isInfoOpen },
+                  { [styles.isInfoOpen]: isInfoOpen },
+                )}
+                onClick={() => toggleInfoOpen()}
+              >
                 <span className={clsx(styles.name, { [styles.infoOpen]: isInfoOpen })}>
                   {isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}
                 </span>
@@ -172,12 +186,23 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
                   <span className={styles.status}>{status}</span>
                 )}
               </div>
+              {isBlocked && (
+                <ButtonUI
+                  className={styles.unblockButton}
+                  label={'Разблокировать'}
+                  variant={'general'}
+                  appearance={'primary'}
+                  onClick={handleUnblockUser}
+                />
+              )}
               <div className={styles.icon} onClick={() => setSearchMessagesVisible(true)}>
                 <SearchIcon />
               </div>
-              <div className={styles.icon} onClick={handleCall}>
-                <CallIcon />
-              </div>
+              {!isBlocked && (
+                <div className={styles.icon} onClick={handleCall}>
+                  <CallIcon />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -197,6 +222,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
         )}
         {isModalOpen && <NotificationModal />}
         {isBlockModalOpen && <BlockModal />}
+        {isUnblockModalOpen && <UnblockContactModal uid={user_uid} fullName={`${firstName} ${lastName}`} />}
         {isAddModalOpen && <AddModal fullName={`${firstName} ${lastName}`} />}
         {isLeaveGroupModalOpen && <LeaveGroupModal chatKey={user_uid} name={nickname} />}
       </div>
