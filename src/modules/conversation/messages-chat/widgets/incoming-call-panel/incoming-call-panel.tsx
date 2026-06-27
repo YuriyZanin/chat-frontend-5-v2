@@ -1,8 +1,9 @@
 'use client';
 import clsx from 'clsx';
+import { removeDomain } from 'modules/conversation/chats/utils/utils';
 import { CallAnimation } from 'modules/conversation/shared/ui/call-animation';
-import { JSX, useEffect, useRef } from 'react';
-import { ImageUI } from 'shared/ui';
+import Image from 'next/image';
+import { JSX, useEffect, useRef, useState } from 'react';
 import { useIceServersQuery } from '../../api';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { getDurationTime } from '../../lib/get-duration-time';
@@ -23,10 +24,10 @@ export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.E
   const {
     isFullScreen,
     isSound,
+    avatarUrl,
     isShowVideo,
     hasRemoteVideo,
     contactFio,
-    avatarUrl,
     fromUserUid,
     messageRtcUid,
     offerSdp,
@@ -45,7 +46,7 @@ export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.E
 
   const URL_DEFAULT_AVATAR = '/images/profile/default.png';
 
-  const localStreamRef = useRef<MediaStream | undefined>(undefined);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -393,7 +394,7 @@ export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.E
 
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((track) => track.stop());
-        localStreamRef.current = undefined;
+        localStreamRef.current = null;
       }
 
       if (peerConnectionRef.current) {
@@ -419,6 +420,10 @@ export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.E
       console.error('Ошибка при завершении звонка:', error);
     }
   };
+  // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
+  const result = `/api/proxy${removeDomain(avatarUrl ?? '')}`;
+  // создаем состояние которое динамически заменить картинку аватара на дефолтную в случае ошибки при её загрузке
+  const [imgSrc, setImgSrc] = useState(result !== '/api/proxy' ? result : URL_DEFAULT_AVATAR);
 
   return (
     <div className={clsx(styles.wrapper, { [styles.fullScreen]: isFullScreen })}>
@@ -438,12 +443,16 @@ export const IncomingCallPanel = ({ currentUid }: IncomingCallPanelProps): JSX.E
       </div>
       <div className={styles.info}>
         {!hasRemoteVideo && (
-          <ImageUI
-            src={avatarUrl ?? URL_DEFAULT_AVATAR}
+          <Image
+            src={imgSrc}
             width={160}
             height={160}
+            unoptimized
             alt={contactFio}
             className={styles.avatar}
+            onError={() => {
+              setImgSrc(URL_DEFAULT_AVATAR);
+            }}
           />
         )}
         <div className={styles.description}>

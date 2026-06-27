@@ -203,7 +203,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       {isReceivingModalOpen && <ReceivingCallPanel onReject={handleRejectCall} onAccept={toggleIncomingModalOpen} />}
       {isCallModalOpen && (
         <OutgoingCallPanel
-          avatarUrl={avatarUrl}
+          avatarUrl={imgSrc}
           contact={`${firstName} ${lastName}`}
           user_uid={user_uid}
           currentUid={currentUid}

@@ -32,7 +32,7 @@ export const ReplyCard = ({ message, isIncomingMessage }: ReplyCardProps): JSX.E
           )}
         </div>
       )}
-      {message?.replied_messages[0].files_list?.length === 0 && message.replied_messages[0].content === ' ' && (
+      {message?.message_rtc && message.replied_messages[0].content === ' ' && (
         <div className={styles.fileIcon}>
           <div className={styles.phoneIcon}>
             <IncomingPhoneIcon />
