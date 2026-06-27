@@ -22,7 +22,7 @@ const URL_DEFAUIT_Avatar = '/images/profile/default.png';
 
 export const ContactPanel = ({ uid, currentUid, profile, isLoading, filesList }: ContactPanelProps): JSX.Element => {
   const { mutate: addToContact } = useAddContactQuery();
-  const { openAddModal } = useChatsStore();
+  const openAddModal = useChatsStore((s) => s.openAddModal);
   const { openUnblockModal } = useInfoStore();
   const { contacts } = useContactsScreen();
 
@@ -33,6 +33,7 @@ export const ContactPanel = ({ uid, currentUid, profile, isLoading, filesList }:
   const { data: users } = useSearchUserByNicknameQuery(nickname ?? '');
   const user = users ? users[0] : undefined;
   const handleAddContact = (): void => {
+    console.log('click add contact, user=', user);
     if (!!user) {
       addToContact({ user_uid: uid });
       openAddModal();
