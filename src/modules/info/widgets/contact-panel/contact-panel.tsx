@@ -69,7 +69,7 @@ export const ContactPanel = ({ uid, currentUid, profile, isLoading, filesList }:
           )}
           {isBlocked && <ActionButton icon={<AddIcon />} label={'Разблокировать'} onClick={handleUnblockContact} />}
           <InfoUploads tabs={tabs} currentUid={currentUid} filesList={filesList} />
-          <AddContactModal />
+          <AddContactModal fullName={`${firstName} ${lastName}`} />
           <BlockContactModal />
           <UnblockContactModal />
           <ClearChatModal />
