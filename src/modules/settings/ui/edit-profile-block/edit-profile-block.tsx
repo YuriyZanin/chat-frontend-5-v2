@@ -5,6 +5,7 @@ import { useEditProfileBlock } from 'modules/settings/lib/edit-profile-block/use
 import { useImageUpload } from 'modules/settings/lib/edit-profile-block/use-image-upload';
 import Image from 'next/image';
 import { JSX, useState } from 'react';
+import { useMediaQuery } from 'shared/hooks';
 import { ButtonUI } from 'shared/ui';
 import { DateSelector } from '../date-selector';
 import { ImageCropperModal } from '../image-cropper/image-cropper-modal';
@@ -45,6 +46,7 @@ export const EditProfileBlock: React.FC = ({}): JSX.Element => {
   const [croppedZoom, setCroppedZoom] = useState<number | null>(null);
 
   console.log(birthday, firstName, lastName, login, 'vot vot');
+  const isMobile = useMediaQuery('(max-width: 410px)');
 
   const handleConfirmCrop = (file: File, zoom: number): void => {
     setCroppedZoom(zoom);
@@ -99,7 +101,7 @@ export const EditProfileBlock: React.FC = ({}): JSX.Element => {
             />
           </div>
           <button type="button" className={styles.selectImage} onClick={triggerFileSelect}>
-            Выбрать фотографию
+            {isMobile ? '+ изменить фото' : 'Выбрать фотографию'}
           </button>
           <input
             type="file"
