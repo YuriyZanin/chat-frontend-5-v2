@@ -123,7 +123,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   return (
     <>
       <div className={styles.container}>
-        <button type="button" className={styles.returnButton} onClick={() => router.back()}>
+        <button type="button" className={styles.returnButton} onClick={() => router.push('/chats')}>
           <div className={styles.iconAndLabelContainer}>
             <Image
               src="/images/settings/returnArrowIcon.svg"
