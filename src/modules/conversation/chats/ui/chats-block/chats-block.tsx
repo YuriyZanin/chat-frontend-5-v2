@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { JSX, useEffect } from 'react';
 import { Dropdown } from 'shared/ui/dropdown';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
+import { useChatsStore } from '../../model/search';
 import { useChatsScreen } from '../../screens/use-chats-screen';
 import { useChatsListStore } from '../../zustand-store-chats-list/zustand-store-chats-list';
 import { AddContactModal } from '../add-contact-modal';
@@ -38,6 +39,10 @@ export const ChatsBlock = (): JSX.Element => {
     hasNextPage,
     isFetchingNextPage,
   } = useChatsScreen();
+
+  const selected = useChatsStore((s) => s.selected);
+  const chat = chats.find((c) => c.chat.id === selected);
+  const { firstName = '', lastName = '' } = chat?.peer ?? {};
 
   const chatsListStore = useChatsListStore((s) => s.chatsList);
   const setChatsListStore = useChatsListStore((s) => s.setChatsList);
@@ -110,7 +115,7 @@ export const ChatsBlock = (): JSX.Element => {
         {/*<ConversationEmptyState variant={'chats'} />*/}
       </ConversationLayout>
       <DeleteChatModal />
-      <AddContactModal />
+      <AddContactModal fullName={`${firstName} ${lastName}`} />
     </>
   );
 };

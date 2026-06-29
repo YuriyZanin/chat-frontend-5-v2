@@ -65,6 +65,19 @@
   cursor: pointer;
 }
 
+.unblockButton {
+  height: 3.2rem;
+  padding: 0.6rem 1.6rem;
+  border-radius: 4px;
+  background-color: #7769e1;
+  color: white;
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0px;
+  text-align: center;
+}
+
 .info {
   flex: 1;
 
@@ -73,6 +86,16 @@
   @include mixins.flex-box($direction: column, $align: flex-start, $gap: 0.4rem);
 
   cursor: pointer;
+  width: 56.4rem;
+  height: 4.3rem;
+
+  &.isInfoOpen {
+    width: 18rem;
+  }
+
+  &.blockButton {
+    max-width: 5.5rem;
+  }
 }
 
 .name,
@@ -83,7 +106,7 @@
 }
 
 .name {
-  width: 56.4rem;
+  width: 100%;
   height: 2.2rem;
   font-size: 1.8rem;
   font-weight: 500;
@@ -92,10 +115,6 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-
-  &.infoOpen {
-    width: 18rem;
-  }
 }
 
 .status {
@@ -105,11 +124,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 
+  height: 1.7rem;
   font-size: 1.4rem;
   font-weight: 400;
 
   color: var(--brand-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+
+.group {
+  height: 1.7rem;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
 .icon {
   @include mixins.flex-box();
 

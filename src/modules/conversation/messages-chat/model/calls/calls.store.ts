@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 type CallsState = {
-  avatarUrl: string | undefined;
+  avatarUrl: string;
   contactFio: string;
   messageRtcUid: string;
   offerSdp: string;
@@ -32,7 +32,7 @@ type CallsState = {
 };
 
 export const useCallsStore = create<CallsState>((set, get) => ({
-  avatarUrl: undefined,
+  avatarUrl: '',
   contactFio: '',
   messageRtcUid: '',
   offerSdp: '',

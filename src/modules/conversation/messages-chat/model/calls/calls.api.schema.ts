@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 const IceServerApiSchema = z.object({
   urls: z.array(z.string()),
-  username: z.string().nullable(),
-  credential: z.string().nullable(),
+  username: z.string().optional(),
+  credential: z.string().optional(),
 });
 
 export const IceServersApiSchema = z.object({

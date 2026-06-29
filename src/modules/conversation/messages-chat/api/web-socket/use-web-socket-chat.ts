@@ -453,19 +453,26 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           lastPongRef.current = Date.now();
           return;
         }
-
+        //9. Голосовой или видеовызов пользователя через WebRTC -соединение.
+        //Отправляет SDP offer получателю для установления P2P соединения.
         if (data.action === 'offer_call' && data.status === 'OK') {
-          console.log('Входящий звонок от ' + data.object.from_user);
+          // поступил вызов на входящее телефонное соединение
           if (currentUserId !== data.object.from_user) {
-            const { first_name, last_name, avatar_url } = data.object.message_rtc.from_user;
+            console.log(`Входящий звонок от абонента ${data.object.from_user}`);
+            const { first_name, last_name, avatar_master_url, avatar_webp_url, avatar_small_url } =
+              data.object.message_rtc?.from_user;
             setCallData({
               contactFio: `${first_name} ${last_name}`,
-              avatarUrl: avatar_url,
+              avatarUrl: avatar_master_url || avatar_webp_url || avatar_small_url,
               messageRtcUid: data.object.message_rtc.uid,
               offerSdp: data.object.offer_sdp,
               fromUserUid: data.object.from_user,
               isReceivingModalOpen: true,
             });
+          }
+          // поступил вызов на исходящее телефонное соединение
+          if (currentUserId === data.object.from_user) {
+            console.log(`Исходящий звонок абоненту ${data.object.to_user}`);
           }
         }
 

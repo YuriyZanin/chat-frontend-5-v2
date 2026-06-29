@@ -7,6 +7,7 @@ import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/ca
 import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
+import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useEffect, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
@@ -92,7 +93,8 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
     toggleCallsOpen,
     toggleIncomingModalOpen,
   } = useCallsStore();
-  const { isInfoOpen, toggleInfoOpen } = useInfoStore();
+  const { isInfoOpen, isUnblockModalOpen, toggleInfoOpen, openUnblockModal } = useInfoStore();
+  // const { openUnblockModal } = useInfoStore((s) => s.openUnblockModal);
   const { isModalOpen } = useNotificationStore();
 
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
@@ -170,6 +172,10 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
         duration: 0,
       },
     });
+  };
+
+  const handleUnblockUser = (): void => {
+    openUnblockModal();
   };
 
   return (
@@ -250,6 +256,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
 
         {isBlockModalOpen && <BlockModal />}
 
+        {isUnblockModalOpen && <UnblockContactModal uid={user_uid} fullName={`${firstName} ${lastName}`} />}
         {isAddModalOpen && <AddModal fullName={`${firstName} ${lastName}`} />}
         {isLeaveGroupModalOpen && <LeaveGroupModal chatKey={user_uid} name={nickname} />}
       </div>
@@ -258,7 +265,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
 
       {isCallModalOpen && (
         <OutgoingCallPanel
-          avatarUrl={avatarUrl}
+          avatarUrl={imgSrc}
           contact={`${firstName} ${lastName}`}
           user_uid={user_uid}
           currentUid={currentUid}
