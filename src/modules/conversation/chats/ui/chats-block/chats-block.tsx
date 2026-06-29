@@ -45,12 +45,12 @@ export const ChatsBlock = (): JSX.Element => {
   const { firstName = '', lastName = '' } = chat?.peer ?? {};
 
   const chatsListStore = useChatsListStore((s) => s.chatsList);
-  const setChatsListStore = useChatsListStore((s) => s.setChatsList);
+  const addChatsListStore = useChatsListStore((s) => s.addChatsList);
   // при изменении массива chats незамедлительнол изменения вносим в store
 
   useEffect(() => {
     if (!chats) return;
-    setChatsListStore(chats);
+    addChatsListStore(chats);
   }, [chats]);
 
   const router = useRouter();

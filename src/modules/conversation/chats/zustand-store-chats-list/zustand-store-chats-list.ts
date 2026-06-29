@@ -9,6 +9,7 @@ type ChatsListState = {
   deleteChatInChatsList: (id: number | undefined) => void;
   updateChatByUid: (request_uid: string, patch: Partial<Chat>) => void;
   deleteChatByUid: (request_uid: string) => void;
+  addChatsList: (chatsList: Chat[]) => void;
 };
 
 export const useChatsListStore = create<ChatsListState>((set) => ({
@@ -36,7 +37,7 @@ export const useChatsListStore = create<ChatsListState>((set) => ({
         chatsList: result,
       };
     }),
-
+  addChatsList: (chatsList: Chat[]): void => set({ chatsList }),
   clearChatsList: (): void =>
     set({
       chatsList: null,
