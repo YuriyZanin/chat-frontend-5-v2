@@ -22,7 +22,7 @@ export const GroupPanel = ({ uid, currentUid, filesList }: GroupPanelProps): JSX
   const name = profile?.name ?? '';
   const membersCount = profile?.participants.length ?? 0;
   const status = formatParticipants(membersCount);
-  const tabs = ['Участники', 'Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
+  const tabs = ['Участники', 'Медиа', 'Файлы', 'Голосовые'];
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
   const result = `/api/proxy${removeDomain(profile?.avatar ?? '')}`;
   return (

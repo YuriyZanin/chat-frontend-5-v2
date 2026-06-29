@@ -1,9 +1,10 @@
 @use 'shared/styles/03_mixins' as mixins;
 
 .container {
-  @include mixins.flex-box($direction: column, $align: center, $justify: center, $gap: 8px);
+  @include mixins.flex-box($direction: column, $gap: 8px);
 
   .tabs {
+    @include mixins.flex-box();
     max-width: 36rem;
     padding: 0 16px 0 16px;
     border-bottom: 0.033rem solid #0000004d;

@@ -13,8 +13,8 @@ export const ContactCard = ({
   onSelectHandler,
   variant,
 }: ContactCardProps): JSX.Element => {
-  const { uid, chatId, fullName, nickname, avatarUrl, wasOnlineAt } = contact;
-  const status = getLastSeenLabel(wasOnlineAt);
+  const { uid, chatId, fullName, nickname, avatarUrl, wasOnlineAt, isOnline } = contact;
+  const status = isOnline ? 'в сети' : getLastSeenLabel(wasOnlineAt);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
     if (selectionMode) {
