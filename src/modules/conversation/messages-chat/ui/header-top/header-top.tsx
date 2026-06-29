@@ -15,7 +15,7 @@ import { getLastSeenLabel } from 'shared/libs';
 import { ButtonUI } from 'shared/ui';
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
-import { formatParticipants } from '../../utils/format-messages';
+import { formatParticipantsChannel, formatParticipantsGroup } from '../../utils/format-messages';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
 import { OutgoingCallPanel } from '../../widgets/outgoing-call-panel';
 import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
@@ -42,6 +42,8 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
   const { chats } = useChatsScreen();
   //хук для получения списка участников опреденной группы/канала (по chat_key)
   const { participants } = useParticipantsScreen(user_uid);
+  const isGroup = user_uid.startsWith('group');
+  const isChannel = user_uid.startsWith('channel');
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
   const chat = isGroupOrChannel
     ? chats.find((c) => c.chat.chatKey === user_uid)
@@ -178,9 +180,13 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
                 <span className={clsx(styles.name, { [styles.infoOpen]: isInfoOpen })}>
                   {isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}
                 </span>
-                {isGroupOrChannel ? (
+                {isChannel ? (
                   <span className={styles.group}>
-                    {formatParticipants(participants?.length ? participants?.length - 1 : 1)}
+                    {formatParticipantsChannel(participants?.length ? participants?.length - 1 : 1)}
+                  </span>
+                ) : isGroup ? (
+                  <span className={styles.group}>
+                    {formatParticipantsGroup(participants?.length ? participants?.length - 1 : 1)}
                   </span>
                 ) : (
                   <span className={styles.status}>{status}</span>
