@@ -23,12 +23,9 @@
   border-bottom: 0.1rem solid var(--surface-disabled);
   padding-left: 1.6rem;
   padding-right: 1.6rem;
-<<<<<<< HEAD
   overflow: hidden;
 
   background-color: var(--surface-secondary);
-=======
->>>>>>> 28d20ca811359318f40c3358d27ab769e635a023
 }
 
 .left {
@@ -87,10 +84,8 @@
   min-width: 0;
 
   @include mixins.flex-box($direction: column, $align: flex-start, $gap: 0.4rem);
-<<<<<<< HEAD
 
   cursor: pointer;
-=======
   width: 56.4rem;
   height: 4.3rem;
 
@@ -101,7 +96,6 @@
   &.blockButton {
     max-width: 5.5rem;
   }
->>>>>>> 28d20ca811359318f40c3358d27ab769e635a023
 }
 
 .name,
@@ -125,15 +119,12 @@
 
 .status {
   width: 100%;
-<<<<<<< HEAD
 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
-=======
   height: 1.7rem;
->>>>>>> 28d20ca811359318f40c3358d27ab769e635a023
   font-size: 1.4rem;
   font-weight: 400;
 
@@ -142,8 +133,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-<<<<<<< HEAD
-=======
 
 .group {
   height: 1.7rem;
@@ -152,7 +141,6 @@
   color: var(--text-secondary);
 }
 
->>>>>>> 28d20ca811359318f40c3358d27ab769e635a023
 .icon {
   @include mixins.flex-box();
 
