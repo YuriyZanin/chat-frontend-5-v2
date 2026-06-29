@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { CallAnimation } from 'modules/conversation/shared/ui/call-animation';
+import Image from 'next/image';
 import { JSX, useEffect, useRef } from 'react';
-import { ImageUI } from 'shared/ui';
 import { useIceServersQuery } from '../../api';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { getDurationTime } from '../../lib/get-duration-time';
@@ -13,7 +13,6 @@ import FullScreenIcon from '../../shared/icons/fullscreen.svg';
 import MicroIcon from '../../shared/icons/micro.svg';
 import VideoIcon from '../../shared/icons/video.svg';
 import styles from './outgoing-call-panel.module.scss';
-
 type OutgoingCallPanelProps = {
   avatarUrl?: string;
   contact: string;
@@ -47,7 +46,7 @@ export const OutgoingCallPanel = ({
   } = useCallsStore();
   const { data: iceConfig, isLoading } = useIceServersQuery();
 
-  const localStreamRef = useRef<MediaStream | undefined>(undefined);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
@@ -71,14 +70,14 @@ export const OutgoingCallPanel = ({
       console.log('Соединение pc открыто');
 
       // Создаем поток только с аудио
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const localStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: true,
+        video: false,
       });
-      localStreamRef.current = stream;
+      localStreamRef.current = localStream;
 
       // Добавляем аудиодорожку в RTCPeerConnection
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+      localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
 
       pc.ontrack = (event): void => {
         const stream = event.streams[0];
@@ -424,7 +423,7 @@ export const OutgoingCallPanel = ({
   const clearCall = (): void => {
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
-      localStreamRef.current = undefined;
+      localStreamRef.current = null;
     }
 
     if (peerConnectionRef.current) {
@@ -505,8 +504,9 @@ export const OutgoingCallPanel = ({
       </div>
       <div className={styles.info}>
         {!hasRemoteVideo && (
-          <ImageUI
+          <Image
             src={avatarUrl ?? URL_DEFAULT_AVATAR}
+            unoptimized
             width={160}
             height={160}
             alt={contact}
