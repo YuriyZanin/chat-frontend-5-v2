@@ -2,7 +2,6 @@
 import clsx from 'clsx';
 import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { removeDomain } from 'modules/conversation/chats/utils/utils';
-import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
@@ -48,6 +47,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
   const chat = isGroupOrChannel
     ? chats.find((c) => c.chat.chatKey === user_uid)
     : chats.find((c) => c.peer.uid === user_uid);
+
   const parts = user_uid.split('_');
   const userUid = parts.length > 1 ? parts[1] : parts[0];
   //xук для получения профиля определенного (uid) пользователя
@@ -62,7 +62,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       nickname: chat?.peer.nickname || '',
       isBlocked: chat?.peer.isBlocked || false,
       isInContacts: chat?.peer.isInContacts || false,
-      status: getLastSeenLabel(chat?.peer.wasOnlineAt || null),
+      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
     };
   } else {
     resultProfile = {
@@ -72,7 +72,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       nickname: profile?.nickname || '',
       isBlocked: profile?.isBlocked || false,
       isInContacts: false,
-      status: getLastSeenLabel(profile?.wasOnlineAt || null),
+      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
     };
   }
   const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
@@ -101,7 +101,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       openButtonMenu();
     }
   }, [closeButtonMenu, openButtonMenu, isBlocked, isInContacts, user_uid]);
-  const { contacts } = useContactsScreen();
 
   const defaultAvatar = isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar;
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
@@ -218,12 +217,14 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {!contacts?.some((c) => c.uid === user_uid) && (
+        {!isInContacts && chat?.messages.firstNewMessage === undefined && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}
             isBlocked={isBlocked}
             isInContact={isInContacts}
+            participants={participants}
+            chat={chat}
           />
         )}
         {isModalOpen && <NotificationModal />}

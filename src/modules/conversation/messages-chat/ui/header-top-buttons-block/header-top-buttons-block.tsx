@@ -1,7 +1,8 @@
 import clsx from 'clsx';
+import type { Chat } from 'modules/conversation/chats/entity';
 import { useAddContactQuery } from 'modules/info/api/info.query';
+import type { Participant } from 'modules/info/entity/info.entity';
 import { useInfoStore } from 'modules/info/model/info.store';
-import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { usePathname } from 'next/navigation';
 import { JSX } from 'react';
 import { useHeaderButtonsModalStore } from '../../zustand-store/zustand-store';
@@ -12,21 +13,23 @@ export const HeaderTopButtonsBlock = ({
   chatKey,
   isInContact,
   isBlocked,
+  participants,
+  chat,
 }: {
   currentUid: string;
   chatKey: string;
   isInContact: boolean;
   isBlocked: boolean;
+  participants: Participant[] | undefined;
+  chat: Chat | undefined;
 }): JSX.Element | null => {
   const { openBlockModal, openAddModal, openLeaveGroupModal, isButtonMenuOpen, closeButtonMenu } =
     useHeaderButtonsModalStore();
   const { isInfoOpen, enterSelectionMode, toggleInfoOpen } = useInfoStore();
   const { mutate: addToContact } = useAddContactQuery();
-  const { participants } = useParticipantsScreen(chatKey);
 
   const member = participants?.find((p) => p.uid === currentUid);
   const isOwner = member?.isOwner ?? false;
-
   const pathname = usePathname();
   const isGroup = pathname.startsWith('/chats/group');
   const isChannel = pathname.startsWith('/chats/channel');
