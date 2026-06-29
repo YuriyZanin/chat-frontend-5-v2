@@ -21,6 +21,7 @@ export const ContextMenu = ({
   position,
   visible,
   onClose,
+  chatType,
 }: {
   chatId?: number;
   lastMessageId?: number;
@@ -32,6 +33,7 @@ export const ContextMenu = ({
   position: { x: number; y: number };
   visible: boolean;
   onClose: () => void;
+  chatType: 'chat' | 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | undefined;
 }): JSX.Element | null => {
   const { openDeleteModal, openAddModal, setSelected } = useChatsStore();
   const { mutate: addContact } = useAddContactQuery();
@@ -79,7 +81,7 @@ export const ContextMenu = ({
 
   return (
     <div className={styles.wrapper} onMouseLeave={onClose} style={{ top: position.y, left: position.x }}>
-      {!isInContacts && (
+      {!isInContacts && chatType === 'chat' && (
         <button className={clsx(styles.cell, styles.cellTop)} onClick={handleAddContact}>
           <div className={styles.text}>Добавить в контакты </div>
           <div className={styles.icon}>
