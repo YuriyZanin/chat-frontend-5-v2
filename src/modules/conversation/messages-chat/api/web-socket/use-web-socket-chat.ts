@@ -559,7 +559,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
               if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
                 text = `@@@ Канал создан`;
               } else {
-                text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
+                text = `@@@ создал(а) группу "${data.object.name}"`;
               }
               // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
               updateChatByUidStore(data.request_uid, result);

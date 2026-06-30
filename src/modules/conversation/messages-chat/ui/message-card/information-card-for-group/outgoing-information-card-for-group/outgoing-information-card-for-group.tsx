@@ -5,7 +5,9 @@ export const OutgoingInformationForGroupCard = ({ message }: OutgoingInformation
   return (
     <div className={styles.box}>
       <div className={styles.wrapper}>
-        <span className={styles.text}> {message.content?.split(' ').slice(1).join(' ')} </span>
+        <span className={styles.text}>
+          {`${message.from_user.first_name} ${message.from_user.last_name} ${message.content?.split(' ').slice(1).join(' ')}`}
+        </span>
       </div>
     </div>
   );
