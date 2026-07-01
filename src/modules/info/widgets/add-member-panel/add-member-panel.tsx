@@ -11,7 +11,7 @@ export const AddMemberPanel = ({ chatKey }: { chatKey: string }): JSX.Element =>
     uid: u.uid,
     firstName: u.firstName,
     lastName: u.lastName,
-    avatarUrl: u.avatarUrl,
+    avatarUrl: u.avatarUrl || u.avatarMasterUrl || u.avatarWebpUrl,
     avatarWebpUrl: u.avatarWebpUrl,
     avatarSmallUrl: u.avatarSmallUrl,
     avatarMasterUrl: u.avatarMasterUrl,
