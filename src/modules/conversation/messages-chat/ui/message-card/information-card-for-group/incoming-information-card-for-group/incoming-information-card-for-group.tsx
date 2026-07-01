@@ -14,7 +14,9 @@ export const IncomingInformationForGroupCard = ({
     >
       <div className={styles.wrapper}>
         <span className={styles.text}>
-          {`${message.from_user.first_name} ${message.from_user.last_name} ${message.content?.split(' ').slice(1).join(' ')}`}
+          {message.content === `@@@ Канал создан`
+            ? message.content?.split(' ').slice(1).join(' ')
+            : `${message.from_user.first_name} ${message.from_user.last_name} ${message.content?.split(' ').slice(1).join(' ')}`}
         </span>
       </div>
     </div>

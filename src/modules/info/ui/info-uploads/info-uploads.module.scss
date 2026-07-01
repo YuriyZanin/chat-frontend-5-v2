@@ -4,12 +4,11 @@
   @include mixins.flex-box($direction: column, $gap: 8px);
 
   .tabs {
-    @include mixins.flex-box();
     max-width: 36rem;
     padding: 0 16px 0 16px;
     border-bottom: 0.033rem solid #0000004d;
     overflow-y: hidden;
-    overflow-x: auto;
+    overflow-x: scroll;
     scrollbar-width: none;
     white-space: nowrap;
   }
