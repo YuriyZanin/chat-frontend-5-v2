@@ -1,7 +1,7 @@
 'use client';
 import clsx from 'clsx';
-import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { removeDomain } from 'modules/conversation/chats/utils/utils';
+import { useChatsListStore } from 'modules/conversation/chats/zustand-store-chats-list/zustand-store-chats-list';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
@@ -37,16 +37,17 @@ const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
 const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProps): JSX.Element => {
-  //хук для получения списка чатов
-  const { chats } = useChatsScreen();
+  //получили список чатов из store
+  const chatsListStore = useChatsListStore((s) => s.chatsList);
+
   //хук для получения списка участников опреденной группы/канала (по chat_key)
   const { participants } = useParticipantsScreen(user_uid);
   const isGroup = user_uid.startsWith('group');
   const isChannel = user_uid.startsWith('channel');
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
   const chat = isGroupOrChannel
-    ? chats.find((c) => c.chat.chatKey === user_uid)
-    : chats.find((c) => c.peer.uid === user_uid);
+    ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
+    : chatsListStore?.find((c) => c.peer.uid === user_uid);
 
   const parts = user_uid.split('_');
   const userUid = parts.length > 1 ? parts[1] : parts[0];
