@@ -33,9 +33,6 @@ export const useGroupTypeSelect = ({
     addSelectedStore(setSelected);
   }, [setSelected]);
 
-  console.log(' mode: ', mode);
-  console.log('initial: ', initial);
-  console.log('selected: ', selected);
   const selectClosed = (): void => {
     setSelected(mode === 'group' ? 'private-group' : 'private-channel');
   };

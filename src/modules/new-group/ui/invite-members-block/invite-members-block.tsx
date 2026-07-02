@@ -43,6 +43,10 @@ export const InviteMembersBlock = (): JSX.Element => {
   useEffect(() => {
     enterSelectionMode();
   }, [enterSelectionMode]);
+  // сразу очищаем поисковую строку
+  useEffect(() => {
+    clearQuery();
+  }, []);
 
   const title = 'Пригласить участников';
   const backPath = mode === 'group' ? '/new-group' : '/new-channel';

@@ -41,7 +41,6 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   const [croppedZoom, setCroppedZoom] = useState<number | null>(null);
   const [groupName, setGroupName] = useState(nameStore);
   const [groupDescription, setGroupDescription] = useState(descriptionStore);
-  console.log('chatTypeStore: ', chatTypeStore);
   const [chatType, setChatType] = useState<'public-group' | 'private-group' | 'public-channel' | 'private-channel'>(
     chatTypeStore === null ? (mode === 'group' ? 'public-group' : 'public-channel') : chatTypeStore,
   );

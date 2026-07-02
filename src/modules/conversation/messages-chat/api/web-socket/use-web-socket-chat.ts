@@ -903,12 +903,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       file,
     }: {
       name: string;
-      chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
+      chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
       uidUsersList: string[];
       description?: string;
       avatarPreview?: string;
       file?: File | null;
     }): Promise<void> => {
+      if (!chatType) return;
       stopRef.current = false;
       const requestUid = crypto.randomUUID();
       //создаем временную чат-заглушку для помещения в список чатов DOM
