@@ -111,6 +111,7 @@ export const InviteMembersBlock = (): JSX.Element => {
               type="button"
               disabled={!hasSelected}
               onClick={handleCreate}
+              style={!hasSelected ? { background: '#e4e4e4', color: '#C5C5C5' } : {}}
             />
           </div>
         }
