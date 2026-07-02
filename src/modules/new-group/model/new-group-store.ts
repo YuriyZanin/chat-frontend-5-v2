@@ -17,9 +17,9 @@ type NewGroupState = {
   setName: (name: string) => void;
   setDescription: (description: string) => void;
   setChatType: (chatType: ChatType | null) => void;
-  setAvatarUid: (avatarUid: string) => void;
-  setAvatarPreview: (avatarPreview: string) => void;
-  setAvatarFile: (avatarFile: File) => void;
+  setAvatarUid: (avatarUid: string | null) => void;
+  setAvatarPreview: (avatarPreview: string | null) => void;
+  setAvatarFile: (avatarFile: File | null) => void;
 };
 
 export const useNewGroupStore = create<NewGroupState>((set) => ({
@@ -36,7 +36,7 @@ export const useNewGroupStore = create<NewGroupState>((set) => ({
   setName: (name: string): void => set({ name }),
   setDescription: (description: string): void => set({ description }),
   setChatType: (chatType: ChatType | null): void => set({ chatType }),
-  setAvatarUid: (avatarUid: string): void => set({ avatarUid }),
-  setAvatarPreview: (avatarPreview: string): void => set({ avatarPreview }),
-  setAvatarFile: (avatarFile: File): void => set({ avatarFile }),
+  setAvatarUid: (avatarUid: string | null): void => set({ avatarUid }),
+  setAvatarPreview: (avatarPreview: string | null): void => set({ avatarPreview }),
+  setAvatarFile: (avatarFile: File | null): void => set({ avatarFile }),
 }));

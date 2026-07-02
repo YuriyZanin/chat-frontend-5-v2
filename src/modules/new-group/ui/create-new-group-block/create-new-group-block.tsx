@@ -22,9 +22,11 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   const chatTypeStore = useNewGroupStore((s) => s.chatType);
   const setAvatarUidStore = useNewGroupStore((s) => s.setAvatarUid);
   const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
+  const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
   const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
   const router = useRouter();
   const pathname = usePathname();
+
   // Определяем режим по пути
   const mode = pathname.includes('/new-channel') ? 'channel' : 'group';
   const {
@@ -117,24 +119,34 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   };
 
   const title = mode === 'group' ? 'Создать группу' : 'Создать канал';
-  const avatarSrc = previewUrl || '/images/settings/noAvatarIcon.svg';
+  const avatarSrc = avatarPreviewStore || '/images/settings/noAvatarIcon.svg';
   const avatarStyle: React.CSSProperties = {};
-  if (croppedZoom !== null && previewUrl) {
+  if (croppedZoom !== null && avatarPreviewStore) {
     avatarStyle.transform = `scale(${croppedZoom / 100})`;
     avatarStyle.transition = 'transform 0.3s ease';
   }
-  const handleExit = (): void => {
+  const handleExitInCreatingGroupOrCannel = (): void => {
     setNameStore('');
     setDescriptionStore('');
     setChatTypeStore(null);
     setSelectedStore(mode === 'group' ? 'public-group' : 'public-channel');
     setChatType(mode === 'group' ? 'public-group' : 'public-channel');
-    router.push('/chats');
+    setAvatarPreviewStore(null);
+    setAvatarUidStore(null);
+    setAvatarFileStore(null);
   };
+
   return (
     <>
       <div className={styles.container}>
-        <button type="button" className={styles.returnButton} onClick={handleExit}>
+        <button
+          type="button"
+          className={styles.returnButton}
+          onClick={() => {
+            handleExitInCreatingGroupOrCannel();
+            router.push('/chats');
+          }}
+        >
           <div className={styles.iconAndLabelContainer}>
             <Image
               src="/images/settings/returnArrowIcon.svg"
@@ -149,7 +161,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
 
         <div className={styles.imageContainer}>
           <div className={styles.avatar}>
-            <Image src={avatarSrc} alt="Аватар" width={200} height={200} className="" style={avatarStyle} />
+            <Image src={avatarSrc} unoptimized alt="Аватар" width={200} height={200} className="" style={avatarStyle} />
           </div>
           <button type="button" className={styles.selectImage} onClick={triggerFileSelect} disabled={isUploadingAvatar}>
             {isUploadingAvatar ? 'Загрузка...' : 'Выбрать фотографию'}
