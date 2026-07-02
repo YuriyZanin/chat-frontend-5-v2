@@ -46,12 +46,17 @@ export const ChatsBlock = (): JSX.Element => {
 
   const chatsListStore = useChatsListStore((s) => s.chatsList);
   const setChatsListStore = useChatsListStore((s) => s.setChatsList);
+  const addChatsListStore = useChatsListStore((s) => s.addChatsList);
 
   // при изменении массива chats незамедлительнол изменения вносим в store
 
   useEffect(() => {
     if (!chats) return;
-    setChatsListStore(chats);
+    if (search === '') {
+      setChatsListStore(chats);
+    } else {
+      addChatsListStore(chats);
+    }
   }, [chats]);
 
   const router = useRouter();
