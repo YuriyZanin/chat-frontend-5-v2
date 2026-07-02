@@ -13,9 +13,13 @@ import styles from './create-new-group-block.module.scss';
 
 export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   const setNameStore = useNewGroupStore((s) => s.setName);
+  const nameStore = useNewGroupStore((s) => s.name);
+  const setSelectedStore = useNewGroupStore((s) => s.setSelected);
   const setModeStore = useNewGroupStore((s) => s.setMode);
   const setDescriptionStore = useNewGroupStore((s) => s.setDescription);
+  const descriptionStore = useNewGroupStore((s) => s.description);
   const setChatTypeStore = useNewGroupStore((s) => s.setChatType);
+  const chatTypeStore = useNewGroupStore((s) => s.chatType);
   const setAvatarUidStore = useNewGroupStore((s) => s.setAvatarUid);
   const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
   const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
@@ -35,10 +39,11 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   } = useImageUpload();
 
   const [croppedZoom, setCroppedZoom] = useState<number | null>(null);
-  const [groupName, setGroupName] = useState('');
-  const [groupDescription, setGroupDescription] = useState('');
+  const [groupName, setGroupName] = useState(nameStore);
+  const [groupDescription, setGroupDescription] = useState(descriptionStore);
+  console.log('chatTypeStore: ', chatTypeStore);
   const [chatType, setChatType] = useState<'public-group' | 'private-group' | 'public-channel' | 'private-channel'>(
-    mode === 'group' ? 'public-group' : 'public-channel',
+    chatTypeStore === null ? (mode === 'group' ? 'public-group' : 'public-channel') : chatTypeStore,
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -119,11 +124,18 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
     avatarStyle.transform = `scale(${croppedZoom / 100})`;
     avatarStyle.transition = 'transform 0.3s ease';
   }
-
+  const handleExit = (): void => {
+    setNameStore('');
+    setDescriptionStore('');
+    setChatTypeStore(null);
+    setSelectedStore(mode === 'group' ? 'public-group' : 'public-channel');
+    setChatType(mode === 'group' ? 'public-group' : 'public-channel');
+    router.push('/chats');
+  };
   return (
     <>
       <div className={styles.container}>
-        <button type="button" className={styles.returnButton} onClick={() => router.push('/chats')}>
+        <button type="button" className={styles.returnButton} onClick={handleExit}>
           <div className={styles.iconAndLabelContainer}>
             <Image
               src="/images/settings/returnArrowIcon.svg"
