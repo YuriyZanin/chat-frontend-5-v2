@@ -58,6 +58,7 @@ export const SearchMessages = ({ setSearchMessagesVisible }: SearchMessagesProps
         className={styles.inputSearch}
         value={searchMessagesStore}
         onChange={(e) => setSearchMessagesStore(e.target.value)}
+        maxLength={100}
         placeholder="Поиск в чате"
         aria-label="Поиск в чате"
       />

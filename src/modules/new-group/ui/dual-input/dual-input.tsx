@@ -116,7 +116,7 @@ const DualInput: React.FC<DualInputProps> = ({
           />
           {firstFocused && (
             <>
-              <span className={styles.counter}>
+              <span className={firstLength === maxFirst ? styles.counterRed : styles.counter}>
                 {firstLength}/{maxFirst}
               </span>
               {valueFirst && (
@@ -153,7 +153,7 @@ const DualInput: React.FC<DualInputProps> = ({
           />
           {secondFocused && (
             <>
-              <span className={styles.counter}>
+              <span className={secondLength === maxSecond ? styles.counterRed : styles.counter}>
                 {secondLength}/{maxSecond}
               </span>
               {valueSecond && (

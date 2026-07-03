@@ -1,8 +1,7 @@
 'use client';
 import clsx from 'clsx';
-import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { removeDomain } from 'modules/conversation/chats/utils/utils';
-import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
+import { useChatsListStore } from 'modules/conversation/chats/zustand-store-chats-list/zustand-store-chats-list';
 import { useCallsStore } from 'modules/conversation/messages-chat/model/calls/calls.store';
 import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
@@ -15,7 +14,7 @@ import { getLastSeenLabel } from 'shared/libs';
 import { ButtonUI } from 'shared/ui';
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
-import { formatParticipants } from '../../utils/format-messages';
+import { formatParticipantsChannel, formatParticipantsGroup } from '../../utils/format-messages';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
 import { OutgoingCallPanel } from '../../widgets/outgoing-call-panel';
 import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
@@ -38,14 +37,18 @@ const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
 const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProps): JSX.Element => {
-  //хук для получения списка чатов
-  const { chats } = useChatsScreen();
+  //получили список чатов из store
+  const chatsListStore = useChatsListStore((s) => s.chatsList);
+
   //хук для получения списка участников опреденной группы/канала (по chat_key)
   const { participants } = useParticipantsScreen(user_uid);
+  const isGroup = user_uid.startsWith('group');
+  const isChannel = user_uid.startsWith('channel');
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
   const chat = isGroupOrChannel
-    ? chats.find((c) => c.chat.chatKey === user_uid)
-    : chats.find((c) => c.peer.uid === user_uid);
+    ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
+    : chatsListStore?.find((c) => c.peer.uid === user_uid);
+
   const parts = user_uid.split('_');
   const userUid = parts.length > 1 ? parts[1] : parts[0];
   //xук для получения профиля определенного (uid) пользователя
@@ -60,7 +63,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       nickname: chat?.peer.nickname || '',
       isBlocked: chat?.peer.isBlocked || false,
       isInContacts: chat?.peer.isInContacts || false,
-      status: getLastSeenLabel(chat?.peer.wasOnlineAt || null),
+      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
     };
   } else {
     resultProfile = {
@@ -70,7 +73,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       nickname: profile?.nickname || '',
       isBlocked: profile?.isBlocked || false,
       isInContacts: false,
-      status: getLastSeenLabel(profile?.wasOnlineAt || null),
+      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
     };
   }
   const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
@@ -99,7 +102,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       openButtonMenu();
     }
   }, [closeButtonMenu, openButtonMenu, isBlocked, isInContacts, user_uid]);
-  const { contacts } = useContactsScreen();
 
   const defaultAvatar = isGroupOrChannel ? URL_DEFAUIT_Avatar_Croup : URL_DEFAUIT_Avatar;
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
@@ -178,9 +180,13 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
                 <span className={clsx(styles.name, { [styles.infoOpen]: isInfoOpen })}>
                   {isGroupOrChannel ? chat?.chat.name : `${firstName} ${lastName}`}
                 </span>
-                {isGroupOrChannel ? (
+                {isChannel ? (
                   <span className={styles.group}>
-                    {formatParticipants(participants?.length ? participants?.length - 1 : 1)}
+                    {formatParticipantsChannel(participants?.length ? participants?.length - 1 : 1)}
+                  </span>
+                ) : isGroup ? (
+                  <span className={styles.group}>
+                    {formatParticipantsGroup(participants?.length ? participants?.length - 1 : 1)}
                   </span>
                 ) : (
                   <span className={styles.status}>{status}</span>
@@ -212,12 +218,14 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {!contacts?.some((c) => c.uid === user_uid) && (
+        {!isInContacts && chat?.messages.firstNewMessage === undefined && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}
             isBlocked={isBlocked}
             isInContact={isInContacts}
+            participants={participants}
+            chat={chat}
           />
         )}
         {isModalOpen && <NotificationModal />}
