@@ -60,9 +60,9 @@ type WebSocketChatProps = {
   }: {
     name: string;
     chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
-    uidUsersList: string[];
+    uidUsersList: string[] | null;
     description?: string;
-    avatarPreview?: string;
+    avatarPreview?: string | null;
     file?: File | null;
   }) => void;
 };

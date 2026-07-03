@@ -92,10 +92,10 @@ type UseWebSocketChatReturn = {
     file,
   }: {
     name: string;
-    chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
-    uidUsersList: string[];
+    chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
+    uidUsersList: string[] | null;
     description?: string;
-    avatarPreview?: string;
+    avatarPreview?: string | null;
     file?: File | null;
   }) => void;
 };
@@ -904,9 +904,9 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     }: {
       name: string;
       chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
-      uidUsersList: string[];
+      uidUsersList: string[] | null;
       description?: string;
-      avatarPreview?: string;
+      avatarPreview?: string | null;
       file?: File | null;
     }): Promise<void> => {
       if (!chatType) return;
@@ -948,7 +948,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         object: {
           name,
           chat_type: chatType,
-          uid_users_list: uidUsersList,
+          uid_users_list: uidUsersList ?? [],
           ...(description && { description }),
         },
       };
