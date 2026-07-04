@@ -135,46 +135,52 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
             <span className={styles.labelText}>{title}</span>
           </div>
         </button>
-
-        <div className={styles.imageContainer}>
-          <div className={styles.avatar}>
-            <Image src={avatarSrc} alt="Аватар" width={200} height={200} className="" style={avatarStyle} />
+        <div className={styles.contentContainer}>
+          <div className={styles.imageContainer}>
+            <div className={styles.avatar}>
+              <Image src={avatarSrc} alt="Аватар" width={200} height={200} className="" style={avatarStyle} />
+            </div>
+            <button
+              type="button"
+              className={styles.selectImage}
+              onClick={triggerFileSelect}
+              disabled={isUploadingAvatar}
+            >
+              {isUploadingAvatar ? 'Загрузка...' : 'Выбрать фотографию'}
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              style={{ display: 'none' }}
+            />
+            {imageUploadError && <div className={styles.error}>{imageUploadError}</div>}
           </div>
-          <button type="button" className={styles.selectImage} onClick={triggerFileSelect} disabled={isUploadingAvatar}>
-            {isUploadingAvatar ? 'Загрузка...' : 'Выбрать фотографию'}
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            style={{ display: 'none' }}
-          />
-          {imageUploadError && <div className={styles.error}>{imageUploadError}</div>}
-        </div>
 
-        <div className={styles.profileForm}>
-          <DualInput
-            maxFirst={100}
-            maxSecond={250}
-            placeholderFirst="Название*"
-            placeholderSecond="Описание"
-            valueFirst={groupName}
-            valueSecond={groupDescription}
-            onChangeFirst={handleNameChange}
-            onChangeSecond={handleDescChange}
-          />
+          <div className={styles.profileForm}>
+            <DualInput
+              maxFirst={100}
+              maxSecond={250}
+              placeholderFirst="Название*"
+              placeholderSecond="Описание"
+              valueFirst={groupName}
+              valueSecond={groupDescription}
+              onChangeFirst={handleNameChange}
+              onChangeSecond={handleDescChange}
+            />
 
-          <GroupTypeSelect mode={mode} initial={chatType} onChange={handleTypeChange} />
+            <GroupTypeSelect mode={mode} initial={chatType} onChange={handleTypeChange} />
 
-          <ButtonUI
-            variant="general"
-            appearance="primary"
-            label="Далее"
-            type="button"
-            disabled={!groupName.trim()}
-            onClick={next}
-          />
+            <ButtonUI
+              variant="general"
+              appearance="primary"
+              label="Далее"
+              type="button"
+              disabled={!groupName.trim()}
+              onClick={next}
+            />
+          </div>
         </div>
       </div>
 

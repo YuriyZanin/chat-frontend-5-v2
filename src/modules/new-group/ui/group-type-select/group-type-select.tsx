@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
+import { useMediaQuery } from 'shared/hooks';
 import { ChatType, useGroupTypeSelect } from '../../lib/group-type-select/use-groupe-type-select';
 import styles from './group-type-select.module.scss';
 
@@ -78,21 +79,25 @@ const GroupTypeSelect: React.FC<GroupTypeSelectProps> = ({ mode = 'group', initi
   const selectedOption = currentConfig.options.find((opt) => opt.value === selected);
   const selectedLabel = selectedOption?.title || (mode === 'group' ? 'Открытая' : 'Публичный');
 
+  const isMobile = useMediaQuery('(max-width: 410px)');
+
   return (
     <div className={styles.wrapper} ref={containerRef}>
       <label className={styles.label}>{currentConfig.label}</label>
-      <div className={styles.field} onClick={toggleOpen}>
-        <span className={styles.value}>{selectedLabel}</span>
-        <span className={styles.arrow}>
-          <Image
-            src={isOpen ? '/images/new-group/upArrowIcon.svg' : '/images/new-group/downArrowIcon.svg'}
-            alt=""
-            width={12}
-            height={8}
-          />
-        </span>
-      </div>
-      {isOpen && (
+      {!isMobile && (
+        <div className={styles.field} onClick={toggleOpen}>
+          <span className={styles.value}>{selectedLabel}</span>
+          <span className={styles.arrow}>
+            <Image
+              src={isOpen ? '/images/new-group/upArrowIcon.svg' : '/images/new-group/downArrowIcon.svg'}
+              alt=""
+              width={12}
+              height={8}
+            />
+          </span>
+        </div>
+      )}
+      {(isOpen || isMobile) && (
         <div className={styles.dropdown}>
           {currentConfig.options.map((option) => (
             <label

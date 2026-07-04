@@ -109,3 +109,13 @@
 
   line-height: 1.2;
 }
+
+@media (max-width: 411px) {
+  .field {
+    background: #f5f6f8;
+  }
+  .dropdown {
+    background: #f5f6f8;
+    box-shadow: none;
+  }
+}

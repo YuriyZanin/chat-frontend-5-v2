@@ -49,40 +49,36 @@
   overflow: hidden;
 }
 
-
 @media (max-width: 410px) {
-  .callButton{
-  position: absolute;
-  left:5.3rem;
-  top: 30rem;
-  color: #ffffff;
-
-  }
-  .messageButton{
+  .callButton {
     position: absolute;
-left:11.5rem;
-  top: 30rem;
-  color: #ffffff;
-
+    left: 5.3rem;
+    top: 30rem;
+    color: #ffffff;
   }
-  .searchButton{
+  .messageButton {
     position: absolute;
-left:17.7rem;
-  top: 30rem;
-  color: #ffffff;
-
+    left: 11.5rem;
+    top: 30rem;
+    color: #ffffff;
   }
-  .videoCallButton{
+  .searchButton {
     position: absolute;
-left:23.9rem;
-  top: 30rem;
-  color: #ffffff;
+    left: 17.7rem;
+    top: 30rem;
+    color: #ffffff;
+  }
+  .videoCallButton {
+    position: absolute;
+    left: 23.9rem;
+    top: 30rem;
+    color: #ffffff;
   }
   .imageWrapper {
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
   }
-  .imageLabel{
+  .imageLabel {
     top: 24rem;
   }
 }

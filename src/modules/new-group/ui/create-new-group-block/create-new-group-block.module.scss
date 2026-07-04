@@ -8,6 +8,9 @@
   background: var(--surface-secondary);
   border: 1px solid var(--border-layout);
 }
+
+.contentContainer {
+}
 .returnButton {
   @include mixins.flex-box(row, space-between, center);
   width: 100%;
@@ -87,4 +90,41 @@
   align-items: center;
   justify-content: center;
   z-index: 50;
+}
+
+@media (max-width: 411px) {
+  .returnButton {
+    height: 5.6rem;
+    gap: 1.2rem;
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
+    padding-left: 1.6rem;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  .avatar {
+    width: 8.8rem;
+    height: 8.8rem;
+  }
+
+  .container {
+    width: 36rem;
+    border: none;
+    background: var(--surface-secondary);
+    min-height: 63.1rem;
+    gap: 0;
+    border: 1px solid var(--border-layout);
+  }
+
+  .imageContainer {
+    padding-top: 2rem;
+    // height: 11.3rem;
+    height: 14rem;
+  }
+  .contentContainer {
+    background: #ffffff;
+    height: 63.1rem;
+    border-radius: 0.8rem;
+  }
 }
