@@ -74,3 +74,15 @@
     margin-bottom: 1.6rem;
   }
 }
+
+@media (max-width: 410px) {
+  .container {
+    background-color: transparent;
+    border: none;
+  }
+
+  .returnButton {
+    background-color: transparent;
+    border: none;
+  }
+}

@@ -45,3 +45,10 @@
   height: 2.1rem;
   margin-left: 2rem;
 }
+
+@media (max-width: 410px) {
+  .container {
+    background-color: transparent;
+    border: none;
+  }
+}

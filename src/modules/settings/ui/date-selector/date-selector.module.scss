@@ -1,3 +1,5 @@
+@use 'shared/styles/03_mixins' as mixins;
+
 .container {
   display: flex;
   flex-direction: column;
@@ -98,5 +100,12 @@
       font-style: italic;
       color: #9ca3af;
     }
+  }
+}
+
+@media (max-width: 411px) {
+  .select {
+    border: 0.1rem solid var(--text-secondary);
+    border-radius: 0.8rem 0.8rem 0.8rem 0.8rem;
   }
 }

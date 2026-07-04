@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUpdateProfile } from 'shared/query/profile.query';
 import { checkUniqueName } from '../../api/unique-name-check.api';
 import { validateLogin, validateName } from '../text-input/text-validation-schema';
@@ -15,6 +15,10 @@ type UseNameStepReturn = {
   loginError: string | undefined;
   isFormValid: boolean;
   isSubmitting: boolean;
+  isNameTouched: boolean;
+  isLoginTouched: boolean;
+  handleIsNameTouched: () => void;
+  handleIsLoginTouched: () => void;
   handleFirstNameChange: (value: string) => void;
   handleLoginChange: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
@@ -26,20 +30,48 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
   const [firstNameError, setFirstNameError] = useState<string | undefined>(undefined);
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isNameTouched, setIsNameTouched] = useState(false);
+  const [isLoginTouched, setIsLoginTouched] = useState(false);
 
   const queryClient = useQueryClient();
 
   const { mutate: updateProfileMutation } = useUpdateProfile();
 
+  const handleIsNameTouched = (): void => {
+    setIsNameTouched(true);
+  };
+
+  const handleIsLoginTouched = (): void => {
+    setIsLoginTouched(true);
+  };
+
+  useEffect(() => {
+    if (isNameTouched && firstName.trim() === '') {
+      setFirstNameError('Заполните поле');
+    }
+  }, [firstName, isNameTouched]);
+  // const handleFirstNameChange = useCallback((value: string) => {
+  //   setFirstName(value);
+  //   if (value !== '') {
+  //     const validation = validateName(value);
+  //     console.log('NAME VALIDATION:', value, validation);
+  //     if (!validation.isValid) {
+  //       setFirstNameError(validation.error);
+  //     } else {
+  //       setFirstNameError(undefined);
+  //     }
+  //   } else {
+  //     setFirstNameError(undefined);
+  //   }
+  // }, []);
+
   const handleFirstNameChange = useCallback((value: string) => {
     setFirstName(value);
-    if (value !== '') {
-      const validation = validateName(value);
-      if (!validation.isValid) {
-        setFirstNameError(validation.error);
-      } else {
-        setFirstNameError(undefined);
-      }
+
+    const validation = validateName(value);
+
+    if (!validation.isValid) {
+      setFirstNameError(validation.error);
     } else {
       setFirstNameError(undefined);
     }
@@ -47,7 +79,18 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
 
   const handleLoginChange = useCallback((value: string) => {
     setLogin(value);
-    setLoginError(undefined);
+    if (value !== '') {
+      const validation = validateLogin(value);
+      console.log('LOGIN VALIDATION:', value, validation);
+
+      if (!validation.isValid) {
+        setLoginError(validation.error);
+      } else {
+        setLoginError(undefined);
+      }
+    } else {
+      setLoginError(undefined);
+    }
   }, []);
 
   const handleSubmit = useCallback(
@@ -61,8 +104,8 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
 
         let hasErrors = false;
 
-        if (firstName.trim() === '') {
-          setFirstNameError('Обязательное поле');
+        if (!firstName.trim()) {
+          setFirstNameError('Заполните поле');
           hasErrors = true;
         } else {
           const nameValidation = validateName(firstName);
@@ -72,8 +115,8 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
           }
         }
 
-        if (login.trim() === '') {
-          setLoginError('Обязательное поле');
+        if (!login.trim()) {
+          setLoginError('Заполните поле');
           hasErrors = true;
         } else {
           const loginValidation = validateLogin(login);
@@ -149,8 +192,22 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
     [firstName, login, next, queryClient, updateProfileMutation],
   );
 
+  // const isFormValid =
+  //   firstName.trim() !== '' &&
+  //   login.trim() !== '' &&
+  //   firstNameError === undefined &&
+  //   loginError === undefined;
+
   const isFormValid = firstName.trim() !== '' && login.trim() !== '' && !firstNameError && !loginError;
 
+  console.log('STATE:', {
+    firstName,
+    login,
+    firstNameError,
+    loginError,
+    isFormValid,
+    isSubmitting,
+  });
   return {
     firstName,
     login,
@@ -158,6 +215,10 @@ export const useNameStep = ({ next }: UseNameStepProps): UseNameStepReturn => {
     loginError,
     isFormValid,
     isSubmitting,
+    isNameTouched,
+    isLoginTouched,
+    handleIsNameTouched,
+    handleIsLoginTouched,
     handleFirstNameChange,
     handleLoginChange,
     handleSubmit,

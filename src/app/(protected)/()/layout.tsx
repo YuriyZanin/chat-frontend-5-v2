@@ -1,4 +1,4 @@
-import { ProtectedLayout } from 'layouts/protected-layout';
+import { AdaptiveLayout } from 'layouts/adaptive-layout';
 import { Navigation } from 'layouts/protected-layout/navigation';
 // import { ProfileBlock } from 'modules/profile';
 import { parseJwtToken } from 'modules/conversation/messages-chat/utils/parse-jwt-token';
@@ -26,7 +26,8 @@ export default async function Layout({
   const refreshUrl = `${BACKEND_API}/api/v1/auth/login/refresh/token/`;
   return (
     <QueryProvider>
-      <ProtectedLayout
+      {/* // <ProtectedLayout nav={<Navigation />} list={list} main={children} info={info} /> */}
+      <AdaptiveLayout
         nav={<Navigation />}
         list={list}
         main={children}
@@ -35,6 +36,7 @@ export default async function Layout({
         currentUserId={payload.user_id}
         refreshUrl={refreshUrl}
       />
+
       <QueryDevtools />
     </QueryProvider>
   );

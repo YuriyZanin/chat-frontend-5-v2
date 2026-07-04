@@ -1,11 +1,14 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { AllSettingsBlock } from 'modules/settings';
 import { useRouter } from 'next/navigation';
 import { JSX } from 'react';
 
 export default function SettingsPage(): JSX.Element {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const handleProfileEdit = (): void => {
     router.push('/settings/edit-profile');
   };
@@ -20,6 +23,9 @@ export default function SettingsPage(): JSX.Element {
 
   const handleLeave = async (): Promise<void> => {
     try {
+      queryClient.clear();
+      localStorage.clear();
+      sessionStorage.clear();
       await fetch('/api/auth/remove-tokens', {
         method: 'POST',
       });

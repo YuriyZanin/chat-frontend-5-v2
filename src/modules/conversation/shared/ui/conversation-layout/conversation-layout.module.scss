@@ -39,3 +39,10 @@
 .body:hover {
   overflow-y: auto;
 }
+
+@media (max-width: 410px) {
+  .wrapper {
+    background-color: transparent;
+    border: none;
+  }
+}

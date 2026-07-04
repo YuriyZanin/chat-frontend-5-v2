@@ -107,3 +107,12 @@
 .focused {
   background-color: #f9f9f9;
 }
+
+@media (max-width: 411px) {
+  .container {
+    background: #f5f6f8;
+  }
+  .inputWrapper {
+    background: #f5f6f8;
+  }
+}
