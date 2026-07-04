@@ -19,8 +19,16 @@
   background: white;
 }
 
+.textWrapper {
+  @include mixins.flex-box($direction: row, $justify: start, $align: center, $gap: 0.8rem);
+}
+
+.infoLabels {
+  width: 16px;
+}
+
 .input {
-  min-width: 28.4rem;
+  width: 28rem;
   border: none;
   outline: none;
   font-size: 1.6rem;
@@ -71,22 +79,23 @@
 }
 
 .clearButton {
-  position: absolute;
-  right: 1.2rem;
-  top: 60%;
-  transform: translateY(-50%);
-  @include mixins.flex-box($justify: center, $align: center);
+  width: 16px;
+  height: 16px;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.6rem;
   color: #999;
-  padding: 0.4rem;
   transition: color 0.2s;
 
   &:hover {
     color: #333;
   }
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
 }
 
 .divider {
