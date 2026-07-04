@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { avatarUploadApi } from 'modules/conversation/chats/api/avatar-upload.api';
 import type { Chat } from 'modules/conversation/chats/entity';
 import type { CreateChatRequestApi } from 'modules/conversation/chats/model/chat/chat.api.schema';
@@ -91,16 +92,17 @@ type UseWebSocketChatReturn = {
     file,
   }: {
     name: string;
-    chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
-    uidUsersList: string[];
+    chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
+    uidUsersList: string[] | null;
     description?: string;
-    avatarPreview?: string;
+    avatarPreview?: string | null;
     file?: File | null;
   }) => void;
 };
 
 export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUrl: string): UseWebSocketChatReturn {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPongRef = useRef<number>(Date.now());
   // прописываем в компоненте актуальный user_uid открытого чата из store
@@ -137,6 +139,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
   const addChatInChatsListStore = useChatsListStore.getState().addChatInChatsList;
   const updateChatByUidStore = useChatsListStore.getInitialState().updateChatByUid;
   const deleteChatByUidStore = useChatsListStore.getInitialState().deleteChatByUid;
+  const chatsListStore = useChatsListStore.getInitialState().chatsList;
 
   // maccив интервалов [{requestUid:timeout_id},...] на каждое отправленное сообщение с помошью ws
   // нужно отследить через какое время на отправленное клиентом сообщение, ws пришлет ответ-подтверждение,
@@ -523,7 +526,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
             resetCall();
           }
         }
-        //входящее ws-сообщение сервера подтверждающее создание группы/канала
+        //10. Входящее ws-сообщение сервера подтверждающее создание группы/канала
         if (data.action === 'create_chat' && data.status === 'OK') {
           console.log('Подтверждение сервера об создании группы/канала:', data);
           // Если сервер пришлёт подтверждение с request_uid,
@@ -559,7 +562,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
               if (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') {
                 text = `@@@ Канал создан`;
               } else {
-                text = `@@@ ${data.object.owner_full_name} создал(а) группу "${data.object.name}"`;
+                text = `@@@ создал(а) группу "${data.object.name}"`;
               }
               // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
               updateChatByUidStore(data.request_uid, result);
@@ -586,6 +589,29 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           stopRef.current = true;
           // Очистим таймаут подтверждения
           pendingTimeouts.current.delete(data.request_uid);
+        }
+        //11 Входящее ws-сообщение сервера подтверждающее добавление участника/подписчика в группу/канал
+        if (data.action === 'add_members_to_chat' && data.status === 'OK') {
+          console.log('Подтверждение сервера об добавлении участника/подписчика в группу/канал:', data);
+          // сообщение получил участник/подписчик группы/канала, у которого еще нет в DOM данной группы/канала
+          if (
+            data.object.added_users.some(
+              (user: { uid: string; full_name: string }) => user.uid === currentUserIdRef.current,
+            ) &&
+            !chatsListStore?.some((chat: Chat) => chat.chat.chatKey === data.object.chat_key)
+          ) {
+            // делаем рефреш chat-list у участника/подписчика, чтобы группа/каннал в которую его добавили сразу появился у него в DOM
+            queryClient.refetchQueries({
+              queryKey: ['chats', 'chat-list'],
+            });
+          } else {
+            // сообщение получил участник/подписчик группы/канала, у которого в DOM уже есть данная группа/канал
+            // делаем рефреш 'participants-list' у участника/подписчика, чтобы в определенной группе/канале
+            // сразу изменить список участников/подписчиков
+            queryClient.refetchQueries({
+              queryKey: ['participants', 'participants-list', data.object.chat_key],
+            });
+          }
         }
       };
     } catch (e) {}
@@ -877,12 +903,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       file,
     }: {
       name: string;
-      chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel';
-      uidUsersList: string[];
+      chatType: 'public-group' | 'private-group' | 'public-channel' | 'private-channel' | null;
+      uidUsersList: string[] | null;
       description?: string;
-      avatarPreview?: string;
+      avatarPreview?: string | null;
       file?: File | null;
     }): Promise<void> => {
+      if (!chatType) return;
       stopRef.current = false;
       const requestUid = crypto.randomUUID();
       //создаем временную чат-заглушку для помещения в список чатов DOM
@@ -921,7 +948,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         object: {
           name,
           chat_type: chatType,
-          uid_users_list: uidUsersList,
+          uid_users_list: uidUsersList ?? [],
           ...(description && { description }),
         },
       };

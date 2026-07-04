@@ -13,14 +13,20 @@ import styles from './create-new-group-block.module.scss';
 
 export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   const setNameStore = useNewGroupStore((s) => s.setName);
+  const nameStore = useNewGroupStore((s) => s.name);
+  const setSelectedStore = useNewGroupStore((s) => s.setSelected);
   const setModeStore = useNewGroupStore((s) => s.setMode);
   const setDescriptionStore = useNewGroupStore((s) => s.setDescription);
+  const descriptionStore = useNewGroupStore((s) => s.description);
   const setChatTypeStore = useNewGroupStore((s) => s.setChatType);
+  const chatTypeStore = useNewGroupStore((s) => s.chatType);
   const setAvatarUidStore = useNewGroupStore((s) => s.setAvatarUid);
   const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
+  const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
   const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
   const router = useRouter();
   const pathname = usePathname();
+
   // Определяем режим по пути
   const mode = pathname.includes('/new-channel') ? 'channel' : 'group';
   const {
@@ -35,10 +41,10 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   } = useImageUpload();
 
   const [croppedZoom, setCroppedZoom] = useState<number | null>(null);
-  const [groupName, setGroupName] = useState('');
-  const [groupDescription, setGroupDescription] = useState('');
+  const [groupName, setGroupName] = useState(nameStore);
+  const [groupDescription, setGroupDescription] = useState(descriptionStore);
   const [chatType, setChatType] = useState<'public-group' | 'private-group' | 'public-channel' | 'private-channel'>(
-    mode === 'group' ? 'public-group' : 'public-channel',
+    chatTypeStore === null ? (mode === 'group' ? 'public-group' : 'public-channel') : chatTypeStore,
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -113,17 +119,34 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   };
 
   const title = mode === 'group' ? 'Создать группу' : 'Создать канал';
-  const avatarSrc = previewUrl || '/images/settings/noAvatarIcon.svg';
+  const avatarSrc = avatarPreviewStore || '/images/settings/noAvatarIcon.svg';
   const avatarStyle: React.CSSProperties = {};
-  if (croppedZoom !== null && previewUrl) {
+  if (croppedZoom !== null && avatarPreviewStore) {
     avatarStyle.transform = `scale(${croppedZoom / 100})`;
     avatarStyle.transition = 'transform 0.3s ease';
   }
+  const handleExitInCreatingGroupOrCannel = (): void => {
+    setNameStore('');
+    setDescriptionStore('');
+    setChatTypeStore(null);
+    setSelectedStore(mode === 'group' ? 'public-group' : 'public-channel');
+    setChatType(mode === 'group' ? 'public-group' : 'public-channel');
+    setAvatarPreviewStore(null);
+    setAvatarUidStore(null);
+    setAvatarFileStore(null);
+  };
 
   return (
     <>
       <div className={styles.container}>
-        <button type="button" className={styles.returnButton} onClick={() => router.back()}>
+        <button
+          type="button"
+          className={styles.returnButton}
+          onClick={() => {
+            handleExitInCreatingGroupOrCannel();
+            router.push('/chats');
+          }}
+        >
           <div className={styles.iconAndLabelContainer}>
             <Image
               src="/images/settings/returnArrowIcon.svg"

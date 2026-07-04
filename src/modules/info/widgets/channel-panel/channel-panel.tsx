@@ -22,7 +22,7 @@ export const ChannelPanel = ({ uid, currentUid, filesList }: ChannelPanelProps):
   const name = profile?.name ?? '';
   const membersCount = profile?.participants.length ?? 0;
   const status = formatSubscribers(membersCount);
-  const tabs = ['Подписчики', 'Медиа', 'Файлы', 'Голосовые', 'Ссылки'];
+  const tabs = ['Подписчики', 'Медиа', 'Файлы', 'Голосовые', 'Сcылки'];
   if (!profile) return null;
   // создаем url для запроса картинки через наш прокси-сервер который в запрос вставляет токен чтобы пройти автоизацию
   const result = `/api/proxy${removeDomain(profile?.avatar ?? '')}`;

@@ -9,7 +9,6 @@ export const getChatList = (params: ChatQuery): Promise<ChatListApiResponse> => 
 
     searchParams.set(key, String(value));
   });
-
   return apiFetch<ChatListApiResponse>(`/api/proxy/api/v1/chat/list/?${searchParams.toString()}`, {
     method: 'GET',
   });

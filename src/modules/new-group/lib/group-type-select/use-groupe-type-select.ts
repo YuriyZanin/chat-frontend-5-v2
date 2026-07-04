@@ -1,5 +1,5 @@
-import { useState } from 'react';
-
+import { useNewGroupStore } from 'modules/new-group/model/new-group-store';
+import { useEffect, useState } from 'react';
 // Общий тип для групп и каналов
 export type GroupType = 'private-group' | 'public-group';
 export type ChannelType = 'private-channel' | 'public-channel';
@@ -21,6 +21,7 @@ export const useGroupTypeSelect = ({
   mode = 'group',
   initial,
 }: UseGroupTypeSelectProps = {}): UseGroupTypeSelectReturn => {
+  const addSelectedStore = useNewGroupStore((s) => s.addSelected);
   // Значения по умолчанию в зависимости от режима
   const getDefaultInitial = (): ChatType => {
     if (initial) return initial;
@@ -28,6 +29,9 @@ export const useGroupTypeSelect = ({
   };
 
   const [selected, setSelected] = useState<ChatType>(getDefaultInitial);
+  useEffect(() => {
+    addSelectedStore(setSelected);
+  }, [setSelected]);
 
   const selectClosed = (): void => {
     setSelected(mode === 'group' ? 'private-group' : 'private-channel');
