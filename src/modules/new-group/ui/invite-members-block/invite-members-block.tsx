@@ -24,13 +24,21 @@ export const InviteMembersBlock = (): JSX.Element => {
   const enterSelectionMode = useContactsSelectionStore((s) => s.enterSelectionMode);
   const selectedUids = useContactsSelectionStore((s) => s.selectedIds);
   const nameStore = useNewGroupStore((s) => s.name);
+  const setNameStore = useNewGroupStore((s) => s.setName);
   const setModeStore = useNewGroupStore((s) => s.setMode);
   const modeStore = useNewGroupStore((s) => s.mode);
   const descriptionStore = useNewGroupStore((s) => s.description);
+  const setDescriptionStore = useNewGroupStore((s) => s.setDescription);
   const chatTypeStore = useNewGroupStore((s) => s.chatType);
+  const setChatTypeStore = useNewGroupStore((s) => s.setChatType);
   const avatarUidStore = useNewGroupStore((s) => s.avatarUid);
+  const setAvatarUidStore = useNewGroupStore((s) => s.setAvatarUid);
   const avatarPreviewStore = useNewGroupStore((s) => s.avatarPreview);
+  const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
   const avatarFileStore = useNewGroupStore((s) => s.avatarFile);
+  const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
+  const setSelectedStore = useNewGroupStore((s) => s.setSelected);
+
   const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
 
   const exitSelectionMode = useContactsSelectionStore((s) => s.exitSelectionMode);
@@ -43,6 +51,10 @@ export const InviteMembersBlock = (): JSX.Element => {
   useEffect(() => {
     enterSelectionMode();
   }, [enterSelectionMode]);
+  // сразу очищаем поисковую строку
+  useEffect(() => {
+    clearQuery();
+  }, []);
 
   const title = 'Пригласить участников';
   const backPath = mode === 'group' ? '/new-group' : '/new-channel';
@@ -75,6 +87,14 @@ export const InviteMembersBlock = (): JSX.Element => {
         file: avatarFileStore,
       });
       exitSelectionMode();
+      setNameStore('');
+      setDescriptionStore('');
+      setChatTypeStore(null);
+      setSelectedStore(mode === 'group' ? 'public-group' : 'public-channel');
+      setAvatarPreviewStore(null);
+      setAvatarUidStore(null);
+      setAvatarFileStore(null);
+
       //router.push('successPath');
     } catch (error) {
       console.error(`Ошибка создания ${mode === 'group' ? 'группы' : 'канала'}:`, error);
@@ -111,6 +131,7 @@ export const InviteMembersBlock = (): JSX.Element => {
               type="button"
               disabled={!hasSelected}
               onClick={handleCreate}
+              style={!hasSelected ? { background: '#e4e4e4', color: '#C5C5C5' } : {}}
             />
           </div>
         }

@@ -23,6 +23,7 @@ export const SearchInput = ({ query, onChange, onClear }: SearchInputProps): JSX
         }}
         placeholder="Поиск"
         aria-label="Поиск"
+        maxLength={100}
       />
 
       {query.length > 0 && onClear && (

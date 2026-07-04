@@ -80,6 +80,7 @@ export const CardShell = ({
           position={contextMenuPos}
           visible={contextMenuVisible}
           onClose={handleCloseMenu}
+          chatType={chatType}
         />
       )}
       <li className={styles.li}>
