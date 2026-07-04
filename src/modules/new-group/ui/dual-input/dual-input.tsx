@@ -105,33 +105,37 @@ const DualInput: React.FC<DualInputProps> = ({
           <label className={`${styles.label} ${firstFocused || valueFirst ? styles.labelActive : ''}`}>
             {placeholderFirst}
           </label>
-          <textarea
-            ref={firstTextareaRef}
-            value={valueFirst}
-            onChange={onFirstChange}
-            onFocus={handleFirstFocus}
-            onBlur={handleFirstBlur}
-            className={styles.input}
-            rows={1}
-          />
-          {firstFocused && (
-            <>
-              <span className={firstLength === maxFirst ? styles.counterRed : styles.counter}>
-                {firstLength}/{maxFirst}
-              </span>
-              {valueFirst && (
-                <button
-                  type="button"
-                  className={styles.clearButton}
-                  onClick={onClearFirst}
-                  onMouseDown={(e) => e.preventDefault()}
-                  aria-label="Очистить"
-                >
-                  <Image src="/images/new-group/clearIcon.svg" alt="" width={16} height={16} />
-                </button>
+          <div className={styles.textWrapper}>
+            <textarea
+              ref={firstTextareaRef}
+              value={valueFirst}
+              onChange={onFirstChange}
+              onFocus={handleFirstFocus}
+              onBlur={handleFirstBlur}
+              className={styles.input}
+              rows={1}
+            />
+            <div className={styles.infoLabels}>
+              {firstFocused && (
+                <>
+                  <span className={firstLength === maxFirst ? styles.counterRed : styles.counter}>
+                    {firstLength}/{maxFirst}
+                  </span>
+                  {valueFirst && (
+                    <button
+                      type="button"
+                      className={styles.clearButton}
+                      onClick={onClearFirst}
+                      onMouseDown={(e) => e.preventDefault()}
+                      aria-label="Очистить"
+                    >
+                      <Image src="/images/new-group/clearIcon.svg" alt="" width={16} height={16} />
+                    </button>
+                  )}
+                </>
               )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -142,33 +146,43 @@ const DualInput: React.FC<DualInputProps> = ({
           <label className={`${styles.label} ${secondFocused || valueSecond ? styles.labelActive : ''}`}>
             {placeholderSecond}
           </label>
-          <textarea
-            ref={secondTextareaRef}
-            value={valueSecond}
-            onChange={onSecondChange}
-            onFocus={handleSecondFocus}
-            onBlur={handleSecondBlur}
-            className={styles.input}
-            rows={1}
-          />
-          {secondFocused && (
-            <>
-              <span className={secondLength === maxSecond ? styles.counterRed : styles.counter}>
-                {secondLength}/{maxSecond}
-              </span>
-              {valueSecond && (
-                <button
-                  type="button"
-                  className={styles.clearButton}
-                  onClick={onClearSecond}
-                  onMouseDown={(e) => e.preventDefault()}
-                  aria-label="Очистить"
-                >
-                  <Image src="/images/new-group/clearIcon.svg" alt="" width={16} height={16} />
-                </button>
+          <div className={styles.textWrapper}>
+            <textarea
+              ref={secondTextareaRef}
+              value={valueSecond}
+              onChange={onSecondChange}
+              onFocus={handleSecondFocus}
+              onBlur={handleSecondBlur}
+              className={styles.input}
+              rows={1}
+            />
+            <div className={styles.infoLabels}>
+              {secondFocused && (
+                <>
+                  <span className={secondLength === maxSecond ? styles.counterRed : styles.counter}>
+                    {secondLength}/{maxSecond}
+                  </span>
+                  {valueSecond && (
+                    <button
+                      type="button"
+                      className={styles.clearButton}
+                      onClick={onClearSecond}
+                      onMouseDown={(e) => e.preventDefault()}
+                      aria-label="Очистить"
+                    >
+                      <Image
+                        className={styles.icon}
+                        src="/images/new-group/clearIcon.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
+                    </button>
+                  )}
+                </>
               )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
