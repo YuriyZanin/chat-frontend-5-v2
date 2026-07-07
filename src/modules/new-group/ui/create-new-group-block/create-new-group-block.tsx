@@ -201,6 +201,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
               label="Далее"
               type="button"
               disabled={!groupName.trim()}
+              style={!groupName.trim() ? { background: '#E4E4E4', color: '#C5C5C5' } : {}}
               onClick={next}
             />
           </div>

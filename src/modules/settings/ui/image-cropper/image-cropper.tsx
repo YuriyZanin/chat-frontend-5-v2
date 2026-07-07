@@ -6,7 +6,7 @@ import styles from './image-cropper.module.scss';
 // Обновляем хук, чтобы он принимал начальные значения
 import { useImageCropper } from 'modules/settings/lib/image-cropper/use-image-cropper';
 import Image from 'next/image';
-
+import Close from './img/close.svg';
 type ImageCropperProps = {
   onClose: () => void;
   onConfirm: (file: File, zoom: number) => void;
@@ -56,7 +56,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       <div className={styles.header}>
         <h2 className={styles.title}>Настроить отображение фото</h2>
         <button className={styles.closeButton} onClick={onClose}>
-          ×
+          <Close />
         </button>
       </div>
 
