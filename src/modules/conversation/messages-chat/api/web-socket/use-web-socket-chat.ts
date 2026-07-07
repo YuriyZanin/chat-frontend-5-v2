@@ -810,7 +810,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           content,
           status: 'publish',
           message_attachment_uids: [],
-          replied_messages: [],
+          replied_message: null,
           forwarded_messages: [],
         },
       };
@@ -824,7 +824,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         }
       }
       if (repliedMessage) {
-        payloadMessage.object.replied_messages = [repliedMessage.uid];
+        payloadMessage.object.replied_message = repliedMessage.uid;
       }
       if (forwardMessage) {
         payloadMessage.object.forwarded_messages = [forwardMessage.uid];
