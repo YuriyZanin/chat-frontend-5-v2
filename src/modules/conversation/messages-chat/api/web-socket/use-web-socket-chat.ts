@@ -245,10 +245,10 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         if (e.code === 1006 || e.code === 4000) {
           try {
             await refreshWsSession(refreshUrl);
-            reconnectTimeout.current = setTimeout(scheduleReconnect, 1000);
           } catch {
             console.log('Refresh failed, need relogin');
           }
+          reconnectTimeout.current = setTimeout(scheduleReconnect, 1000);
         }
       };
 

@@ -74,10 +74,10 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       <div className={styles.sliderContainer}>
         <input
           type="range"
-          min="50"
-          max="200"
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
+          min={0}
+          max={150}
+          value={zoom - 100}
+          onChange={(e) => setZoom(Number(e.target.value) + 100)}
           className={styles.slider}
         />
         <button className={''} onClick={handleConfirm} disabled={!previewUrl}>
