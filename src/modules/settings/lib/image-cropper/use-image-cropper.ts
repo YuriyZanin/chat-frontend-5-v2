@@ -1,5 +1,6 @@
 // src/modules/settings/lib/image-cropper/use-image-cropper.ts
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react'; // Добавляем useEffect
+import { cropImage } from './crop-image';
 
 type UseImageCropperReturn = {
   zoom: number;
@@ -17,6 +18,7 @@ type UseImageCropperReturn = {
   handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleMouseUp: () => void;
+  cropAndGetFile: () => Promise<File>;
 
   // fileInputRef: React.RefObject<HTMLInputElement>;
 };
@@ -98,40 +100,66 @@ export const useImageCropper = (
         setPosition({ x: 0, y: 0 });
       }
     };
-  }, [previewUrl, zoom]);
+  }, [previewUrl, zoom, setMaxOffset]);
 
   // Обработчики для перетаскивания
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>): void => {
-    // Разрешаем перетаскивание только если зум > 100%
-    if (zoom <= 100) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (zoom <= 100) return;
 
-    e.preventDefault();
-    setIsDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY };
-    dragOffset.current = { x: position.x, y: position.y };
-  };
+      e.preventDefault();
+      setIsDragging(true);
+      dragStart.current = { x: e.clientX, y: e.clientY };
+      dragOffset.current = { x: position.x, y: position.y };
+    },
+    [zoom, position],
+  );
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
-    if (!isDragging) return;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isDragging) return;
 
-    const deltaX = e.clientX - dragStart.current.x;
-    const deltaY = e.clientY - dragStart.current.y;
+      const deltaX = e.clientX - dragStart.current.x;
+      const deltaY = e.clientY - dragStart.current.y;
 
-    // Применяем ограничения
-    const newX = Math.max(-maxOffset.x, Math.min(maxOffset.x, dragOffset.current.x + deltaX));
-    const newY = Math.max(-maxOffset.y, Math.min(maxOffset.y, dragOffset.current.y + deltaY));
+      const newX = Math.max(-maxOffset.x, Math.min(maxOffset.x, dragOffset.current.x + deltaX));
+      const newY = Math.max(-maxOffset.y, Math.min(maxOffset.y, dragOffset.current.y + deltaY));
 
-    setPosition({ x: newX, y: newY });
-  };
-
-  const handleMouseUp = (): void => {
+      setPosition({ x: newX, y: newY });
+    },
+    [isDragging, maxOffset],
+  );
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
+  // Функция для создания обрезанного файла
+  const cropAndGetFile = useCallback(async (): Promise<File> => {
+    if (!previewUrl) {
+      throw new Error('Изображение не загружено');
+    }
+
+    if (!containerRef.current) {
+      throw new Error('Контейнер не найден');
+    }
+
+    // Получаем размеры контейнера
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const containerSize = {
+      width: containerRect.width,
+      height: containerRect.height,
+    };
+
+    // Создаем обрезанное изображение
+    const croppedFile = await cropImage(previewUrl, zoom, position, containerSize);
+
+    return croppedFile;
+  }, [previewUrl, zoom, position]);
 
   const reset = useCallback(() => {
     setZoom(100);
     setPreviewUrl(null);
     setOriginalFile(null);
+    setIsDragging(false);
     setPosition({ x: 0, y: 0 });
     setMaxOffset({ x: 0, y: 0 });
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -153,5 +181,6 @@ export const useImageCropper = (
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    cropAndGetFile,
   };
 };

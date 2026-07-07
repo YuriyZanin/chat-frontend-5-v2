@@ -1,12 +1,14 @@
 // src/modules/settings/ui/image-cropper/image-cropper.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './image-cropper.module.scss';
 // Обновляем хук, чтобы он принимал начальные значения
+import { useNewGroupStore } from 'modules/new-group/model/new-group-store';
 import { useImageCropper } from 'modules/settings/lib/image-cropper/use-image-cropper';
 import Image from 'next/image';
 import Close from './img/close.svg';
+
 type ImageCropperProps = {
   onClose: () => void;
   onConfirm: (file: File, zoom: number) => void;
@@ -35,8 +37,12 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     handleMouseMove,
     handleMouseUp,
     isDragging,
+    cropAndGetFile,
   } = useImageCropper(initialPreviewUrl, initialOriginalFile); // <-- Передаём пропсы в хук
 
+  const [isProcessing, setIsProcessing] = useState(false);
+  const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
+  const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
   // Сброс при изменении зума
   useEffect(() => {
     if (zoom <= 100) {
@@ -44,9 +50,38 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     }
   }, [zoom]);
 
-  const handleConfirm = (): void => {
-    if (originalFile) {
+  const handleConfirm = async (): Promise<void> => {
+    if (!previewUrl) return;
+    if (zoom <= 100 && originalFile) {
       onConfirm(originalFile, zoom);
+      return;
+    }
+    try {
+      setIsProcessing(true);
+
+      // Создаем обрезанный файл
+      const croppedFile = await cropAndGetFile();
+
+      // Получаем URL для предпросмотра
+      const croppedUrl = URL.createObjectURL(croppedFile);
+
+      // Вызываем callback с файлом и zoom
+      onConfirm(croppedFile, zoom);
+
+      console.log('Обрезанное изображение создано:', {
+        file: croppedFile,
+        url: croppedUrl,
+        size: croppedFile.size,
+        type: croppedFile.type,
+      });
+
+      // Закрываем модалку
+      onClose();
+    } catch (error) {
+      console.error('Ошибка при обрезке изображения:', error);
+      alert('Не удалось обрезать изображение. Попробуйте еще раз.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -109,7 +144,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
           }}
           className={styles.slider}
         />
-        <button onClick={handleConfirm} disabled={!previewUrl}>
+        <button onClick={handleConfirm} disabled={!previewUrl || isProcessing}>
           <Image src={'/images/settings/okImageCropperIcon.svg'} alt="" width={36} height={36} />
         </button>
       </div>
