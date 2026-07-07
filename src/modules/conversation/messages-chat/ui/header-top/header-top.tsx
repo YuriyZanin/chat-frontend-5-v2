@@ -193,14 +193,13 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
               </button>
             )}
 
-            <div className={styles.image}>
+            <div className={styles.avatar}>
               <Image
                 src={imgSrc}
                 alt={firstName}
                 unoptimized
                 width={40}
                 height={40}
-                className={styles.image}
                 onClick={() => toggleInfoOpen()}
                 onError={() => {
                   setImgSrc(defaultAvatar);
