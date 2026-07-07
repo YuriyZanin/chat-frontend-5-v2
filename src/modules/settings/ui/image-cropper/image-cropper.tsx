@@ -1,7 +1,7 @@
 // src/modules/settings/ui/image-cropper/image-cropper.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import styles from './image-cropper.module.scss';
 // Обновляем хук, чтобы он принимал начальные значения
 import { useImageCropper } from 'modules/settings/lib/image-cropper/use-image-cropper';
@@ -27,20 +27,24 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     originalFile, // <-- Это теперь будет из хука, инициализированного с initialOriginalFile
     handleFileChange,
     reset,
+    setPosition,
+    position,
+    containerRef,
+    fileInputRef,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    isDragging,
   } = useImageCropper(initialPreviewUrl, initialOriginalFile); // <-- Передаём пропсы в хук
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Устанавливаем CSS-переменную для масштаба
+  // Сброс при изменении зума
   useEffect(() => {
-    const container = document.querySelector(`.${styles.previewContainer}`) as HTMLElement | null;
-    if (container) {
-      container.style.setProperty('--zoom', `${zoom / 100}`);
+    if (zoom <= 100) {
+      setPosition({ x: 0, y: 0 });
     }
   }, [zoom]);
 
   const handleConfirm = (): void => {
-    // Используем originalFile из хука (который теперь синхронизирован)
     if (originalFile) {
       onConfirm(originalFile, zoom);
     }
@@ -60,9 +64,28 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         </button>
       </div>
 
-      <div className={styles.previewContainer}>
+      <div
+        className={styles.previewContainer}
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onMouseDown={handleMouseDown}
+        style={{
+          cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+        }}
+      >
         {previewUrl ? (
-          <img src={previewUrl} alt="Preview" className={styles.previewImage} draggable={false} />
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className={styles.previewImage}
+            draggable={false}
+            style={{
+              transform: `translate(calc(${position.x}px), calc(${position.y}px)) scale(${zoom / 100})`,
+              transformOrigin: 'center center',
+            }}
+          />
         ) : (
           <div className={styles.placeholder}>
             <span>Выберите изображение</span>
@@ -77,11 +100,17 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
           min={0}
           max={150}
           value={zoom - 100}
-          onChange={(e) => setZoom(Number(e.target.value) + 100)}
+          onChange={(e) => {
+            const newZoom = Number(e.target.value) + 100;
+            setZoom(newZoom);
+            if (newZoom <= 100) {
+              setPosition({ x: 0, y: 0 });
+            }
+          }}
           className={styles.slider}
         />
-        <button className={''} onClick={handleConfirm} disabled={!previewUrl}>
-          <Image src={'/images/settings/okImageCropperIcon.svg'} alt="" width={36} height={36} className={''} />
+        <button onClick={handleConfirm} disabled={!previewUrl}>
+          <Image src={'/images/settings/okImageCropperIcon.svg'} alt="" width={36} height={36} />
         </button>
       </div>
 
