@@ -20,6 +20,7 @@ import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
 
 import {
   useHeaderButtonsModalStore,
+  useMessagesChatStore,
   useSearchIndicatorStore,
   useSearchMessagesStore,
 } from '../../zustand-store/zustand-store';
@@ -38,6 +39,7 @@ import styles from './header-top.module.scss';
 
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import Image from 'next/image';
+
 import type { HeaderTopProps } from './header-top.props';
 import BackIcon from './icons/back-icon.svg';
 import CallIcon from './icons/call-icon.svg';
@@ -48,7 +50,8 @@ const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.sv
 export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProps): JSX.Element => {
   //получили список чатов из store
   const chatsListStore = useChatsListStore((s) => s.chatsList);
-
+  // получим список сообщений из store пользователя user_uid
+  const messagesByUserStore = useMessagesChatStore((s) => s.messagesByUser[user_uid]) ?? [];
   //хук для получения списка участников опреденной группы/канала (по chat_key)
   const { participants } = useParticipantsScreen(user_uid);
   const isGroup = user_uid.startsWith('group');
@@ -249,7 +252,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {!isInContacts && chat?.messages.firstNewMessage === undefined && (
+        {messagesByUserStore.length === 1 && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}
