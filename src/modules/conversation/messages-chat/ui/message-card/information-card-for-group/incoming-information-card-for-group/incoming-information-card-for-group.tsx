@@ -4,7 +4,8 @@ import type { IncomingInformationForGroupCardProps } from './incoming-informatio
 export const IncomingInformationForGroupCard = ({
   message,
   register,
-}: IncomingInformationForGroupCardProps): JSX.Element => {
+}: IncomingInformationForGroupCardProps): JSX.Element | null => {
+  if (message.content === `@@@`) return null;
   return (
     <div
       className={styles.box}

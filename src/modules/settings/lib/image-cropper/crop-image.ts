@@ -46,10 +46,6 @@ export const cropImage = (
         const validSy = Math.max(0, Math.min(maxSy, sy));
         const validSWidth = Math.min(sWidth, img.width - validSx);
         const validSHeight = Math.min(sHeight, img.height - validSy);
-
-        console.log('Область обрезки в исходном изображении:');
-        console.log('sx:', validSx, 'sy:', validSy, 'width:', validSWidth, 'height:', validSHeight);
-
         // Рисуем напрямую из исходного изображения
         ctx.drawImage(
           img,

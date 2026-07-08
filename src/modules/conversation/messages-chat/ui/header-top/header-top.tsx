@@ -71,29 +71,31 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       : chatsListStore?.find((c) => c.peer.uid === user_uid);
   }, [chatsListStore, user_uid, isGroupOrChannel]);
 
-  let resultProfile;
+  console.log('messagesByUserStore: ', messagesByUserStore);
 
-  if (chatOrContact === 'chat') {
-    resultProfile = {
-      avatarUrl: chat?.peer.avatarUrl || '',
-      firstName: chat?.peer.firstName || '',
-      lastName: chat?.peer.lastName || '',
-      nickname: chat?.peer.nickname || '',
-      isBlocked: chat?.peer.isBlocked || false,
-      isInContacts: chat?.peer.isInContacts || false,
-      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
-    };
-  } else {
-    resultProfile = {
-      avatarUrl: profile?.avatar || profile?.avatarUrl || profile?.avatarWebp || profile?.avatarWebpUrl || '',
-      firstName: profile?.firstName || '',
-      lastName: profile?.lastName || '',
-      nickname: profile?.nickname || '',
-      isBlocked: profile?.isBlocked || false,
-      isInContacts: false,
-      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
-    };
-  }
+  const resultProfile = useMemo(() => {
+    if (chatOrContact === 'chat') {
+      return {
+        avatarUrl: chat?.peer.avatarUrl || '',
+        firstName: chat?.peer.firstName || '',
+        lastName: chat?.peer.lastName || '',
+        nickname: chat?.peer.nickname || '',
+        isBlocked: chat?.peer.isBlocked || false,
+        isInContacts: chat?.peer.isInContacts || false,
+        status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
+      };
+    } else {
+      return {
+        avatarUrl: profile?.avatar || profile?.avatarUrl || profile?.avatarWebp || profile?.avatarWebpUrl || '',
+        firstName: profile?.firstName || '',
+        lastName: profile?.lastName || '',
+        nickname: profile?.nickname || '',
+        isBlocked: profile?.isBlocked || false,
+        isInContacts: false,
+        status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
+      };
+    }
+  }, [chatOrContact, chat, profile]);
   const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
   const [searchMessagesVisible, setSearchMessagesVisible] = useState<boolean>(false);
 

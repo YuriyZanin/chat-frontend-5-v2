@@ -5,10 +5,10 @@ import type { Participant } from 'modules/info/entity/info.entity';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { usePathname } from 'next/navigation';
 import { JSX } from 'react';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { useHeaderButtonsModalStore } from '../../zustand-store/zustand-store';
 import styles from './header-top-buttons-block.module.scss';
 import CloseIcon from './icon/close.svg';
-
 export const HeaderTopButtonsBlock = ({
   currentUid,
   chatKey,
@@ -52,7 +52,9 @@ export const HeaderTopButtonsBlock = ({
   const handleLeaveGroup = (): void => {
     openLeaveGroupModal();
   };
-
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+  if (webSocketChatSrore === null) return null;
+  const { sendMessage } = webSocketChatSrore;
   if (!isButtonMenuOpen || (isGroup && !member)) return null;
 
   return (
@@ -88,7 +90,13 @@ export const HeaderTopButtonsBlock = ({
         </>
       )}
 
-      <button className={styles.icon} onClick={closeButtonMenu}>
+      <button
+        className={styles.icon}
+        onClick={() => {
+          closeButtonMenu();
+          sendMessage({ content: '@@@' });
+        }}
+      >
         <CloseIcon />
       </button>
     </div>
