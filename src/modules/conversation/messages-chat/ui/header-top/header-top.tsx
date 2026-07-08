@@ -8,7 +8,7 @@ import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect, useMemo, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
@@ -57,14 +57,20 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
   const isGroup = user_uid.startsWith('group');
   const isChannel = user_uid.startsWith('channel');
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
-  const chat = isGroupOrChannel
-    ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
-    : chatsListStore?.find((c) => c.peer.uid === user_uid);
-
   const parts = user_uid.split('_');
   const userUid = parts.length > 1 ? parts[1] : parts[0];
   //xук для получения профиля определенного (uid) пользователя
   const { data: profile, isLoading } = useInfoProfileQuery(userUid);
+
+  const chat = useMemo(() => {
+    if (!chatsListStore || !user_uid) {
+      return undefined;
+    }
+    return isGroupOrChannel
+      ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
+      : chatsListStore?.find((c) => c.peer.uid === user_uid);
+  }, [chatsListStore, user_uid, isGroupOrChannel]);
+
   let resultProfile;
 
   if (chatOrContact === 'chat') {
@@ -191,7 +197,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
         <div className={styles.contactWrapper}>
           <div className={styles.left}>
             {isMobile && (
-              <button type="button" className={''} onClick={() => router.push('/chats')}>
+              <button type="button" onClick={() => router.push('/chats')}>
                 <BackIcon />
               </button>
             )}
