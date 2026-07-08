@@ -68,13 +68,6 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       // Вызываем callback с файлом и zoom
       onConfirm(croppedFile, zoom);
 
-      console.log('Обрезанное изображение создано:', {
-        file: croppedFile,
-        url: croppedUrl,
-        size: croppedFile.size,
-        type: croppedFile.type,
-      });
-
       // Закрываем модалку
       onClose();
     } catch (error) {

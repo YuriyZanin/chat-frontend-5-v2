@@ -58,7 +58,6 @@ export const InviteMembersBlock = (): JSX.Element => {
 
   const title = 'Пригласить участников';
   const backPath = mode === 'group' ? '/new-group' : '/new-channel';
-  const successPath = mode === 'group' ? '/new-group' : '/new-channel';
   const buttonLabel = 'Создать';
 
   const handleCreate = async (): Promise<void> => {
@@ -71,11 +70,6 @@ export const InviteMembersBlock = (): JSX.Element => {
     }
 
     const usersArray = Array.isArray(selectedUids) ? selectedUids : Array.from(selectedUids);
-
-    if (modeStore === 'group' && usersArray.length === 0) {
-      alert('Выберите хотя бы одного участника');
-      return;
-    }
 
     try {
       createGroupOrChannel({
@@ -102,9 +96,6 @@ export const InviteMembersBlock = (): JSX.Element => {
     }
   };
 
-  const hasSelected =
-    modeStore === 'group' ? (Array.isArray(selectedUids) ? selectedUids.length > 0 : selectedUids.size > 0) : true; // Для канала выбор участников опционален
-
   return (
     <div className={styles.container}>
       <button type="button" className={styles.returnButton} onClick={() => router.push(backPath)}>
@@ -124,15 +115,7 @@ export const InviteMembersBlock = (): JSX.Element => {
         header={<SearchInput query={query} onChange={setQuery} onClear={clearQuery} />}
         footer={
           <div className={styles.createButtonContainer}>
-            <ButtonUI
-              variant="general"
-              appearance="primary"
-              label={buttonLabel}
-              type="button"
-              disabled={!hasSelected}
-              onClick={handleCreate}
-              style={!hasSelected ? { background: '#e4e4e4', color: '#C5C5C5' } : {}}
-            />
+            <ButtonUI variant="general" appearance="primary" label={buttonLabel} type="button" onClick={handleCreate} />
           </div>
         }
       >

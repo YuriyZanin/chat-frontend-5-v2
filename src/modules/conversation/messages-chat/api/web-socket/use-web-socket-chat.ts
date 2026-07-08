@@ -341,7 +341,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           (data.object.chat_type === 'public-group' || data.object.chat_type === 'private-group') &&
           data.object.from_user?.uid !== currentUserIdRef.current
         ) {
-          console.log('Получили входящее сообщение с группы) :', data);
+          console.log('Получили входящее сообщение из группы) :', data);
           // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
           // (это id группы отправившей входящее сообщение)
           const fromUserUid = data.object.chat_key;
@@ -349,7 +349,21 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           upsertMessageForUser(fromUserUid, serverMessage);
           addChatInChatsListStore(translateMessageIntoChat(serverMessage));
         }
-
+        //  Поступило входящее сообщение c канала
+        if (
+          data.action === 'create_text_message' &&
+          data.status === 'OK' &&
+          (data.object.chat_type === 'public-channel' || data.object.chat_type === 'private-channel') &&
+          data.object.from_user?.uid !== currentUserIdRef.current
+        ) {
+          console.log('Получили входящее сообщение из канала) :', data);
+          // добавляем входящее сообщение в {store} в массив с ключом userId===data.object.from_user.uid
+          // (это id группы отправившей входящее сообщение)
+          const fromUserUid = data.object.chat_key;
+          const serverMessage = { ...data.object, status: 'sent' };
+          upsertMessageForUser(fromUserUid, serverMessage);
+          addChatInChatsListStore(translateMessageIntoChat(serverMessage));
+        }
         //4. входящее ws-сообщение read-status поступило отправителю первоначального исходящего текстового сообщения в обычном чате
         if (
           data.action === 'change_status_read_message' &&
