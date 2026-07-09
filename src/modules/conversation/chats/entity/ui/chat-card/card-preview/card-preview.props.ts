@@ -5,4 +5,5 @@ export type CardPreviewProps = {
   filesSummary?: FilesSummaryEntity;
   replied: boolean;
   forwarded: boolean;
+  isCurrentUser: boolean;
 };

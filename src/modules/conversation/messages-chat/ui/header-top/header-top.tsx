@@ -71,8 +71,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
       : chatsListStore?.find((c) => c.peer.uid === user_uid);
   }, [chatsListStore, user_uid, isGroupOrChannel]);
 
-  console.log('messagesByUserStore: ', messagesByUserStore);
-
   const resultProfile = useMemo(() => {
     if (chatOrContact === 'chat') {
       return {

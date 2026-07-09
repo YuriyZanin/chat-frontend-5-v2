@@ -68,6 +68,7 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
     fetchNextPage,
     hasNextPage,
   } = useChatsQuery({ search: normalizedSearch });
+
   const chats = useMemo(() => myChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [], [myChats]);
   const { data: myModalChats } = useChatsQuery({ search: normalizedModalSearch });
   const modalChats = useMemo(

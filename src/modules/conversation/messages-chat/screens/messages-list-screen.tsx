@@ -3,13 +3,15 @@ import { JSX, useEffect } from 'react';
 import { useWebSocketChatStore } from '../api/web-socket/use-web-socket-chat-store';
 import { DefaultMessagesPage } from '../ui/default-messages-page';
 import { MessagesList } from '../ui/messages-list/messages-list';
-import { useMessagesChatStore, useUserIdStore } from '../zustand-store/zustand-store';
+import { useCurrentUserIdStore, useMessagesChatStore, useUserIdStore } from '../zustand-store/zustand-store';
 import { MessagesListScreenProps } from './messades-list-screen.props';
 import { useMessagesListScreen } from './use-messages-list-screen';
 
 export const MessagesListScreen = ({ user_uid, currentUserId }: MessagesListScreenProps): JSX.Element => {
   const userIdStore = useUserIdStore((s) => s.userId);
   const setUserIdStore = useUserIdStore((s) => s.setUserId);
+  const setCurrentUserIdStore = useCurrentUserIdStore((s) => s.setCurrentUserId);
+
   const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]) ?? [];
   const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
   const setMessagesForUser = useMessagesChatStore((s) => s.setMessagesForUser);
@@ -19,7 +21,8 @@ export const MessagesListScreen = ({ user_uid, currentUserId }: MessagesListScre
 
   useEffect(() => {
     setUserIdStore(user_uid);
-  }, [user_uid, setUserIdStore]);
+    setCurrentUserIdStore(currentUserId);
+  }, [user_uid, setUserIdStore, currentUserId, setCurrentUserIdStore]);
 
   useEffect(() => {
     if (!userIdStore) return;

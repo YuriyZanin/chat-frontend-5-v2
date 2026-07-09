@@ -43,7 +43,6 @@ export type FilesSummaryEntity = {
 type LastMessageEntity = BaseMessageEntity & {
   fromUser: string;
   content: string;
-
   filesSummary: FilesSummaryEntity;
   hasRepliedMessage: boolean;
   hasForwardedMessage: boolean;

@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import { Chat } from 'modules/conversation/chats/entity';
+import { useCurrentUserIdStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
 import { CardHeader, CardShell } from 'modules/conversation/shared/ui/card';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { usePathname } from 'next/navigation';
@@ -11,7 +12,7 @@ import { CardNewMessageMeta } from './card-new-message-meta';
 import { CardPreview } from './card-preview';
 import { CHAT_TYPE_PREFIXES } from './chat-card.constant';
 import styles from './chat-card.module.scss';
-import { MutedIcon } from './icons';
+import { MutedCloseIcon, MutedIcon } from './icons';
 
 export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
   const { setChatId } = useInfoStore();
@@ -27,14 +28,16 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
       hasForwardedMessage = false,
       hasRepliedMessage = false,
       filesSummary = undefined,
+      fromUser,
     } = {},
   } = messages || {};
-
+  //получаем uid пользователя данного мессанджера
+  const currentUserIdStore = useCurrentUserIdStore((s) => s.currentUserId);
   const pathname = usePathname();
   const prefix = CHAT_TYPE_PREFIXES[chat.chatType];
   const isSelected = pathname === `/chats/${chat.chatType === 'chat' ? peer.uid : `${prefix}_${peer.uid}`}`;
   const hasNewMessages = lastMessageUid !== uid && lastSeenMessage?.id !== lastMessageId;
-
+  const isCurrentUser = fromUser === currentUserIdStore;
   const handleClick = (): void => {
     setChatId(id);
   };
@@ -60,7 +63,13 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
       <div className={styles.card}>
         <div className={styles.header}>
           <CardHeader title={firstName ? `${firstName} ${lastName}` : `${nickname}`} selected={isSelected}>
-            {!notifications && <MutedIcon className={styles.mutedIcon} />}
+            {!notifications ? (
+              <MutedIcon className={styles.mutedIcon} />
+            ) : chatType !== 'chat' ? (
+              <MutedCloseIcon className={styles.mutedCloseIcon} />
+            ) : (
+              <></>
+            )}
           </CardHeader>
 
           <CardHeaderMeta
@@ -75,6 +84,7 @@ export const ChatCard = ({ peer, chat, messages }: Chat): JSX.Element => {
             filesSummary={filesSummary}
             replied={hasRepliedMessage}
             forwarded={hasForwardedMessage}
+            isCurrentUser={isCurrentUser}
           />
 
           <CardNewMessageMeta newMessageCount={newMessageCount} isFavorite={is_favorite} />
