@@ -67,7 +67,7 @@ export const HeaderTopButtonsBlock = ({
             </button>
           ) : (
             <button className={clsx(styles.buttonsWrapper, styles.blockContact)} onClick={handleLeaveGroup}>
-              {isChannel ? 'Покинуть канал' : 'Покинуть группу'}
+              {isChannel ? 'Отписаться' : 'Покинуть группу'}
             </button>
           )}
         </>
