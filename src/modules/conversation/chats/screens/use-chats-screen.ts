@@ -28,6 +28,7 @@ type UseChatsScreenReturn = {
   chats: Chat[];
   modalChats: Chat[];
   status: string;
+  statusModal: string;
   fetchNextPage: (
     options?: FetchNextPageOptions,
   ) => Promise<InfiniteQueryObserverResult<InfiniteData<ChatListApiResponse>, unknown>>;
@@ -70,7 +71,7 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
   } = useChatsQuery({ search: normalizedSearch });
 
   const chats = useMemo(() => myChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [], [myChats]);
-  const { data: myModalChats } = useChatsQuery({ search: normalizedModalSearch });
+  const { data: myModalChats, status: statusModal } = useChatsQuery({ search: normalizedModalSearch });
   const modalChats = useMemo(
     () => myModalChats?.pages.flatMap((page) => page.results.map(mapChatFromApi)) ?? [],
     [myModalChats],
@@ -120,5 +121,6 @@ export const useChatsScreen = (): UseChatsScreenReturn => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    statusModal,
   };
 };
