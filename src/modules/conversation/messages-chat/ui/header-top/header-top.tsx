@@ -113,18 +113,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
 
-  // const {
-  //   avatarUrl = '',
-  //   firstName = '',
-  //   lastName = '',
-  //   nickname = '',
-  //   wasOnlineAt = null,
-  //   isBlocked = false,
-  //   isInContacts = false,
-  // } = chat?.peer ?? {};
-
-  // const status = getLastSeenLabel(wasOnlineAt);
-
   const searchIndicatorStore = useSearchIndicatorStore((s) => s.searchIndicator);
 
   const searchMessagesStore = useSearchMessagesStore((s) => s.searchMessages);
@@ -258,7 +246,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {messagesByUserStore.length === 1 && (
+        {messagesByUserStore.length <= 1 && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}
