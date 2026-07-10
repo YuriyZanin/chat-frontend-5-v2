@@ -2,6 +2,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 import { usePlusofonGetToken, usePlusofonStart, usePlusofonStatus } from 'shared/query/auth.query';
 
+const AUTH_CHANNEL = 'auth';
+
 type UsePhoneStepPlusofonProps = {
   next: () => void;
   onPhoneConfirmed: (phone: string) => void;
@@ -278,6 +280,8 @@ export const usePhoneStepPlusofon = ({
               stopPolling();
               setStatusMessage('Звонок подтверждён! Получение токенов...');
 
+              broadcastAuthChanged();
+
               if (!tokensReceivedRef.current && !isAuthCompletedRef.current) {
                 getTokens(
                   {
@@ -390,6 +394,12 @@ export const usePhoneStepPlusofon = ({
     setIsCallModalOpen(false);
     resetState();
   }, [resetState]);
+
+  const broadcastAuthChanged = (): void => {
+    const ch = new BroadcastChannel(AUTH_CHANNEL);
+    ch.postMessage({ type: 'AUTH_CHANGED', at: Date.now() });
+    ch.close();
+  };
 
   const isButtonEnabled = isPhoneFilled && isPhoneValid && !isLoading;
 
