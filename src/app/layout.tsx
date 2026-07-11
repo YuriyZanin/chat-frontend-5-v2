@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { AuthSync } from 'modules/auth/ui/auth-sync';
 import { AlertProvider } from 'modules/conversation/messages-chat/hooks/use-alert';
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
@@ -33,7 +34,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={clsx(roboto.variable, sfPro.variable)}>
         <QueryProvider>
-          <AlertProvider>{children}</AlertProvider>
+          <AlertProvider>
+            <AuthSync />
+            {children}
+          </AlertProvider>
         </QueryProvider>
       </body>
     </html>
