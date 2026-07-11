@@ -31,7 +31,7 @@ export default function RootLayout({
   children: ReactNode;
 }>): JSX.Element {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body className={clsx(roboto.variable, sfPro.variable)}>
         <QueryProvider>
           <AlertProvider>
