@@ -8,7 +8,7 @@ import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
 import { useNotificationStore } from 'modules/notification/model/notification.store';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect, useMemo, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 
 import { NotificationModal } from '../../../../notification/ui/notification-modal';
@@ -20,6 +20,7 @@ import { ReceivingCallPanel } from '../../widgets/receiving-call-panel';
 
 import {
   useHeaderButtonsModalStore,
+  useMessagesChatStore,
   useSearchIndicatorStore,
   useSearchMessagesStore,
 } from '../../zustand-store/zustand-store';
@@ -38,6 +39,7 @@ import styles from './header-top.module.scss';
 
 import { useContactsScreen } from 'modules/conversation/contacts/screens/use-contacts-screen';
 import Image from 'next/image';
+
 import type { HeaderTopProps } from './header-top.props';
 import BackIcon from './icons/back-icon.svg';
 import CallIcon from './icons/call-icon.svg';
@@ -48,43 +50,50 @@ const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.sv
 export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProps): JSX.Element => {
   //получили список чатов из store
   const chatsListStore = useChatsListStore((s) => s.chatsList);
-
+  // получим список сообщений из store пользователя user_uid
+  const messagesByUserStore = useMessagesChatStore((s) => s.messagesByUser[user_uid]) ?? [];
   //хук для получения списка участников опреденной группы/канала (по chat_key)
   const { participants } = useParticipantsScreen(user_uid);
   const isGroup = user_uid.startsWith('group');
   const isChannel = user_uid.startsWith('channel');
   const isGroupOrChannel = user_uid.startsWith('group') || user_uid.startsWith('channel');
-  const chat = isGroupOrChannel
-    ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
-    : chatsListStore?.find((c) => c.peer.uid === user_uid);
-
   const parts = user_uid.split('_');
   const userUid = parts.length > 1 ? parts[1] : parts[0];
   //xук для получения профиля определенного (uid) пользователя
   const { data: profile, isLoading } = useInfoProfileQuery(userUid);
-  let resultProfile;
 
-  if (chatOrContact === 'chat') {
-    resultProfile = {
-      avatarUrl: chat?.peer.avatarUrl || '',
-      firstName: chat?.peer.firstName || '',
-      lastName: chat?.peer.lastName || '',
-      nickname: chat?.peer.nickname || '',
-      isBlocked: chat?.peer.isBlocked || false,
-      isInContacts: chat?.peer.isInContacts || false,
-      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
-    };
-  } else {
-    resultProfile = {
-      avatarUrl: profile?.avatar || profile?.avatarUrl || profile?.avatarWebp || profile?.avatarWebpUrl || '',
-      firstName: profile?.firstName || '',
-      lastName: profile?.lastName || '',
-      nickname: profile?.nickname || '',
-      isBlocked: profile?.isBlocked || false,
-      isInContacts: false,
-      status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
-    };
-  }
+  const chat = useMemo(() => {
+    if (!chatsListStore || !user_uid) {
+      return undefined;
+    }
+    return isGroupOrChannel
+      ? chatsListStore?.find((c) => c.chat.chatKey === user_uid)
+      : chatsListStore?.find((c) => c.peer.uid === user_uid);
+  }, [chatsListStore, user_uid, isGroupOrChannel]);
+
+  const resultProfile = useMemo(() => {
+    if (chatOrContact === 'chat') {
+      return {
+        avatarUrl: chat?.peer.avatarUrl || '',
+        firstName: chat?.peer.firstName || '',
+        lastName: chat?.peer.lastName || '',
+        nickname: chat?.peer.nickname || '',
+        isBlocked: chat?.peer.isBlocked || false,
+        isInContacts: chat?.peer.isInContacts || false,
+        status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(chat?.peer.wasOnlineAt || null),
+      };
+    } else {
+      return {
+        avatarUrl: profile?.avatar || profile?.avatarUrl || profile?.avatarWebp || profile?.avatarWebpUrl || '',
+        firstName: profile?.firstName || '',
+        lastName: profile?.lastName || '',
+        nickname: profile?.nickname || '',
+        isBlocked: profile?.isBlocked || false,
+        isInContacts: false,
+        status: chat?.peer.isOnline ? 'в сети' : getLastSeenLabel(profile?.wasOnlineAt || null),
+      };
+    }
+  }, [chatOrContact, chat, profile]);
   const { avatarUrl, firstName, lastName, nickname, isBlocked, isInContacts, status } = resultProfile;
   const [searchMessagesVisible, setSearchMessagesVisible] = useState<boolean>(false);
 
@@ -103,18 +112,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
 
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
-
-  // const {
-  //   avatarUrl = '',
-  //   firstName = '',
-  //   lastName = '',
-  //   nickname = '',
-  //   wasOnlineAt = null,
-  //   isBlocked = false,
-  //   isInContacts = false,
-  // } = chat?.peer ?? {};
-
-  // const status = getLastSeenLabel(wasOnlineAt);
 
   const searchIndicatorStore = useSearchIndicatorStore((s) => s.searchIndicator);
 
@@ -188,19 +185,18 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
         <div className={styles.contactWrapper}>
           <div className={styles.left}>
             {isMobile && (
-              <button type="button" className={''} onClick={() => router.push('/chats')}>
+              <button type="button" onClick={() => router.push('/chats')}>
                 <BackIcon />
               </button>
             )}
 
-            <div className={styles.image}>
+            <div className={styles.avatar}>
               <Image
                 src={imgSrc}
                 alt={firstName}
                 unoptimized
                 width={40}
                 height={40}
-                className={styles.image}
                 onClick={() => toggleInfoOpen()}
                 onError={() => {
                   setImgSrc(defaultAvatar);
@@ -250,7 +246,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {!isInContacts && chat?.messages.firstNewMessage === undefined && (
+        {messagesByUserStore.length <= 1 && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}

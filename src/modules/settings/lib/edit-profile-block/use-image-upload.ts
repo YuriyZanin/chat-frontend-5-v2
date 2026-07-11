@@ -13,6 +13,8 @@ type UseImageUploadReturn = {
   openCropper: () => void; // Новая функция
   closeCropper: () => void; // Новая функция
   fileInputRef: React.RefObject<HTMLInputElement | null>;
+  setSelectedFile: (file: File | null) => void;
+  setPreviewUrl: (url: string | null) => void;
 };
 
 export const useImageUpload = (): UseImageUploadReturn => {
@@ -86,5 +88,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
     openCropper,
     closeCropper,
     fileInputRef,
+    setSelectedFile,
+    setPreviewUrl,
   };
 };

@@ -5,7 +5,13 @@ import { ForwardReplyIcon } from '../icons';
 import styles from './card-preview.module.scss';
 import { CardPreviewProps } from './card-preview.props';
 
-export const CardPreview = ({ content, filesSummary, replied, forwarded }: CardPreviewProps): JSX.Element => {
+export const CardPreview = ({
+  content,
+  filesSummary,
+  replied,
+  forwarded,
+  isCurrentUser,
+}: CardPreviewProps): JSX.Element => {
   const { count = 0, types = [] } = filesSummary || {};
 
   const getPreviewText = (): string => {
@@ -42,7 +48,10 @@ export const CardPreview = ({ content, filesSummary, replied, forwarded }: CardP
         </div>
       )}
 
-      <span className={styles.previewText}>{getPreviewText()}</span>
+      <span className={styles.previewText}>
+        {isCurrentUser && <div>Вы</div>}
+        {getPreviewText()}
+      </span>
     </div>
   );
 };

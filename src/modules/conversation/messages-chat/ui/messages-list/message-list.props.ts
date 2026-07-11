@@ -1,8 +1,9 @@
 import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { MessagesListApiResponse, RestMessageApi } from '../../model/messages-list';
+import type { Msg } from '../../zustand-store/zustand-store';
 
 export type MessageListProps = {
-  messagesList: RestMessageApi[];
+  messagesByUser: Msg[];
   currentUserId: string;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;

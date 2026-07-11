@@ -32,11 +32,16 @@ export const useSearchAndNavigateSortedMessages = ({
   wrapperRef,
 }: UseSearchAndNavigateSortedMessagesProps): UseSearchAndNavigateSortedMessagesReturn => {
   const userIdStore = useUserIdStore((s) => s.userId);
+  const userId = userIdStore.startsWith('group_')
+    ? userIdStore.replace('group_', '')
+    : userIdStore.startsWith('channel_')
+      ? userIdStore.replace('channel_', '')
+      : userIdStore;
 
   //хук для получения с сервера списка всех сообщений чата
-  const { messagesList, fetchNextPage, hasNextPage } = useMessagesListScreen(userIdStore.replace('group_', ''));
+  const { messagesList, fetchNextPage, hasNextPage } = useMessagesListScreen(userId);
   // хук для получения с сервера списка сообщений чата, текст которых содержит значение "searchMessagesStore"
-  const { searchMessagesStore, uidMessagesSearch } = useMessagesListSearchScreen(userIdStore.replace('group_', ''));
+  const { searchMessagesStore, uidMessagesSearch } = useMessagesListSearchScreen(userId);
 
   // Создаём Map для быстрого поиска uid -> индекс в flatList
   const uidToIndexMap = useMemo(() => {

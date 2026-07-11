@@ -5,6 +5,7 @@ import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/we
 import { JSX, useEffect } from 'react';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useInfoProfileQuery } from '../api';
+import { useGroupOrChanelQuery } from '../api/info.query';
 import { useInfoEditGroupStore } from '../model/info.edit-group.store';
 import { useInfoSearchStore } from '../model/info.search.store';
 import { useInfoStore } from '../model/info.store';
@@ -52,8 +53,10 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
   const { hasChanges } = useInfoEditGroupStore();
 
   const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
-
-  const { data: profile, isLoading } = useInfoProfileQuery(uid);
+  //получаем профиль чата по uid
+  const { data: profileChat, isLoading } = useInfoProfileQuery(uid);
+  // получаем профиль группы/канала по chatKey
+  const { data: profileGroupOrCannel, isLoading: isLoadingGroupOrCannel } = useGroupOrChanelQuery(uid);
   // делаем сортировку на сервере filesList по mime-типaм для определенного (uid) чата/группы/канала
   const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
   const { filesList: fileFileList } = useChatFilesListScreen({ query: 'application', chatKey: uid });
@@ -78,10 +81,18 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
   const groupMenuItems: DropdownItem[] = [
     {
       label: 'Покинуть группу',
-      icon: <LeaveIcon />,
+      icon: profileGroupOrCannel?.chatType === 'private-group' ? <LeaveIconRed /> : <LeaveIcon />,
+      variant: profileGroupOrCannel?.chatType === 'private-group' ? 'alert' : undefined,
       onClick: openLeaveGroupModal,
     },
   ];
+  if (isGroup && profileGroupOrCannel?.chatType === 'public-group' && !participant?.isOwner) {
+    groupMenuItems.unshift({
+      label: 'Очистить чат',
+      icon: <ClearIcon />,
+      onClick: openClearModal,
+    });
+  }
 
   if (isGroup && participant?.isOwner) {
     groupMenuItems.unshift({
@@ -135,7 +146,7 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
     },
   ];
 
-  if (!isGroup && !profile?.isBlocked) {
+  if (!isGroup && !profileChat?.isBlocked) {
     contactMenuItems.push({
       label: 'Заблокировать',
       icon: <BlockIcon />,
@@ -218,6 +229,8 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
         uid={uid}
         currentUid={currentUid}
         filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
+        profile={profileGroupOrCannel}
+        isLoading={isLoadingGroupOrCannel}
       />,
     );
   }
@@ -257,7 +270,7 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
     <InfoHeader menuItems={contactMenuItems} onClose={toggleInfoOpen} />,
     <ContactPanel
       uid={uid}
-      profile={profile}
+      profile={profileChat}
       isLoading={isLoading}
       currentUid={currentUid}
       filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}

@@ -16,14 +16,17 @@ const URL_DEFAUIT_Avatar = '/images/messages-chats/default-avatar.svg';
 const URL_DEFAUIT_Avatar_Croup = '/images/messages-chats/default-avatar-group.svg';
 
 export const AlertForward = ({ onOk, onCancel }: AlertForwardProps): JSX.Element => {
-  const { chats, search, setSearch, clearSearch } = useChatsScreen();
+  const { modalChats, modalSearch, setModalSearch, clearModalSearch, statusModal } = useChatsScreen();
   const inputRef = useRef<HTMLInputElement | null>(null);
   //устанавливае изначально фокус на <input> поиска
   useEffect(() => {
     inputRef.current?.focus();
+    return (): void => {
+      clearModalSearch();
+    };
   }, []);
   const handlerOnClickInput = (): void => {
-    clearSearch?.();
+    clearModalSearch();
     inputRef.current?.focus();
   };
   return (
@@ -51,17 +54,17 @@ export const AlertForward = ({ onOk, onCancel }: AlertForwardProps): JSX.Element
           <input
             ref={inputRef}
             className={styles.searchInput}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={modalSearch}
+            onChange={(e) => setModalSearch(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
-                clearSearch?.();
+                clearModalSearch();
               }
             }}
             placeholder="Поиск"
             aria-label="Поиск чатов"
           />
-          {search && (
+          {modalSearch && (
             <button>
               <div className={styles.icon}>
                 <Close onClick={handlerOnClickInput} />
@@ -70,11 +73,11 @@ export const AlertForward = ({ onOk, onCancel }: AlertForwardProps): JSX.Element
           )}
         </div>
       </div>
-      {!!chats.length &&
-        chats.map((chat) => {
-          return <AlertForwardChatCard key={chat.chat.id} chat={chat} onOk={onOk} clearSearch={clearSearch} />;
+      {!!modalChats.length &&
+        modalChats.map((chat) => {
+          return <AlertForwardChatCard key={chat.chat.id} chat={chat} onOk={onOk} clearSearch={clearModalSearch} />;
         })}
-      {search && !chats.length && <DefauitBox />}
+      {modalSearch && !modalChats.length && statusModal === 'success' && <DefauitBox />}
     </div>
   );
 };

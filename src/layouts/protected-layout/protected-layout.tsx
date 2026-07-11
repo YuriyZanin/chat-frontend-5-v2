@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { useWebSocketChat } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat';
 import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import styles from './protected-layout.module.scss';
 import { ProtectedLayoutProps } from './protected-layout.props';
 
@@ -37,23 +37,26 @@ export const ProtectedLayout = ({
   } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
   // все полученные функции для работы с ws-соединения записываем в store чтобы использовать их в любом месте программы
   const setWebSocketChatStore = useWebSocketChatStore((s) => s.setWebSocketChat);
-  setWebSocketChatStore({
-    sendMessage,
-    sendProfile,
-    sendChangeStatusReadMessage,
-    sendDeleteMessage,
-    sendMembers,
-    sendLeaveGroup,
-    sendDeleteGroup,
-    sendEditGroup,
-    sendClearGroup,
-    sendAnswerCall,
-    sendCallCompletion,
-    sendCallStateUpdate,
-    sendIceCandidate,
-    sendOfferCall,
-    createGroupOrChannel,
-  });
+  useEffect(() => {
+    setWebSocketChatStore({
+      sendMessage,
+      sendProfile,
+      sendChangeStatusReadMessage,
+      sendDeleteMessage,
+      sendMembers,
+      sendLeaveGroup,
+      sendDeleteGroup,
+      sendEditGroup,
+      sendClearGroup,
+      sendAnswerCall,
+      sendCallCompletion,
+      sendCallStateUpdate,
+      sendIceCandidate,
+      sendOfferCall,
+      createGroupOrChannel,
+    });
+  }, [setWebSocketChatStore]);
+
   return (
     <div className={styles.root}>
       <div className={styles.shell}>

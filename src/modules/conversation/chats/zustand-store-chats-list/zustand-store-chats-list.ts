@@ -46,7 +46,7 @@ export const useChatsListStore = create<ChatsListState>((set) => ({
   addChatInChatsList: (chat: Chat): void =>
     set((s) => {
       const prev = s.chatsList ?? [];
-      const exists = prev.find((c) => c.peer.uid === chat.peer.uid);
+      const exists = prev.find((c) => c.chat.chatKey === chat.chat.chatKey);
       if (exists) {
         return {
           chatsList: [...prev],

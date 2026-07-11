@@ -38,6 +38,10 @@
   flex-shrink: 0;
   fill: var(--preview-icon);
 }
+.mutedCloseIcon {
+  flex-shrink: 0;
+  fill: var(--preview-icon);
+}
 
 .preview {
   @include mixins.flex-box($justify: space-between, $align: center, $gap: 0.4rem);

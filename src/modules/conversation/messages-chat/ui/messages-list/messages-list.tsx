@@ -5,7 +5,7 @@ import { useSearchAndNavigateSortedMessages } from '../../hooks/use-search-and-n
 import { handlerMessagesList } from '../../lib/handler-messages-list';
 import type { RestMessageApi } from '../../model/messages-list';
 import { smoothScrollElementIntoView } from '../../utils/smooth-scroll';
-import { useMessagesChatStore, useToastVisibleStore } from '../../zustand-store/zustand-store';
+import { useToastVisibleStore } from '../../zustand-store/zustand-store';
 import { DateCard } from '../date-card/date-card';
 import { IncomingAudioCard } from '../message-card/audio-card/incoming-audio-card/incoming-audio-card';
 import { OutgoingAudioCard } from '../message-card/audio-card/outgoing-audio-card/outgoing-audio-card';
@@ -27,7 +27,7 @@ import styles from './message-list.module.scss';
 import type { MessageListProps } from './message-list.props';
 import { useFixedTargetIndex } from './use-fixed-target-index';
 export const MessagesList = ({
-  messagesList,
+  messagesByUser,
   currentUserId,
   hasNextPage,
   isFetchingNextPage,
@@ -39,16 +39,7 @@ export const MessagesList = ({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const targetItemRef = useRef<HTMLDivElement | null>(null);
   const lastItemRef = useRef<HTMLDivElement | null>(null);
-  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]);
-  const setMessagesForUser = useMessagesChatStore((s) => s.setMessagesForUser);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!userIdStore) return;
-    const normalized = messagesList.map((m) => ({ ...m, status: 'sent' as const }));
-    setMessagesForUser(userIdStore, normalized);
-  }, [messagesList, userIdStore, setMessagesForUser]);
-
   const { results, messagesLength } = useMemo(() => {
     const messagesStore = messagesByUser ?? [];
     // убираем дублирования сообщений если это явление имеется есть

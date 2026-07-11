@@ -13,7 +13,7 @@ const serializerRequestObjectCreateMessageApiSchema = z.object({
   content: z.string().trim(),
   status: z.enum(['publish', 'draft']),
   message_attachment_uids: z.array(string()).nullable().optional(),
-  replied_messages: z.array(string()).nullable().optional(),
+  replied_message: string().nullable().optional(),
   forwarded_messages: z.array(string()).nullable().optional(),
 });
 export const serializerRequestCreatingMessageApiSchema = z.object({

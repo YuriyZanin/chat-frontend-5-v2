@@ -4,7 +4,8 @@ import type { IncomingInformationForGroupCardProps } from './incoming-informatio
 export const IncomingInformationForGroupCard = ({
   message,
   register,
-}: IncomingInformationForGroupCardProps): JSX.Element => {
+}: IncomingInformationForGroupCardProps): JSX.Element | null => {
+  if (message.content === `@@@`) return null;
   return (
     <div
       className={styles.box}
@@ -13,11 +14,7 @@ export const IncomingInformationForGroupCard = ({
       }}
     >
       <div className={styles.wrapper}>
-        <span className={styles.text}>
-          {message.content === `@@@ Канал создан`
-            ? message.content?.split(' ').slice(1).join(' ')
-            : `${message.from_user.first_name} ${message.from_user.last_name} ${message.content?.split(' ').slice(1).join(' ')}`}
-        </span>
+        <span className={styles.text}>{message.content?.split(' ').slice(1).join(' ')}</span>
       </div>
     </div>
   );

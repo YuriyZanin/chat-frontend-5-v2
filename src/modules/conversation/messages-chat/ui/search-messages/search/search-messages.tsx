@@ -27,6 +27,7 @@ export const SearchMessages = ({ setSearchMessagesVisible }: SearchMessagesProps
   const goToNextSearchMessageStore = useGoToNextSearchMessageStore((s) => s.goToNextSearchMessage);
   const goToPrevSearchMessageStore = useGoToPrevSearchMessageStore((s) => s.goToPrevSearchMessage);
   const searchIndicatorStore = useSearchIndicatorStore((s) => s.searchIndicator);
+
   //устанавливае изначально фокус на <input> поиска
   useEffect(() => {
     inputRef.current?.focus();
@@ -57,12 +58,12 @@ export const SearchMessages = ({ setSearchMessagesVisible }: SearchMessagesProps
         ref={inputRef}
         className={styles.inputSearch}
         value={searchMessagesStore}
-        onChange={(e) => setSearchMessagesStore(e.target.value)}
+        onChange={(e) => setSearchMessagesStore(e.target.value.trim())}
         maxLength={100}
         placeholder="Поиск в чате"
         aria-label="Поиск в чате"
       />
-      {searchMessagesStore && (
+      {searchMessagesStore && searchIndicatorStore && (
         <div className={styles.navigateButton}>
           <div className={styles.iconSearch}>
             <button

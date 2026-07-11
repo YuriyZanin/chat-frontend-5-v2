@@ -1,5 +1,5 @@
 import { removeDomain } from 'modules/conversation/chats/utils/utils';
-import { useGenerateInviteLinkQuery, useGroupOrChanelQuery } from 'modules/info/api/info.query';
+import { useGenerateInviteLinkQuery } from 'modules/info/api/info.query';
 import { formatParticipants } from 'modules/info/shared/utils/format';
 import { ClearGroupModal } from 'modules/info/ui/clear-group-modal';
 import { DeleteGroupModal } from 'modules/info/ui/delete-group-modal';
@@ -14,11 +14,11 @@ import type { GroupPanelProps } from './group-panel.props';
 
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
-export const GroupPanel = ({ uid, currentUid, filesList }: GroupPanelProps): JSX.Element => {
+export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: GroupPanelProps): JSX.Element => {
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
-  const { data: profile, isLoading } = useGroupOrChanelQuery(uid);
+
   const name = profile?.name ?? '';
   const membersCount = profile?.participants.length ?? 0;
   const status = formatParticipants(membersCount);

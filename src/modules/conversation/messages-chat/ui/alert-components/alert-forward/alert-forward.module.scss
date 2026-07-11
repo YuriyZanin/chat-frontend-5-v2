@@ -76,7 +76,7 @@
   height: 2.4rem;
 }
 .cardWrapper {
-  @include mixins.flex-box($gap: 1rem);
+  @include mixins.flex-box($justify: start, $gap: 1rem);
   width: 100%;
   height: 5.6rem;
   padding: 0rem 1.6rem;
@@ -107,6 +107,7 @@
   width: 100%;
   height: 5.6rem;
   border-bottom: 0.1rem solid var(--border-card-contact);
+  min-width: 0;
 }
 .name {
   @include mixins.flex-box($justify: start);
@@ -118,7 +119,9 @@
   line-height: 1.2;
   letter-spacing: 0.01;
   color: var(--text-primary);
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 .status {
   @include mixins.flex-box($justify: start);

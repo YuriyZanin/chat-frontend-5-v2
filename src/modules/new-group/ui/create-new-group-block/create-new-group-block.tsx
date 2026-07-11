@@ -38,6 +38,8 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
     fileInputRef,
     isCropperOpen,
     closeCropper,
+    setSelectedFile,
+    setPreviewUrl,
   } = useImageUpload();
 
   const [croppedZoom, setCroppedZoom] = useState<number | null>(null);
@@ -91,10 +93,12 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
   };
 
   const handleConfirmCrop = async (file: File, zoom: number): Promise<void> => {
+    const url = URL.createObjectURL(file);
     setCroppedZoom(zoom);
     closeCropper();
-
     setIsUploadingAvatar(true);
+    setSelectedFile(file);
+    setPreviewUrl(url);
     try {
       const uid = await uploadAvatar(file);
       setAvatarUidStore(uid);
@@ -161,7 +165,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
         <div className={styles.contentContainer}>
           <div className={styles.imageContainer}>
             <div className={styles.avatar}>
-              <Image src={avatarSrc} alt="Аватар" width={200} height={200} className="" style={avatarStyle} />
+              <Image src={avatarSrc} alt="Аватар" width={200} height={200} />
             </div>
             <button
               type="button"
@@ -201,6 +205,7 @@ export const CreateNewGroupBlock: React.FC = (): JSX.Element => {
               label="Далее"
               type="button"
               disabled={!groupName.trim()}
+              style={!groupName.trim() ? { background: '#E4E4E4', color: '#C5C5C5' } : {}}
               onClick={next}
             />
           </div>

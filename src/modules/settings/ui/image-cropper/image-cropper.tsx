@@ -1,11 +1,13 @@
 // src/modules/settings/ui/image-cropper/image-cropper.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './image-cropper.module.scss';
 // Обновляем хук, чтобы он принимал начальные значения
+import { useNewGroupStore } from 'modules/new-group/model/new-group-store';
 import { useImageCropper } from 'modules/settings/lib/image-cropper/use-image-cropper';
 import Image from 'next/image';
+import Close from './img/close.svg';
 
 type ImageCropperProps = {
   onClose: () => void;
@@ -27,22 +29,52 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
     originalFile, // <-- Это теперь будет из хука, инициализированного с initialOriginalFile
     handleFileChange,
     reset,
+    setPosition,
+    position,
+    containerRef,
+    fileInputRef,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    isDragging,
+    cropAndGetFile,
   } = useImageCropper(initialPreviewUrl, initialOriginalFile); // <-- Передаём пропсы в хук
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Устанавливаем CSS-переменную для масштаба
+  const [isProcessing, setIsProcessing] = useState(false);
+  const setAvatarPreviewStore = useNewGroupStore((s) => s.setAvatarPreview);
+  const setAvatarFileStore = useNewGroupStore((s) => s.setAvatarFile);
+  // Сброс при изменении зума
   useEffect(() => {
-    const container = document.querySelector(`.${styles.previewContainer}`) as HTMLElement | null;
-    if (container) {
-      container.style.setProperty('--zoom', `${zoom / 100}`);
+    if (zoom <= 100) {
+      setPosition({ x: 0, y: 0 });
     }
   }, [zoom]);
 
-  const handleConfirm = (): void => {
-    // Используем originalFile из хука (который теперь синхронизирован)
-    if (originalFile) {
+  const handleConfirm = async (): Promise<void> => {
+    if (!previewUrl) return;
+    if (zoom <= 100 && originalFile) {
       onConfirm(originalFile, zoom);
+      return;
+    }
+    try {
+      setIsProcessing(true);
+
+      // Создаем обрезанный файл
+      const croppedFile = await cropAndGetFile();
+
+      // Получаем URL для предпросмотра
+      const croppedUrl = URL.createObjectURL(croppedFile);
+
+      // Вызываем callback с файлом и zoom
+      onConfirm(croppedFile, zoom);
+
+      // Закрываем модалку
+      onClose();
+    } catch (error) {
+      console.error('Ошибка при обрезке изображения:', error);
+      alert('Не удалось обрезать изображение. Попробуйте еще раз.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -56,13 +88,32 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       <div className={styles.header}>
         <h2 className={styles.title}>Настроить отображение фото</h2>
         <button className={styles.closeButton} onClick={onClose}>
-          ×
+          <Close />
         </button>
       </div>
 
-      <div className={styles.previewContainer}>
+      <div
+        className={styles.previewContainer}
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onMouseDown={handleMouseDown}
+        style={{
+          cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default',
+        }}
+      >
         {previewUrl ? (
-          <img src={previewUrl} alt="Preview" className={styles.previewImage} draggable={false} />
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className={styles.previewImage}
+            draggable={false}
+            style={{
+              transform: `translate(calc(${position.x}px), calc(${position.y}px)) scale(${zoom / 100})`,
+              transformOrigin: 'center center',
+            }}
+          />
         ) : (
           <div className={styles.placeholder}>
             <span>Выберите изображение</span>
@@ -74,14 +125,20 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
       <div className={styles.sliderContainer}>
         <input
           type="range"
-          min="50"
-          max="200"
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
+          min={0}
+          max={150}
+          value={zoom - 100}
+          onChange={(e) => {
+            const newZoom = Number(e.target.value) + 100;
+            setZoom(newZoom);
+            if (newZoom <= 100) {
+              setPosition({ x: 0, y: 0 });
+            }
+          }}
           className={styles.slider}
         />
-        <button className={''} onClick={handleConfirm} disabled={!previewUrl}>
-          <Image src={'/images/settings/okImageCropperIcon.svg'} alt="" width={36} height={36} className={''} />
+        <button onClick={handleConfirm} disabled={!previewUrl || isProcessing}>
+          <Image src={'/images/settings/okImageCropperIcon.svg'} alt="" width={36} height={36} />
         </button>
       </div>
 

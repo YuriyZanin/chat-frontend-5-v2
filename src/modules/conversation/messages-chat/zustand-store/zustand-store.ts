@@ -112,6 +112,18 @@ export const useUserIdStore = create<UserIdState>((set) => ({
   clearUserId: (): void => set({ userId: '' }),
 }));
 
+type CurrentUserIdState = {
+  currentUserId: string;
+  setCurrentUserId: (q: string) => void;
+  clearCurrentUserId: () => void;
+};
+
+export const useCurrentUserIdStore = create<CurrentUserIdState>((set) => ({
+  currentUserId: '',
+  setCurrentUserId: (currentUserId): void => set({ currentUserId }),
+  clearCurrentUserId: (): void => set({ currentUserId: '' }),
+}));
+
 type ForAllDelete = {
   forAllDelete: boolean | null;
   setForAllDelete: (q: boolean) => void;
