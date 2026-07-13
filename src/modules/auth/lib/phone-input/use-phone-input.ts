@@ -32,6 +32,7 @@ export const usePhoneInput = (options: UsePhoneInputOptions = {}): UsePhoneInput
 
     let newValue = inputValue;
     if (inputValue.startsWith('+') && !inputValue.startsWith('+7')) {
+      newValue = '+' + inputValue.substring(1).replace(/\D/g, '');
       setInternalValue(newValue);
       onChange?.(newValue);
       const newIsFilled = newValue.trim() !== '';
