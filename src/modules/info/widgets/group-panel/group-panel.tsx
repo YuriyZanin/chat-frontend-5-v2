@@ -40,7 +40,7 @@ export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: G
           <InfoSummary description={profile?.description} />
           <InfoSummary inviteLink={link?.invite_link} chatKey={uid} />
           <InfoUploads tabs={tabs} currentUid={currentUid} chatKey={uid} filesList={filesList} />
-          <ClearGroupModal chatKey={uid} />
+          <ClearGroupModal profile={profile} />
           <DeleteMemberModal chatKey={uid} />
           <LeaveGroupModal chatKey={uid} name={name} />
           <DeleteGroupModal chatKey={uid} name={name} />

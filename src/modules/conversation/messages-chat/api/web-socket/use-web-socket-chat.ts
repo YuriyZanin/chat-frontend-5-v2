@@ -146,6 +146,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
   const addChatInChatsListStore = useChatsListStore.getState().addChatInChatsList;
   const updateChatByUidStore = useChatsListStore.getInitialState().updateChatByUid;
   const deleteChatByUidStore = useChatsListStore.getInitialState().deleteChatByUid;
+  const clearMessagesForUserStore = useMessagesChatStore((s) => s.clearMessagesForUser);
   const chatsListStore = useChatsListStore.getInitialState().chatsList;
 
   // maccив интервалов [{requestUid:timeout_id},...] на каждое отправленное сообщение с помошью ws
@@ -629,7 +630,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           // Очистим таймаут подтверждения
           pendingTimeouts.current.delete(data.request_uid);
         }
-        //11 Входящее ws-сообщение сервера подтверждающее добавление участника/подписчика в группу/канал
+        //11. Входящее ws-сообщение сервера подтверждающее добавление участника/подписчика в группу/канал
         if (data.action === 'add_members_to_chat' && data.status === 'OK') {
           console.log('Подтверждение сервера об добавлении участника/подписчика в группу/канал:', data);
           // сообщение получил участник/подписчик группы/канала, у которого еще нет в DOM данной группы/канала
@@ -650,6 +651,22 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
             queryClient.refetchQueries({
               queryKey: ['participants', 'participants-list', data.object.chat_key],
             });
+          }
+        }
+
+        //12. Входящее ws-сообщение сервера подтверждающее очистку группы/канала от всех сообщений (у всех)
+        if (data.action === 'clear_group_messages' && data.status === 'OK') {
+          console.log('Подтверждение сервера об очистке группы/канала от всех сообщений: ', data);
+          // сообщение получил user который не инициировал очистку чата
+          if (data.object.cleared_by !== currentUserIdRef.current) {
+            // мгновенно очищаем группу/канал от сообщений
+            clearMessagesForUserStore(data.object.chatKey);
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
+          } else {
+            //cообщение получил user который инициировал очистку чата
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
           }
         }
       };
@@ -1005,12 +1022,12 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
         socket.send(JSON.stringify(payload));
         console.log('Sent create_chat request:', payload);
-        //Устанавливаем таймаут ожидания подтверждения (5cek)
+        //Устанавливаем таймаут ожидания подтверждения (5cek)=
         const to = setTimeout(() => {
-          // Если за 60 cек не пришло сообщение-подтверждение от ws меняем в сообщении
+          // Если за 10 cек не пришло сообщение-подтверждение от ws
           console.log('Группа/канал не созданы');
           pendingTimeouts.current.delete(requestUid);
-        }, 60000);
+        }, 10000);
         pendingTimeouts.current.set(requestUid, to);
       } else {
         // Если ws-соединение по какой-то причине закрыто, тогда ставим это сообщение (payload) в очередь на отправку
@@ -1076,6 +1093,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server crear group: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      const to = setTimeout(() => {
+        // Если за 10 cек не пришло сообщение-подтверждение от ws
+        console.log('Ошибка очистки группы/канала от сообщений');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 10000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }

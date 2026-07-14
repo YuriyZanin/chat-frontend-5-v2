@@ -86,13 +86,6 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
       onClick: openLeaveGroupModal,
     },
   ];
-  if (isGroup && profileGroupOrCannel?.chatType === 'public-group' && !participant?.isOwner) {
-    groupMenuItems.unshift({
-      label: 'Очистить чат',
-      icon: <ClearIcon />,
-      onClick: openClearModal,
-    });
-  }
 
   if (isGroup && participant?.isOwner) {
     groupMenuItems.unshift({

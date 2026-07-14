@@ -64,12 +64,24 @@ export const useDeleteChatMutation = (): UseMutationResult<void, Error, number> 
   });
 };
 
-export const useClearChatMutation = (): UseMutationResult<void, Error, number> => {
-  const queryClient = useQueryClient();
+type ClearChatBody = {
+  is_favorite: boolean;
+  last_message: {
+    from_user: string;
+    new: boolean;
+  };
+};
 
-  return useMutation<void, Error, number>({
-    mutationFn: async (id) => {
-      await clearChat(id);
+type ClearChatVars = {
+  id: number;
+  body?: ClearChatBody;
+};
+
+export const useClearChatMutation = (): UseMutationResult<void, Error, ClearChatVars> => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, ClearChatVars>({
+    mutationFn: async ({ id, body }) => {
+      await clearChat(id, body);
     },
 
     onSuccess: () => {

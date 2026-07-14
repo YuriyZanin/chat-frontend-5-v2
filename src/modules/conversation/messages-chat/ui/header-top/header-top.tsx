@@ -7,11 +7,9 @@ import { useInfoProfileQuery } from 'modules/info/api';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { useParticipantsScreen } from 'modules/info/screens/use-participant-screen';
 import { UnblockContactModal } from 'modules/info/ui/unblock-contact-modal';
-import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useEffect, useMemo, useState } from 'react';
 import { getLastSeenLabel } from 'shared/libs';
 
-import { NotificationModal } from '../../../../notification/ui/notification-modal';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
 import { formatParticipantsChannel, formatParticipantsGroup } from '../../utils/format-messages';
 import { IncomingCallPanel } from '../../widgets/incoming-call-panel';
@@ -108,7 +106,6 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
   } = useCallsStore();
   const { isInfoOpen, isUnblockModalOpen, toggleInfoOpen, openUnblockModal } = useInfoStore();
   // const { openUnblockModal } = useInfoStore((s) => s.openUnblockModal);
-  const { isModalOpen } = useNotificationStore();
 
   const { isBlockModalOpen, isAddModalOpen, isLeaveGroupModalOpen, closeButtonMenu, openButtonMenu } =
     useHeaderButtonsModalStore();
@@ -246,7 +243,7 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             lastSearchIndex={searchIndicatorStore?.lastSearchIndex ?? 0}
           />
         )}
-        {messagesByUserStore.length <= 1 && (
+        {messagesByUserStore.length <= 1 && !isLoading && (
           <HeaderTopButtonsBlock
             currentUid={currentUid}
             chatKey={user_uid}
@@ -254,10 +251,9 @@ export const HeaderTop = ({ user_uid, currentUid, chatOrContact }: HeaderTopProp
             isInContact={isInContacts}
             participants={participants}
             chat={chat}
+            messages={messagesByUserStore}
           />
         )}
-
-        {isModalOpen && <NotificationModal />}
 
         {isBlockModalOpen && <BlockModal />}
 
