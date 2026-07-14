@@ -14,7 +14,14 @@ import type { GroupPanelProps } from './group-panel.props';
 
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
-export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: GroupPanelProps): JSX.Element => {
+export const GroupPanel = ({
+  uid,
+  currentUid,
+  filesList,
+  profile,
+  isLoading,
+  chat_id,
+}: GroupPanelProps): JSX.Element => {
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
@@ -40,7 +47,7 @@ export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: G
           <InfoSummary description={profile?.description} />
           <InfoSummary inviteLink={link?.invite_link} chatKey={uid} />
           <InfoUploads tabs={tabs} currentUid={currentUid} chatKey={uid} filesList={filesList} />
-          <ClearGroupModal profile={profile} />
+          <ClearGroupModal profile={profile} currentUid={currentUid} chat_id={chat_id} />
           <DeleteMemberModal chatKey={uid} />
           <LeaveGroupModal chatKey={uid} name={name} />
           <DeleteGroupModal chatKey={uid} name={name} />

@@ -7,8 +7,15 @@ import { ClearGroupRequestAPI } from 'modules/info/model/info.web-socket.api.sch
 import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useState } from 'react';
 import { Modal } from 'shared/ui';
-
-export const ClearGroupModal = ({ profile }: { profile: GroupInfo | undefined }): JSX.Element | null => {
+export const ClearGroupModal = ({
+  profile,
+  currentUid,
+  chat_id,
+}: {
+  profile: GroupInfo | undefined;
+  currentUid: string;
+  chat_id: number;
+}): JSX.Element | null => {
   const { isClearModalOpen, closeClearModal } = useInfoStore();
   const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
   const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
@@ -20,7 +27,7 @@ export const ClearGroupModal = ({ profile }: { profile: GroupInfo | undefined })
   const body = {
     is_favorite: profile?.isFavorite || false,
     last_message: {
-      from_user: profile?.lastMessage?.fromUser || '',
+      from_user: profile?.createdBy || '',
       new: true,
     },
   };
@@ -47,9 +54,12 @@ export const ClearGroupModal = ({ profile }: { profile: GroupInfo | undefined })
       if (clearForAll) {
         setCallback(() => sendAndInvalidate());
       } else {
-        setCallback(() => clearChat({ id: profile?.id, body }));
+        if (profile.createdBy === currentUid && status === 'success') {
+          setCallback(() => clearChat({ id: profile.id, body }));
+        } else {
+          setCallback(() => clearChat({ id: chat_id, body }));
+        }
       }
-
       setTitle('История чата удалена');
       setTimer(5000);
       openPopup();
@@ -65,7 +75,7 @@ export const ClearGroupModal = ({ profile }: { profile: GroupInfo | undefined })
 
   if (!isClearModalOpen) return null;
 
-  return (
+  return profile?.createdBy === currentUid ? (
     <Modal
       title={`Очистить чат?`}
       content={
@@ -78,6 +88,16 @@ export const ClearGroupModal = ({ profile }: { profile: GroupInfo | undefined })
       checkboxText="Удалить для всех"
       toggleCheckBox={setClearForAll}
       checked={clearForAll}
+      onFirstButtonClick={handleCloseClearModal}
+      onSecondButtonClick={handleClear}
+      onClose={handleCloseClearModal}
+    />
+  ) : (
+    <Modal
+      title="Очистить чат?"
+      content="Все сообщения в этой группе будут удалены только для вас. Участники по-прежнему смогут их видеть"
+      firstButtonText="Отменить"
+      secondButtonText="Очистить"
       onFirstButtonClick={handleCloseClearModal}
       onSecondButtonClick={handleClear}
       onClose={handleCloseClearModal}

@@ -2,7 +2,8 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
-import { JSX, useEffect } from 'react';
+import { useMessagesChatStore, useUserIdStore } from 'modules/conversation/messages-chat/zustand-store/zustand-store';
+import { JSX, useEffect, useMemo } from 'react';
 import { DropdownItem } from 'shared/ui/dropdown/dropdown.props';
 import { useInfoProfileQuery } from '../api';
 import { useGroupOrChanelQuery } from '../api/info.query';
@@ -57,6 +58,12 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
   const { data: profileChat, isLoading } = useInfoProfileQuery(uid);
   // получаем профиль группы/канала по chatKey
   const { data: profileGroupOrCannel, isLoading: isLoadingGroupOrCannel } = useGroupOrChanelQuery(uid);
+  const userIdStore = useUserIdStore((s) => s.userId);
+  const messagesByUser = useMessagesChatStore((s) => s.messagesByUser[userIdStore]) ?? [];
+  //это id для очистки чата
+  const chat_id = useMemo(() => {
+    return messagesByUser[0]?.chat_id;
+  }, [messagesByUser]);
   // делаем сортировку на сервере filesList по mime-типaм для определенного (uid) чата/группы/канала
   const { filesList: imageFileList } = useChatFilesListScreen({ query: 'image', chatKey: uid });
   const { filesList: fileFileList } = useChatFilesListScreen({ query: 'application', chatKey: uid });
@@ -86,6 +93,13 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
       onClick: openLeaveGroupModal,
     },
   ];
+  if (isGroup && profileGroupOrCannel?.chatType === 'public-group' && !participant?.isOwner) {
+    groupMenuItems.unshift({
+      label: 'Очистить чат',
+      icon: <ClearIcon />,
+      onClick: openClearModal,
+    });
+  }
 
   if (isGroup && participant?.isOwner) {
     groupMenuItems.unshift({
@@ -224,6 +238,7 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
         filesList={{ imageFileList, fileFileList, voiceFileList, linksList }}
         profile={profileGroupOrCannel}
         isLoading={isLoadingGroupOrCannel}
+        chat_id={chat_id}
       />,
     );
   }
