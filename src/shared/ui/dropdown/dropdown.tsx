@@ -16,7 +16,7 @@ export const Dropdown: FC<DropdownProps> = ({ trigger, children, items }) => {
   };
 
   return (
-    <div className={styles.dropdown} ref={dropdownRef}>
+    <div className={styles.dropdown} ref={dropdownRef} onMouseLeave={closeMenu}>
       {trigger && (
         <div className={styles.trigger} onClick={toggleMenu}>
           {trigger}

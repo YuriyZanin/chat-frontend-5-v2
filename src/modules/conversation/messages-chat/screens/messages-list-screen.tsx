@@ -78,7 +78,7 @@ export const MessagesListScreen = ({ user_uid, currentUserId }: MessagesListScre
         />
       );
     }
-    if (status === 'success') {
+    if (status === 'success' || messagesByUser.length === 0) {
       return (
         <DefaultMessagesPage
           url={'/images/messages-chats/default-img.svg'}

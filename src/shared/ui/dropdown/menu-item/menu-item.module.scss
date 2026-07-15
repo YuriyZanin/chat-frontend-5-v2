@@ -16,6 +16,9 @@
     &.alert {
       color: var(--text-state-error, #ff0000);
     }
+    &.general {
+      color: var(--text-primary);
+    }
   }
 
   .menuItemIcon {
