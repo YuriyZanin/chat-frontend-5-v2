@@ -115,7 +115,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
   const { toUserUid, messageRtcUid, addCandidate, setCallData, setState, resetCall } = useCallsStore();
   //делаем ссылку на актуальный user_uid открытого чата
   const userIdRef = useRef<string>(userId);
-  const stopRef = useRef<boolean>(true);
+  const stopRef = useRef<boolean>(false);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -698,6 +698,12 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           queryClient.refetchQueries({
             queryKey: ['participants', 'participants-list', data.object.chat_key],
           });
+          const text = `Права администратора группы переданы ${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName}`;
+          if (!stopRef.current) {
+            // после передачи прав администратора группы/канала от имени нового владельца прав отправляем сообщение всем подписчикам
+            sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
+            stopRef.current = true;
+          }
         }
       };
     } catch (e) {}
@@ -1076,13 +1082,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server members: ', payload);
-      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      //Устанавливаем таймаут ожидания подтверждения (10cek)=
       const to = setTimeout(() => {
         if (!pendingTimeouts.current.get(payload.request_uid)) return;
-        // Если за 5 cек не пришло сообщение-подтверждение от ws
+        // Если за 10 cек не пришло сообщение-подтверждение от ws
         console.log('Добавление / удаление участников в группу / канал не подтверждено.');
         pendingTimeouts.current.delete(payload.request_uid);
-      }, 5000);
+      }, 10000);
       pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
@@ -1103,6 +1109,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
 
   // сделать администратором группы/канала
   const sendMakeAdministratorGroupOrChannel = (payload: TransferOwnerRequestAPI): void => {
+    stopRef.current = false;
     const resultZod = serializerRequestTransferOwnerSchema.safeParse(payload);
     const socket = wsRef.current;
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
