@@ -694,16 +694,16 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
             'Подтверждение сервера о передаче прав администратора группы/канала другому участнику/подписчику: ',
             data,
           );
+          const chatKey = data?.object?.chat_key;
           // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
           queryClient.refetchQueries({
-            queryKey: ['participants', 'participants-list', data.object.chat_key],
+            queryKey: ['participants', 'participants-list', chatKey],
           });
-          const text = `Права администратора группы переданы ${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName}`;
-          if (!stopRef.current) {
-            // после передачи прав администратора группы/канала от имени нового владельца прав отправляем сообщение всем подписчикам
-            sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
-            stopRef.current = true;
-          }
+
+          const isGroup = typeof chatKey === 'string' && chatKey.startsWith('group_');
+          const text: string = `Права администратора ${isGroup ? 'группы' : 'канала'} переданы ${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName}`;
+          // после передачи прав администратора группы/канала от имени нового владельца прав отправляем сообщение всем подписчикам
+          sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
         }
       };
     } catch (e) {}
@@ -1109,7 +1109,6 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
 
   // сделать администратором группы/канала
   const sendMakeAdministratorGroupOrChannel = (payload: TransferOwnerRequestAPI): void => {
-    stopRef.current = false;
     const resultZod = serializerRequestTransferOwnerSchema.safeParse(payload);
     const socket = wsRef.current;
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
