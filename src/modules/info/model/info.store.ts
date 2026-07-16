@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { Participant } from '../entity/info.entity';
 
 type InfoState = {
   isInfoOpen: boolean;
@@ -12,12 +13,14 @@ type InfoState = {
   isEditChatModalOpen: boolean;
   isLeaveGroupModalOpen: boolean;
   isDeleteGroupModalOpen: boolean;
+  isMakeAdministratorModalOpen: boolean;
   selectedIds: Set<string>;
   uid: string | undefined;
   setUid: (uid: string) => void;
   chatId: number | undefined;
   setChatId: (id: number) => void;
   uidToDelete: string | undefined;
+  selectedAdministrator: Participant | undefined;
   toggleInfoOpen: () => void;
   closeInfoScreen: () => void;
   openBlockModal: () => void;
@@ -36,7 +39,8 @@ type InfoState = {
   closeDeleteGroupModal: () => void;
   openEditChatModal: () => void;
   closeEditChatModal: () => void;
-
+  openMakeAdministratorModal: (selectedAdministrator: Participant) => void;
+  closeMakeAdministratorModal: () => void;
   enterSettingsMode: () => void;
   exitSettingsMode: () => void;
 
@@ -59,6 +63,7 @@ export const useInfoStore = create<InfoState>((set, get) => ({
   isGroupSettingsMode: false,
   isLeaveGroupModalOpen: false,
   isDeleteGroupModalOpen: false,
+  isMakeAdministratorModalOpen: false,
   selectedIds: new Set(),
   uid: undefined,
   setUid: (uid): void => {
@@ -69,6 +74,7 @@ export const useInfoStore = create<InfoState>((set, get) => ({
     set({ chatId: chatId });
   },
   uidToDelete: undefined,
+  selectedAdministrator: undefined,
   toggleInfoOpen: (): void => {
     const state = get();
     set({ isInfoOpen: !state.isInfoOpen });
@@ -89,6 +95,9 @@ export const useInfoStore = create<InfoState>((set, get) => ({
   closeLeaveGroupModal: (): void => set({ isLeaveGroupModalOpen: false }),
   openDeleteGroupModal: (): void => set({ isDeleteGroupModalOpen: true }),
   closeDeleteGroupModal: (): void => set({ isDeleteGroupModalOpen: false }),
+  openMakeAdministratorModal: (selectedAdministrator): void =>
+    set({ isMakeAdministratorModalOpen: true, selectedAdministrator }),
+  closeMakeAdministratorModal: (): void => set({ isMakeAdministratorModalOpen: false }),
   openEditChatModal: (): void => set({ isEditChatModalOpen: true }),
   closeEditChatModal: (): void => set({ isEditChatModalOpen: false }),
 

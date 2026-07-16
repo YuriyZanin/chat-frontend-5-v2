@@ -4,6 +4,7 @@ import type {
   DeleteGroupRequestAPI,
   EditChatRequestAPI,
   LeaveGroupRequestAPI,
+  TransferOwnerRequestAPI,
 } from 'modules/info/model/info.web-socket.api.schema';
 import { create } from 'zustand';
 import type {
@@ -40,6 +41,7 @@ type WebSocketChatProps = {
   sendDeleteGroup: (payload: DeleteGroupRequestAPI) => void;
   sendEditGroup: (payload: EditChatRequestAPI) => void;
   sendClearGroup: (payload: ClearGroupRequestAPI) => void;
+  sendMakeAdministratorGroupOrChannel: (payload: TransferOwnerRequestAPI) => void;
   sendAnswerCall: (payload: AnswerCallRequestAPI) => void;
   sendCallCompletion: (payload: CallCompleteRequestAPI) => void;
   sendCallStateUpdate: (payload: CallStateRequestAPI) => void;
@@ -85,6 +87,7 @@ type WebSocketChatState = {
     sendIceCandidate,
     sendOfferCall,
     createGroupOrChannel,
+    sendMakeAdministratorGroupOrChannel,
   }: WebSocketChatProps) => void;
 };
 

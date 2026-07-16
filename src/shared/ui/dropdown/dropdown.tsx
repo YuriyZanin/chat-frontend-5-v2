@@ -16,7 +16,7 @@ export const Dropdown: FC<DropdownProps> = ({ trigger, children, items }) => {
   };
 
   return (
-    <div className={styles.dropdown} ref={dropdownRef} onMouseLeave={closeMenu}>
+    <div className={styles.dropdown} ref={dropdownRef}>
       {trigger && (
         <div className={styles.trigger} onClick={toggleMenu}>
           {trigger}
@@ -29,7 +29,7 @@ export const Dropdown: FC<DropdownProps> = ({ trigger, children, items }) => {
         </div>
       )}
 
-      <div className={clsx(styles.menu, isOpen ? styles.open : styles.hidden)} ref={menuRef}>
+      <div className={clsx(styles.menu, isOpen ? styles.open : styles.hidden)} ref={menuRef} onMouseLeave={closeMenu}>
         {items.map((item, index) => (
           <MenuItem
             key={index}

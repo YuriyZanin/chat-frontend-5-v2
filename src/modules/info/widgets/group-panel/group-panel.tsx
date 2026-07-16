@@ -9,9 +9,9 @@ import { InfoNotification } from 'modules/info/ui/info-notification';
 import { InfoSummary } from 'modules/info/ui/info-summary';
 import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { LeaveGroupModal } from 'modules/info/ui/leave-group-modal';
+import { MakeAdministratorModal } from 'modules/info/ui/make-administrator-modal';
 import { JSX } from 'react';
 import type { GroupPanelProps } from './group-panel.props';
-
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
 export const GroupPanel = ({
@@ -51,6 +51,7 @@ export const GroupPanel = ({
           <DeleteMemberModal chatKey={uid} />
           <LeaveGroupModal chatKey={uid} name={name} />
           <DeleteGroupModal chatKey={uid} name={name} />
+          <MakeAdministratorModal chatKey={uid} />
         </>
       )}
     </>

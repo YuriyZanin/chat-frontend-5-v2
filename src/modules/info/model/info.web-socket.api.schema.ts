@@ -7,7 +7,7 @@ const serializerRequestObjectMembersApiSchema = z.object({
 
 export const serializerRequestApiSchema = z.object({
   action: z.enum(['add_members_to_chat', 'remove_members_from_chat']),
-  request_uid: z.string().optional(),
+  request_uid: z.string(),
   object: serializerRequestObjectMembersApiSchema,
 });
 
@@ -54,3 +54,15 @@ export const serializerRequestClearGroupMessages = z.object({
 });
 
 export type ClearGroupRequestAPI = z.infer<typeof serializerRequestClearGroupMessages>;
+
+const serializerRequestObjectTransferOwner = z.object({
+  chat_key: z.string(),
+  new_owner_uid: z.string(),
+});
+export const serializerRequestTransferOwnerSchema = z.object({
+  action: z.enum(['transfer_owner']),
+  request_uid: z.string(),
+  object: serializerRequestObjectTransferOwner,
+});
+
+export type TransferOwnerRequestAPI = z.infer<typeof serializerRequestTransferOwnerSchema>;

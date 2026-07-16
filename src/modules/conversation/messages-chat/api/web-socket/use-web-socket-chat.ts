@@ -9,6 +9,7 @@ import { translateMessageIntoChat } from 'modules/conversation/chats/utils/utils
 import { useChatsListStore } from 'modules/conversation/chats/zustand-store-chats-list/zustand-store-chats-list';
 import { useInfoProfileQuery } from 'modules/info/api';
 import type { ProfileInfo } from 'modules/info/entity/info.entity';
+import type { TransferOwnerRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import {
   AddOrRemoveMembersRequestAPI,
   ClearGroupRequestAPI,
@@ -19,6 +20,7 @@ import {
   serializerRequestClearGroupMessages,
   serializerRequestEditChat,
   serializerRequestLeaveGroupApiSchema,
+  serializerRequestTransferOwnerSchema,
 } from 'modules/info/model/info.web-socket.api.schema';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
@@ -50,6 +52,7 @@ import type { Attachment } from '../../ui/context-menu/context-menu-attach-file/
 import { useMessagesChatStore, useUserIdStore } from '../../zustand-store/zustand-store';
 import { filesUploadApi } from '../files-upload.api';
 import { voiceUploadApi } from '../voice-upload.api';
+
 type UseWebSocketChatReturn = {
   sendMessage: ({
     content,
@@ -74,6 +77,7 @@ type UseWebSocketChatReturn = {
   sendDeleteGroup: (payload: DeleteGroupRequestAPI) => void;
   sendEditGroup: (payload: EditChatRequestAPI) => void;
   sendClearGroup: (payload: ClearGroupRequestAPI) => void;
+  sendMakeAdministratorGroupOrChannel: (payload: TransferOwnerRequestAPI) => void;
   sendAnswerCall: (payload: AnswerCallRequestAPI) => void;
   sendCallCompletion: (payload: CallCompleteRequestAPI) => void;
   sendCallStateUpdate: (payload: CallStateRequestAPI) => void;
@@ -170,6 +174,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       | OfferCallRequestAPI
       | DeleteMessageApi
       | CreateChatRequestApi
+      | TransferOwnerRequestAPI
     )[]
   >([]);
   // функции пин/понг
@@ -669,6 +674,31 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
             pendingTimeouts.current.delete(data.request_uid);
           }
         }
+        //13. Входящее ws-сообщение сервера подтверждающее передачу прав администратора группы/канала другому участнику/подписчику
+        // сообщение получил инициатор передачи прав администратора
+        if (data.action === 'transfer_owner' && data.status === 'OK') {
+          console.log(
+            'Подтверждение сервера о передаче прав администратора группы/канала другому участнику/подписчику: ',
+            data,
+          );
+          // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
+          queryClient.refetchQueries({
+            queryKey: ['participants', 'participants-list', data.object.chat_key],
+          });
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        // сообщение получил участник/подписчик, которому переданы права администратора группы/канала
+        if (data.action === 'owner_transferred' && data.status === 'OK') {
+          console.log(
+            'Подтверждение сервера о передаче прав администратора группы/канала другому участнику/подписчику: ',
+            data,
+          );
+          // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
+          queryClient.refetchQueries({
+            queryKey: ['participants', 'participants-list', data.object.chat_key],
+          });
+        }
       };
     } catch (e) {}
   }, [
@@ -1024,10 +1054,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
         console.log('Sent create_chat request:', payload);
         //Устанавливаем таймаут ожидания подтверждения (5cek)=
         const to = setTimeout(() => {
-          // Если за 10 cек не пришло сообщение-подтверждение от ws
+          if (!pendingTimeouts.current.get(requestUid)) return;
+          // Если за 5 cек не пришло сообщение-подтверждение от ws
           console.log('Группа/канал не созданы');
           pendingTimeouts.current.delete(requestUid);
-        }, 10000);
+        }, 5000);
         pendingTimeouts.current.set(requestUid, to);
       } else {
         // Если ws-соединение по какой-то причине закрыто, тогда ставим это сообщение (payload) в очередь на отправку
@@ -1045,6 +1076,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server members: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      const to = setTimeout(() => {
+        if (!pendingTimeouts.current.get(payload.request_uid)) return;
+        // Если за 5 cек не пришло сообщение-подтверждение от ws
+        console.log('Добавление / удаление участников в группу / канал не подтверждено.');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 5000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }
@@ -1057,6 +1096,26 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server leave from group: ', payload);
+    } else {
+      messageQueueRef.current.push(payload);
+    }
+  };
+
+  // сделать администратором группы/канала
+  const sendMakeAdministratorGroupOrChannel = (payload: TransferOwnerRequestAPI): void => {
+    const resultZod = serializerRequestTransferOwnerSchema.safeParse(payload);
+    const socket = wsRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
+      socket.send(JSON.stringify(payload));
+      console.log('Send to server make administrator for group or channell: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      const to = setTimeout(() => {
+        if (!pendingTimeouts.current.get(payload.request_uid)) return;
+        // Если за 5 cек не пришло сообщение-подтверждение от ws
+        console.log('Права администратора не переданы участнику/подписчику группы/канала');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 5000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }
@@ -1265,6 +1324,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     sendDeleteGroup,
     sendEditGroup,
     sendClearGroup,
+    sendMakeAdministratorGroupOrChannel,
     sendAnswerCall,
     sendCallCompletion,
     sendCallStateUpdate,

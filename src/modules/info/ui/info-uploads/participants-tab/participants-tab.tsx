@@ -35,21 +35,29 @@ export const ParticipantsTab = ({ currentUid, chatKey }: ParticipantsTabProps): 
       <SearchPanel query={query} onChange={setQuery} onClear={clearQuery} />
       {query ? (
         <>
-          <ParticipantsPanel participants={filtered} isOwnerGroupOrChannel={isOwnerGroupOrChannel} />
+          <ParticipantsPanel participants={filtered} isOwnerGroupOrChannel={isOwnerGroupOrChannel} isGroup={isGroup} />
         </>
       ) : (
         <>
           {owner && (
             <>
               <div className={styles.label}>Владелец</div>
-              <ParticipantCardSelectable isOwnerGroupOrChannel={isOwnerGroupOrChannel} participant={owner} />
+              <ParticipantCardSelectable
+                isOwnerGroupOrChannel={isOwnerGroupOrChannel}
+                participant={owner}
+                isGroup={isGroup}
+              />
             </>
           )}
 
           {members.length > 0 && (
             <>
               <div className={styles.label}>{isGroup ? 'Участники' : 'Подписчики'}</div>
-              <ParticipantsPanel participants={members} isOwnerGroupOrChannel={isOwnerGroupOrChannel} />
+              <ParticipantsPanel
+                participants={members}
+                isOwnerGroupOrChannel={isOwnerGroupOrChannel}
+                isGroup={isGroup}
+              />
             </>
           )}
         </>

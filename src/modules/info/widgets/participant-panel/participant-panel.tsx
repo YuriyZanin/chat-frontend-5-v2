@@ -5,9 +5,11 @@ import { JSX } from 'react';
 export const ParticipantsPanel = ({
   participants,
   isOwnerGroupOrChannel,
+  isGroup,
 }: {
   participants?: Participant[];
   isOwnerGroupOrChannel: boolean;
+  isGroup: boolean;
 }): JSX.Element => {
   return (
     <div>
@@ -17,6 +19,7 @@ export const ParticipantsPanel = ({
             key={member.uid}
             isOwnerGroupOrChannel={isOwnerGroupOrChannel}
             participant={member}
+            isGroup={isGroup}
           />
         ))}
       </ul>

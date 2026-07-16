@@ -12,14 +12,17 @@ import DeleteIcon from '../../../../shared/icons/delete-outline.svg';
 export const ParticipantCardSelectable = ({
   participant,
   isOwnerGroupOrChannel,
+  isGroup,
 }: {
   participant: Participant;
   isOwnerGroupOrChannel: boolean;
+  isGroup: boolean;
 }): JSX.Element => {
   const isSelectionMode = useInfoStore((s) => s.isAddMembersMode);
   const selectedIds = useInfoStore((s) => s.selectedIds);
   const toggleSelection = useInfoStore((s) => s.toggleSelection);
   const openDeleteModal = useInfoStore((s) => s.openDeleteParticipantModal);
+  const openMakeAdministratorModalStore = useInfoStore((s) => s.openMakeAdministratorModal);
 
   const isSelected = selectedIds.has(participant.uid);
   const { uid, firstName, lastName, avatarUrl, wasOnlineAt, isOnline } = participant;
@@ -36,10 +39,10 @@ export const ParticipantCardSelectable = ({
     {
       label: 'Сделать администратором',
       variant: 'general',
-      onClick: (): void => {},
+      onClick: (): void => openMakeAdministratorModalStore(participant),
     },
     {
-      label: 'Удалить из группы',
+      label: `Удалить из ${isGroup ? 'группы' : 'канала'}`,
       icon: <DeleteIcon />,
       variant: 'alert',
       onClick: () => openDeleteModal(participant.uid),
