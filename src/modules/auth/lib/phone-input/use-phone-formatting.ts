@@ -29,7 +29,7 @@ export const usePhoneFormatting = (): ((inputValue: string) => string) => {
       prefix = '+7';
       digitsToFormat = digitsOnly.substring(1);
     } else if (digitsOnly.length > 0) {
-      prefix = '';
+      prefix = '+7';
       digitsToFormat = digitsOnly;
     }
 
