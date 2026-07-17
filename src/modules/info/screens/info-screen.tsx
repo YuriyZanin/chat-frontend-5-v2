@@ -213,7 +213,7 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
     if (isAddMembersMode) {
       return renderWithLayout(
         <InfoHeader title="Пригласить участников" backProps={{ icon: <BackIcon />, onClick: handleBack }} />,
-        <AddMemberPanel chatKey={uid} />,
+        <AddMemberPanel chatKey={uid} currentUid={currentUid} />,
         <AddMembersButton label="Добавить в группу" onClick={handleAddMembers} disabled={selectedIds.size === 0} />,
       );
     }
@@ -247,7 +247,7 @@ export const InfoScreen = ({ uid, currentUid }: InfoScreenProps): JSX.Element =>
     if (isAddMembersMode) {
       return renderWithLayout(
         <InfoHeader title="Пригласить подписчиков" backProps={{ icon: <BackIcon />, onClick: handleBack }} />,
-        <AddMemberPanel chatKey={uid} />,
+        <AddMemberPanel chatKey={uid} currentUid={currentUid} />,
         <AddMembersButton label="Добавить в канал" onClick={handleAddMembers} disabled={selectedIds.size === 0} />,
       );
     }
