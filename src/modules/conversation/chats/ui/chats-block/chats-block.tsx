@@ -45,19 +45,14 @@ export const ChatsBlock = (): JSX.Element => {
   const { firstName = '', lastName = '' } = chat?.peer ?? {};
 
   const chatsListStore = useChatsListStore((s) => s.chatsList);
-  const setChatsListStore = useChatsListStore((s) => s.setChatsList);
   const addChatsListStore = useChatsListStore((s) => s.addChatsList);
 
   // при изменении массива chats незамедлительнол изменения вносим в store
 
   useEffect(() => {
     if (!chats) return;
-    if (search === '') {
-      setChatsListStore(chats);
-    } else {
-      addChatsListStore(chats);
-    }
-  }, [chats]);
+    addChatsListStore(chats);
+  }, [chats, addChatsListStore]);
 
   const router = useRouter();
   const contactMenuItems: DropdownItem[] = [

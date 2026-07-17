@@ -1,21 +1,22 @@
-import { useQueryClient } from '@tanstack/react-query';
+import type { ChatType } from 'modules/conversation/chats/model/chat';
 import { useWebSocketChatStore } from 'modules/conversation/messages-chat/api/web-socket/use-web-socket-chat-store';
 import { useInfoStore } from 'modules/info/model/info.store';
 import { LeaveGroupRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
+import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX } from 'react';
 import { Modal } from 'shared/ui';
-
 type LeaveGroupModalProps = {
   chatKey: string;
   name: string;
+  chatType: ChatType | undefined;
 };
 
-export const LeaveGroupModal = ({ chatKey, name }: LeaveGroupModalProps): JSX.Element | null => {
-  const queryClient = useQueryClient();
+export const LeaveGroupModal = ({ chatKey, name, chatType }: LeaveGroupModalProps): JSX.Element | null => {
   const { isLeaveGroupModalOpen, closeLeaveGroupModal } = useInfoStore();
+  const { openPopup, setCallback, setTitle, setTimer } = useNotificationStore();
+  // закрывает всю панель инфо
+  const { closeInfoScreen } = useInfoStore();
   const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
-
-  if (!isLeaveGroupModalOpen) return null;
 
   const handleLeaveGroup = (): void => {
     if (webSocketChatSrore === null) return;
@@ -26,20 +27,24 @@ export const LeaveGroupModal = ({ chatKey, name }: LeaveGroupModalProps): JSX.El
       request_uid: requestUid,
       object: { chat_key: chatKey },
     };
-
-    sendLeaveGroup(payload);
-
-    queryClient.refetchQueries({
-      queryKey: ['participants', 'participants-list', chatKey],
-    });
-
+    setCallback(() => sendLeaveGroup(payload));
     closeLeaveGroupModal();
+    setTitle('Вы покинули Группу');
+    setTimer(5000);
+    openPopup();
+    closeInfoScreen();
   };
+
+  if (!isLeaveGroupModalOpen) return null;
 
   return (
     <Modal
       title={`Покинуть группу «${name}»?`}
-      content={'Это открытая группа — вы сможете вернуться в любой момент'}
+      content={
+        chatType === 'public-group'
+          ? 'Это открытая группа — вы сможете вернуться в любой момент'
+          : 'Вы не cможете просматривать сообщения и вернуться в группу без приглашения'
+      }
       firstButtonText="Отменить"
       secondButtonText="Покинуть"
       onFirstButtonClick={closeLeaveGroupModal}

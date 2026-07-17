@@ -27,6 +27,7 @@ export const GroupPanel = ({
   });
 
   const name = profile?.name ?? '';
+  const chatType = profile?.chatType;
   const membersCount = profile?.participants.length ?? 0;
   const status = formatParticipants(membersCount);
   const tabs = ['Участники', 'Медиа', 'Файлы', 'Голосовые', 'Сcылки'];
@@ -49,7 +50,7 @@ export const GroupPanel = ({
           <InfoUploads tabs={tabs} currentUid={currentUid} chatKey={uid} filesList={filesList} />
           <ClearGroupModal profile={profile} currentUid={currentUid} chat_id={chat_id} />
           <DeleteMemberModal chatKey={uid} />
-          <LeaveGroupModal chatKey={uid} name={name} />
+          <LeaveGroupModal chatKey={uid} name={name} chatType={chatType} />
           <DeleteGroupModal chatKey={uid} name={name} />
           <MakeAdministratorModal chatKey={uid} />
         </>
