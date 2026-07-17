@@ -18,6 +18,15 @@ export const deleteChat = async (id: number): Promise<void> => {
   await apiFetch<void>(`/api/proxy/api/v1/chat/list/${id}/`, { method: 'DELETE' });
 };
 
-export const clearChat = async (id: number): Promise<void> => {
-  await apiFetch<void>(`/api/proxy/api/v1/chat/list/clear/${id}/`, { method: 'POST' });
+export const clearChat = async (
+  id: number,
+  body?: {
+    is_favorite: boolean;
+    last_message: {
+      from_user: string;
+      new: boolean;
+    };
+  },
+): Promise<void> => {
+  await apiFetch<void>(`/api/proxy/api/v1/chat/list/clear/${id}/`, { method: 'POST', body: JSON.stringify(body) });
 };

@@ -34,6 +34,7 @@ export const ProtectedLayout = ({
     sendIceCandidate,
     sendOfferCall,
     createGroupOrChannel,
+    sendMakeAdministratorGroupOrChannel,
   } = useWebSocketChat(wsUrl, currentUserId, refreshUrl);
   // все полученные функции для работы с ws-соединения записываем в store чтобы использовать их в любом месте программы
   const setWebSocketChatStore = useWebSocketChatStore((s) => s.setWebSocketChat);
@@ -54,6 +55,7 @@ export const ProtectedLayout = ({
       sendIceCandidate,
       sendOfferCall,
       createGroupOrChannel,
+      sendMakeAdministratorGroupOrChannel,
     });
   }, [setWebSocketChatStore]);
 

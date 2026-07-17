@@ -9,17 +9,25 @@ import { InfoNotification } from 'modules/info/ui/info-notification';
 import { InfoSummary } from 'modules/info/ui/info-summary';
 import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { LeaveGroupModal } from 'modules/info/ui/leave-group-modal';
+import { MakeAdministratorModal } from 'modules/info/ui/make-administrator-modal';
 import { JSX } from 'react';
 import type { GroupPanelProps } from './group-panel.props';
-
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
-export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: GroupPanelProps): JSX.Element => {
+export const GroupPanel = ({
+  uid,
+  currentUid,
+  filesList,
+  profile,
+  isLoading,
+  chat_id,
+}: GroupPanelProps): JSX.Element => {
   const { data: link } = useGenerateInviteLinkQuery(uid, {
     expires_in: 86400,
   });
 
   const name = profile?.name ?? '';
+  const chatType = profile?.chatType;
   const membersCount = profile?.participants.length ?? 0;
   const status = formatParticipants(membersCount);
   const tabs = ['Участники', 'Медиа', 'Файлы', 'Голосовые', 'Сcылки'];
@@ -40,10 +48,11 @@ export const GroupPanel = ({ uid, currentUid, filesList, profile, isLoading }: G
           <InfoSummary description={profile?.description} />
           <InfoSummary inviteLink={link?.invite_link} chatKey={uid} />
           <InfoUploads tabs={tabs} currentUid={currentUid} chatKey={uid} filesList={filesList} />
-          <ClearGroupModal chatKey={uid} />
+          <ClearGroupModal profile={profile} currentUid={currentUid} chat_id={chat_id} />
           <DeleteMemberModal chatKey={uid} />
-          <LeaveGroupModal chatKey={uid} name={name} />
+          <LeaveGroupModal chatKey={uid} name={name} chatType={chatType} />
           <DeleteGroupModal chatKey={uid} name={name} />
+          <MakeAdministratorModal chatKey={uid} />
         </>
       )}
     </>

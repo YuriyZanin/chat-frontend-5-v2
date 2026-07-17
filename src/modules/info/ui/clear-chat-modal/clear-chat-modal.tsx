@@ -17,7 +17,7 @@ export const ClearChatModal = (): JSX.Element | null => {
 
   const handleClear = (): void => {
     if (chatId) {
-      setCallback(() => clearChat(chatId));
+      setCallback(() => clearChat({ id: chatId }));
       setTitle('История чата удалена');
       setTimer(5000);
       openPopup();

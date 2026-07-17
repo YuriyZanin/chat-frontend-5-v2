@@ -44,7 +44,7 @@ export const DeleteMemberModal = ({ chatKey }: DeleteMemberModalProps): JSX.Elem
 
   return (
     <Modal
-      title={`Удалить ${firstName} ${lastName} из группы?`}
+      title={`Удалить ${firstName} ${lastName} из ${chatKey.startsWith('group_') ? 'группы' : 'канала'}?`}
       content="Пользователь потеряет доступ ко всем сообщениям и не сможет вернуться без приглашения"
       firstButtonText="Отменить"
       secondButtonText="Удалить"

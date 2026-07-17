@@ -1,4 +1,6 @@
 'use client';
+import { NotificationModal } from 'modules/notification';
+import { useNotificationStore } from 'modules/notification/model/notification.store';
 import { JSX, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { READING_TIME, useIntersectionRead } from '../../hooks/use-intersection-read';
 import { useSearchAndNavigateSortedMessages } from '../../hooks/use-search-and-navigate-sorted-messages';
@@ -7,6 +9,7 @@ import type { RestMessageApi } from '../../model/messages-list';
 import { smoothScrollElementIntoView } from '../../utils/smooth-scroll';
 import { useToastVisibleStore } from '../../zustand-store/zustand-store';
 import { DateCard } from '../date-card/date-card';
+import { DefaultMessagesPage } from '../default-messages-page';
 import { IncomingAudioCard } from '../message-card/audio-card/incoming-audio-card/incoming-audio-card';
 import { OutgoingAudioCard } from '../message-card/audio-card/outgoing-audio-card/outgoing-audio-card';
 import { IncomingFileCard } from '../message-card/file-card/incoming-file-card/incoming-file-card';
@@ -26,6 +29,7 @@ import { ScrollButton } from '../scroll-button/scroll-button';
 import styles from './message-list.module.scss';
 import type { MessageListProps } from './message-list.props';
 import { useFixedTargetIndex } from './use-fixed-target-index';
+
 export const MessagesList = ({
   messagesByUser,
   currentUserId,
@@ -69,6 +73,7 @@ export const MessagesList = ({
 
   // Состояние для отслеживания положения скролла
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const { isModalOpen } = useNotificationStore();
   // Эффект для отслеживания позиции скролла
   useEffect(() => {
     const container = wrapperRef.current;
@@ -227,6 +232,19 @@ export const MessagesList = ({
     useSearchAndNavigateSortedMessages({ flatList, wrapperRef });
   // текущий домен
   const baseUrl = window.location.origin;
+
+  if (isModalOpen) {
+    return (
+      <>
+        <DefaultMessagesPage
+          url={'/images/messages-chats/default-img.svg'}
+          topText={'Сообщений пока нет'}
+          bottomText={'Напишите первым :)'}
+        />
+        <NotificationModal chatKey={userIdStore} posCopy={{ top: posCopy.top, left: posCopy.left }} />
+      </>
+    );
+  }
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
       {/* Если список пуст, всё равно рендерим sentinel чтобы observer был стабилен */}
@@ -424,6 +442,7 @@ export const MessagesList = ({
         </button>
       )}
       {toastVisibleStore && <NotificationCopyCard posCopy={{ top: posCopy.top, left: posCopy.left }} />}
+      {isModalOpen && <NotificationModal chatKey={userIdStore} posCopy={{ top: posCopy.top, left: posCopy.left }} />}
     </div>
   );
 };

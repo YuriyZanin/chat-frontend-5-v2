@@ -16,7 +16,7 @@ export const ParticipantsTab = ({ currentUid, chatKey }: ParticipantsTabProps): 
   const members = filtered?.filter((p) => !p.isOwner) ?? [];
   const current = participants?.find((p) => p.uid === currentUid);
   const isGroup = chatKey.startsWith('group');
-
+  const isOwnerGroupOrChannel = owner?.uid === currentUid;
   const handleAddToGroup = (): void => {
     clearSelection();
     clearQuery();
@@ -35,21 +35,29 @@ export const ParticipantsTab = ({ currentUid, chatKey }: ParticipantsTabProps): 
       <SearchPanel query={query} onChange={setQuery} onClear={clearQuery} />
       {query ? (
         <>
-          <ParticipantsPanel participants={filtered} />
+          <ParticipantsPanel participants={filtered} isOwnerGroupOrChannel={isOwnerGroupOrChannel} isGroup={isGroup} />
         </>
       ) : (
         <>
           {owner && (
             <>
               <div className={styles.label}>Владелец</div>
-              <ParticipantCardSelectable {...owner} />
+              <ParticipantCardSelectable
+                isOwnerGroupOrChannel={isOwnerGroupOrChannel}
+                participant={owner}
+                isGroup={isGroup}
+              />
             </>
           )}
 
           {members.length > 0 && (
             <>
               <div className={styles.label}>{isGroup ? 'Участники' : 'Подписчики'}</div>
-              <ParticipantsPanel participants={members} />
+              <ParticipantsPanel
+                participants={members}
+                isOwnerGroupOrChannel={isOwnerGroupOrChannel}
+                isGroup={isGroup}
+              />
             </>
           )}
         </>

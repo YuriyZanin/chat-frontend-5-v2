@@ -6,6 +6,7 @@ export type GroupPanelProps = {
   currentUid: string;
   profile: GroupInfo | undefined;
   isLoading: boolean;
+  chat_id: number;
   filesList: {
     imageFileList: ChatFilesListApi[] | undefined;
     fileFileList: ChatFilesListApi[] | undefined;

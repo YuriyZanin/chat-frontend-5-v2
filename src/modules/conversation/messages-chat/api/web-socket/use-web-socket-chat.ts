@@ -5,10 +5,13 @@ import { avatarUploadApi } from 'modules/conversation/chats/api/avatar-upload.ap
 import type { Chat } from 'modules/conversation/chats/entity';
 import type { CreateChatRequestApi } from 'modules/conversation/chats/model/chat/chat.api.schema';
 import { CreateChatRequestSchema } from 'modules/conversation/chats/model/chat/chat.api.schema';
+import { useChatsScreen } from 'modules/conversation/chats/screens/use-chats-screen';
 import { translateMessageIntoChat } from 'modules/conversation/chats/utils/utils';
 import { useChatsListStore } from 'modules/conversation/chats/zustand-store-chats-list/zustand-store-chats-list';
 import { useInfoProfileQuery } from 'modules/info/api';
 import type { ProfileInfo } from 'modules/info/entity/info.entity';
+import { useInfoStore } from 'modules/info/model/info.store';
+import type { TransferOwnerRequestAPI } from 'modules/info/model/info.web-socket.api.schema';
 import {
   AddOrRemoveMembersRequestAPI,
   ClearGroupRequestAPI,
@@ -19,6 +22,7 @@ import {
   serializerRequestClearGroupMessages,
   serializerRequestEditChat,
   serializerRequestLeaveGroupApiSchema,
+  serializerRequestTransferOwnerSchema,
 } from 'modules/info/model/info.web-socket.api.schema';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
@@ -74,6 +78,7 @@ type UseWebSocketChatReturn = {
   sendDeleteGroup: (payload: DeleteGroupRequestAPI) => void;
   sendEditGroup: (payload: EditChatRequestAPI) => void;
   sendClearGroup: (payload: ClearGroupRequestAPI) => void;
+  sendMakeAdministratorGroupOrChannel: (payload: TransferOwnerRequestAPI) => void;
   sendAnswerCall: (payload: AnswerCallRequestAPI) => void;
   sendCallCompletion: (payload: CallCompleteRequestAPI) => void;
   sendCallStateUpdate: (payload: CallStateRequestAPI) => void;
@@ -111,7 +116,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
   const { toUserUid, messageRtcUid, addCandidate, setCallData, setState, resetCall } = useCallsStore();
   //делаем ссылку на актуальный user_uid открытого чата
   const userIdRef = useRef<string>(userId);
-  const stopRef = useRef<boolean>(true);
+  const stopRef = useRef<boolean>(false);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -145,9 +150,18 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
   const deleteMessageByUidForUser = useMessagesChatStore.getState().deleteMessageByUidForUser;
   const addChatInChatsListStore = useChatsListStore.getState().addChatInChatsList;
   const updateChatByUidStore = useChatsListStore.getInitialState().updateChatByUid;
-  const deleteChatByUidStore = useChatsListStore.getInitialState().deleteChatByUid;
-  const chatsListStore = useChatsListStore.getInitialState().chatsList;
-
+  const deleteChatByUidStore = useChatsListStore((s) => s.deleteChatByUid);
+  const clearMessagesForUserStore = useMessagesChatStore((s) => s.clearMessagesForUser);
+  const chatsListStore = useChatsListStore((s) => s.chatsList);
+  const chatsListRef = useRef<Chat[] | null>(chatsListStore);
+  const { search: searchChatsList } = useChatsScreen();
+  const searchChatsListRef = useRef<string>(searchChatsList);
+  useEffect(() => {
+    chatsListRef.current = chatsListStore;
+    searchChatsListRef.current = searchChatsList;
+  }, [chatsListStore, searchChatsList]);
+  // закрывает всю панель инфо
+  const { closeInfoScreen } = useInfoStore();
   // maccив интервалов [{requestUid:timeout_id},...] на каждое отправленное сообщение с помошью ws
   // нужно отследить через какое время на отправленное клиентом сообщение, ws пришлет ответ-подтверждение,
   // либо его вообще не пришлет
@@ -169,6 +183,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       | OfferCallRequestAPI
       | DeleteMessageApi
       | CreateChatRequestApi
+      | TransferOwnerRequestAPI
     )[]
   >([]);
   // функции пин/понг
@@ -556,70 +571,30 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           } else {
             text = `${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName} создал(а) группу "${data.object.name}"`;
           }
-          // Если сервер пришлёт подтверждение с request_uid,
-          if (data.request_uid) {
-            const result = {
-              peer: {
-                uid: data.object.chat_id,
-                username: data.object.chat_key,
-                nickname: data.object.name,
-                firstName: '',
-                lastName: '',
-                avatarUrl: data.object.avatar_master_url ?? data.object.avatar_webp_url ?? '',
-                avatarWebpUrl: data.object.avatar_master_url ?? '',
-                isBlocked: false,
-                isOnline: false,
-                isInContacts: false,
-                wasOnlineAt: 0,
-              },
-              chat: {
-                id: data.object.chat_id,
-                chatKey: data.object.chat_key,
-                chatType: data.object.chat_type,
-                name: data.object.name,
-                is_favorite: false,
-                notifications: true,
-                newMessageCount: 1,
-                lastActivityAt: 0,
-              },
-              messages: {
-                lastSeenMessage: undefined,
-                firstNewMessage: undefined,
-                lastMessage: {
-                  id: 0,
-                  uid: '',
-                  fromUser: data.object.created_by === currentUserIdRef.current ? currentUserIdRef.current : '',
-                  content: text,
-                  filesSummary: {
-                    types: [],
-                    count: 0,
-                  },
-                  hasRepliedMessage: false,
-                  hasForwardedMessage: false,
-                  new: true,
-                  createdAt: Date.now() / 1000,
-                  updatedAt: Date.now() / 1000,
-                },
-              },
-            };
-            if (data.object.created_by === currentUserIdRef.current) {
-              // если владелец группы/канала, то заменим в store заглушку чата стоящую в DOM на присланный сервером чат
-              updateChatByUidStore(data.request_uid, result);
-              if (!stopRef.current) {
-                //после создания группы/канала сразу туда переходим
-                router.push(`/chats/${data.object.chat_key}`);
-                // после создания группы/канала от имени владельца отправляем сообщение всем подписчикам
-                sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
-                stopRef.current = true;
-              }
-            } else {
-              // если участник группы/канала, то добавим в список чатов в store новый чат
-              addChatInChatsListStore(result);
+          // если владелец группы/канала, то
+          if (data.object.created_by === currentUserIdRef.current) {
+            if (!stopRef.current) {
+              // делаем рефреш chat-list, чтобы у владельца группа/каннал появилась у него в DOM
+              queryClient.removeQueries({
+                queryKey: ['chats', 'chat-list', searchChatsListRef.current],
+              });
+              //после создания группы/канала сразу туда переходим
+              router.push(`/chats/${data.object.chat_key}`);
+              // после создания группы/канала от имени владельца отправляем сообщение всем подписчикам
+              sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
+              stopRef.current = true;
             }
+            // если участник группы/канала, то добавим в список чатов в store новый чат
+          } else {
+            // делаем рефреш chat-list, чтобы у участников появилась в DOM созданная группа/канал
+            queryClient.removeQueries({
+              queryKey: ['chats', 'chat-list', searchChatsListRef.current],
+            });
           }
-          // Очистим таймаут подтверждения
+          // во всех случаях очистим таймаут подтверждения
           pendingTimeouts.current.delete(data.request_uid);
         }
+
         //входящее ws-сообщение сервера не подтверждающее создание группы/канала из-за возникшей ошибки
         if (data.action === 'create_chat' && data.status === 'error') {
           console.log('Cообщение сервера что при создании группы/канала возникла ошибка :', data);
@@ -629,7 +604,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
           // Очистим таймаут подтверждения
           pendingTimeouts.current.delete(data.request_uid);
         }
-        //11 Входящее ws-сообщение сервера подтверждающее добавление участника/подписчика в группу/канал
+        //11. Входящее ws-сообщение сервера подтверждающее добавление участника/подписчика в группу/канал
         if (data.action === 'add_members_to_chat' && data.status === 'OK') {
           console.log('Подтверждение сервера об добавлении участника/подписчика в группу/канал:', data);
           // сообщение получил участник/подписчик группы/канала, у которого еще нет в DOM данной группы/канала
@@ -637,11 +612,11 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
             data.object.added_users.some(
               (user: { uid: string; full_name: string }) => user.uid === currentUserIdRef.current,
             ) &&
-            !chatsListStore?.some((chat: Chat) => chat.chat.chatKey === data.object.chat_key)
+            !chatsListRef.current?.some((chat: Chat) => chat.chat.chatKey === data.object.chat_key)
           ) {
             // делаем рефреш chat-list у участника/подписчика, чтобы группа/каннал в которую его добавили сразу появился у него в DOM
-            queryClient.refetchQueries({
-              queryKey: ['chats', 'chat-list'],
+            queryClient.removeQueries({
+              queryKey: ['chats', 'chat-list', searchChatsListRef.current],
             });
           } else {
             // сообщение получил участник/подписчик группы/канала, у которого в DOM уже есть данная группа/канал
@@ -651,6 +626,102 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
               queryKey: ['participants', 'participants-list', data.object.chat_key],
             });
           }
+          // Очистим таймаут подтверждения в любом случае
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        //12. Входящее ws-сообщение сервера подтверждающее удаление участника/подписчика из группы/канала
+        if (data.action === 'remove_members_from_chat' && data.status === 'OK') {
+          console.log('Подтверждение сервера об удалении участника/подписчика из группы/канала:', data);
+          // сообщение получил удаленный участник/подписчик группы/канала
+          if (
+            data.object.remove_users.some(
+              (user: { uid: string; full_name: string }) => user.uid === currentUserIdRef.current,
+            )
+          ) {
+            // делаем рефреш chat-list у удаленного участника/подписчика, чтобы группа/каннал из которого его удалили исчез у него из DOM
+            queryClient.refetchQueries({
+              queryKey: ['chats', 'chat-list', searchChatsListRef.current],
+            });
+            console.log('start');
+            //cooбщение получили все иные участники/подписчики группы/канала
+          } else {
+            // делаем рефреш 'participants-list' у участника/подписчика, чтобы в определенной группе/канале
+            // сразу изменить список участников/подписчиков
+            queryClient.refetchQueries({
+              queryKey: ['participants', 'participants-list', data.object.chat_key],
+            });
+          }
+          // Очистим таймаут подтверждения в любом случае
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        //13. Входящее ws-сообщение сервера подтверждающее очистку группы/канала от всех сообщений (у всех)
+        if (data.action === 'clear_group_messages' && data.status === 'OK') {
+          console.log('Подтверждение сервера об очистке группы/канала от всех сообщений: ', data);
+          // сообщение получил user который не инициировал очистку чата
+          if (data.object.cleared_by !== currentUserIdRef.current) {
+            // мгновенно очищаем группу/канал от сообщений
+            clearMessagesForUserStore(data.object.chatKey);
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
+          } else {
+            //cообщение получил user который инициировал очистку чата
+            // Очистим таймаут подтверждения
+            pendingTimeouts.current.delete(data.request_uid);
+          }
+        }
+        //14. Входящее ws-сообщение сервера подтверждающее передачу прав администратора группы/канала другому участнику/подписчику
+        // сообщение получил инициатор передачи прав администратора
+        if (data.action === 'transfer_owner' && data.status === 'OK') {
+          console.log(
+            'Подтверждение сервера о передаче прав администратора группы/канала другому участнику/подписчику: ',
+            data,
+          );
+          // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
+          queryClient.refetchQueries({
+            queryKey: ['participants', 'participants-list', data.object.chat_key],
+          });
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+        }
+        // сообщение получил участник/подписчик, которому переданы права администратора группы/канала
+        if (data.action === 'owner_transferred' && data.status === 'OK') {
+          console.log(
+            'Подтверждение сервера о передаче прав администратора группы/канала другому участнику/подписчику: ',
+            data,
+          );
+          const chatKey = data?.object?.chat_key;
+          // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
+          queryClient.refetchQueries({
+            queryKey: ['participants', 'participants-list', chatKey],
+          });
+
+          const isGroup = typeof chatKey === 'string' && chatKey.startsWith('group_');
+          const text: string = `Права администратора ${isGroup ? 'группы' : 'канала'} переданы ${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName}`;
+          // после передачи прав администратора группы/канала от имени нового владельца прав отправляем сообщение всем подписчикам
+          sendMessage({ content: `@@@ ${text}`, chatKey: data.object.chat_key });
+        }
+
+        //15. Входящее ws-сообщение сервера подтверждающее покидание группы/канала участником/подписчиком
+        if (data.action === 'leave_chat' && data.status === 'OK') {
+          console.log('Подтверждение сервера о покидании группы/канала участником/подписчиком: ', data);
+          // сообщение получил инициатор покидания группы/канала
+          if (data.object.left_user.uid === currentUserIdRef.current) {
+            // делаем рефреш его chat-list
+            queryClient.removeQueries({
+              queryKey: ['chats', 'chat-list', searchChatsListRef.current],
+            });
+            //после выхода из группы/канала переходим на страницу чаты и закрываем блок инфо
+            router.push(`/chats`);
+            closeInfoScreen();
+          }
+          // Очистим таймаут подтверждения
+          pendingTimeouts.current.delete(data.request_uid);
+        } else {
+          // сообщение получили иные участники группы/канала
+          // делаем перезагрузку списка участников/подписчиков группы/канала, где произошли изменения
+          queryClient.refetchQueries({
+            queryKey: ['participants', 'participants-list', data?.object?.chat_key],
+          });
         }
       };
     } catch (e) {}
@@ -951,36 +1022,6 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       if (!chatType) return;
       stopRef.current = false;
       const requestUid = crypto.randomUUID();
-      //создаем временную чат-заглушку для помещения в список чатов DOM
-      const tempChat: Chat = {
-        peer: {
-          uid: requestUid,
-          username: '',
-          nickname: name,
-          firstName: '',
-          lastName: '',
-          avatarUrl: avatarPreview ?? '',
-          avatarWebpUrl: avatarPreview ?? '',
-          isBlocked: false,
-          isOnline: false,
-          isInContacts: false,
-          wasOnlineAt: 0,
-        },
-        chat: {
-          id: 0,
-          chatKey: '',
-          chatType: chatType,
-          name,
-          is_favorite: false,
-          notifications: true,
-          newMessageCount: 0,
-          lastActivityAt: 0,
-        },
-        messages: {},
-      };
-
-      // записываем в store и показываем локально сразу в DOM созданный клиентом чат (tempChat)
-      addChatInChatsListStore(tempChat);
       const payload: CreateChatRequestApi = {
         action: 'create_chat',
         request_uid: requestUid,
@@ -1005,12 +1046,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
       if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
         socket.send(JSON.stringify(payload));
         console.log('Sent create_chat request:', payload);
-        //Устанавливаем таймаут ожидания подтверждения (5cek)
+        //Устанавливаем таймаут ожидания подтверждения (5cek)=
         const to = setTimeout(() => {
-          // Если за 60 cек не пришло сообщение-подтверждение от ws меняем в сообщении
+          if (!pendingTimeouts.current.get(requestUid)) return;
+          // Если за 5 cек не пришло сообщение-подтверждение от ws
           console.log('Группа/канал не созданы');
           pendingTimeouts.current.delete(requestUid);
-        }, 60000);
+        }, 5000);
         pendingTimeouts.current.set(requestUid, to);
       } else {
         // Если ws-соединение по какой-то причине закрыто, тогда ставим это сообщение (payload) в очередь на отправку
@@ -1028,6 +1070,14 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server members: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (10cek)=
+      const to = setTimeout(() => {
+        if (!pendingTimeouts.current.get(payload.request_uid)) return;
+        // Если за 10 cек не пришло сообщение-подтверждение от ws
+        console.log('Добавление/удаление участников в группу/канал не подтверждено.');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 10000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }
@@ -1035,11 +1085,46 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
 
   // Покинуть группу / канал
   const sendLeaveGroup = (payload: LeaveGroupRequestAPI): void => {
+    const chatKey = payload.object.chat_key;
+    const isGroup = typeof chatKey === 'string' && chatKey.startsWith('group_');
+    const text: string = `${profileUserRef.current?.firstName} ${profileUserRef.current?.lastName} покинул(а) ${isGroup ? 'группу' : 'канал'}`;
+    // перед покиданием группы/канала инициатор отправляем сообщение всем подписчикам об этом факте
+    sendMessage({ content: `@@@ ${text}`, chatKey });
+    // проверка валидации запроса с помощью zod
     const resultZod = serializerRequestLeaveGroupApiSchema.safeParse(payload);
     const socket = wsRef.current;
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
+      //отправлем запрос на покидание группы через ws-соединение
       socket.send(JSON.stringify(payload));
       console.log('Send to server leave from group: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения сервера (5cek)=
+      const to = setTimeout(() => {
+        if (!pendingTimeouts.current.get(payload.request_uid)) return;
+        // Если за 5 cек не пришло сообщение-подтверждение от ws
+        console.log('Покинуть группу/канал не удалось.');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 5000);
+      pendingTimeouts.current.set(payload.request_uid, to);
+    } else {
+      messageQueueRef.current.push(payload);
+    }
+  };
+
+  // сделать администратором группы/канала
+  const sendMakeAdministratorGroupOrChannel = (payload: TransferOwnerRequestAPI): void => {
+    const resultZod = serializerRequestTransferOwnerSchema.safeParse(payload);
+    const socket = wsRef.current;
+    if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
+      socket.send(JSON.stringify(payload));
+      console.log('Send to server make administrator for group or channell: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      const to = setTimeout(() => {
+        if (!pendingTimeouts.current.get(payload.request_uid)) return;
+        // Если за 5 cек не пришло сообщение-подтверждение от ws
+        console.log('Права администратора не переданы участнику/подписчику группы/канала');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 5000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }
@@ -1076,6 +1161,13 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     if (socket && socket.readyState === WebSocket.OPEN && resultZod.success) {
       socket.send(JSON.stringify(payload));
       console.log('Send to server crear group: ', payload);
+      //Устанавливаем таймаут ожидания подтверждения (5cek)=
+      const to = setTimeout(() => {
+        // Если за 10 cек не пришло сообщение-подтверждение от ws
+        console.log('Ошибка очистки группы/канала от сообщений');
+        pendingTimeouts.current.delete(payload.request_uid);
+      }, 10000);
+      pendingTimeouts.current.set(payload.request_uid, to);
     } else {
       messageQueueRef.current.push(payload);
     }
@@ -1241,6 +1333,7 @@ export function useWebSocketChat(wsUrl: string, currentUserId: string, refreshUr
     sendDeleteGroup,
     sendEditGroup,
     sendClearGroup,
+    sendMakeAdministratorGroupOrChannel,
     sendAnswerCall,
     sendCallCompletion,
     sendCallStateUpdate,

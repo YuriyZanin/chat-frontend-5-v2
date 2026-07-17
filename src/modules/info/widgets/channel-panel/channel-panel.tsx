@@ -9,9 +9,9 @@ import { InfoNotification } from 'modules/info/ui/info-notification';
 import { InfoSummary } from 'modules/info/ui/info-summary';
 import { InfoUploads } from 'modules/info/ui/info-uploads';
 import { LeaveChannelModal } from 'modules/info/ui/leave-channel-modal';
+import { MakeAdministratorModal } from 'modules/info/ui/make-administrator-modal';
 import { JSX } from 'react';
 import type { ChannelPanelProps } from './channel-panel.props';
-
 const URL_DEFAUIT_Avatar_Croup = '/images/profile/group-default.png';
 
 export const ChannelPanel = ({ uid, currentUid, filesList }: ChannelPanelProps): JSX.Element | null => {
@@ -46,6 +46,7 @@ export const ChannelPanel = ({ uid, currentUid, filesList }: ChannelPanelProps):
           <DeleteMemberModal chatKey={uid} />
           <LeaveChannelModal chatKey={uid} name={name} />
           <DeleteGroupModal chatKey={uid} name={name} />
+          <MakeAdministratorModal chatKey={uid} />
         </>
       )}
     </>

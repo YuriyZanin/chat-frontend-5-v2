@@ -6,6 +6,7 @@
   height: 100%;
   background-color: var(--surface-secondary-50);
   overflow: hidden;
+  position: relative;
 }
 .image {
   @include mixins.flex-box();

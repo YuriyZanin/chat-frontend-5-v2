@@ -6,6 +6,7 @@ import { useInfoStore } from 'modules/info/model/info.store';
 import { usePathname } from 'next/navigation';
 import { JSX } from 'react';
 import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
+import type { Msg } from '../../zustand-store/zustand-store';
 import { useHeaderButtonsModalStore } from '../../zustand-store/zustand-store';
 import styles from './header-top-buttons-block.module.scss';
 import CloseIcon from './icon/close.svg';
@@ -16,6 +17,7 @@ export const HeaderTopButtonsBlock = ({
   isBlocked,
   participants,
   chat,
+  messages,
 }: {
   currentUid: string;
   chatKey: string;
@@ -23,6 +25,7 @@ export const HeaderTopButtonsBlock = ({
   isBlocked: boolean;
   participants: Participant[] | undefined;
   chat: Chat | undefined;
+  messages: Msg[];
 }): JSX.Element | null => {
   const { openBlockModal, openAddModal, openLeaveGroupModal, isButtonMenuOpen, closeButtonMenu } =
     useHeaderButtonsModalStore();
@@ -58,21 +61,49 @@ export const HeaderTopButtonsBlock = ({
   if (!isButtonMenuOpen || (isGroup && !member)) return null;
 
   return (
-    <div className={styles.wrapper}>
+    <>
       {isGroup || isChannel ? (
         <>
           {isOwner ? (
-            <button className={clsx(styles.buttonsWrapper, styles.addContact)} onClick={handleAddMembers}>
-              {isChannel ? 'Пригласить подписчиков' : 'Добавить участников'}
-            </button>
+            messages.length === 0 || (messages.length === 1 && messages[0].content?.startsWith('@@@')) ? (
+              <div className={styles.wrapper}>
+                <button className={clsx(styles.buttonsWrapper, styles.addContact)} onClick={handleAddMembers}>
+                  {isChannel ? 'Пригласить подписчиков' : 'Добавить участников'}
+                </button>
+                <button
+                  className={styles.icon}
+                  onClick={() => {
+                    closeButtonMenu();
+                    sendMessage({ content: '@@@' });
+                  }}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            ) : (
+              <> </>
+            )
+          ) : messages.length !== 0 && messages[0].content?.startsWith('@@@') ? (
+            <div className={styles.wrapper}>
+              <button className={clsx(styles.buttonsWrapper, styles.blockContact)} onClick={handleLeaveGroup}>
+                {isChannel ? 'Отписаться' : 'Покинуть группу'}
+              </button>
+              <button
+                className={styles.icon}
+                onClick={() => {
+                  closeButtonMenu();
+                  sendMessage({ content: '@@@' });
+                }}
+              >
+                <CloseIcon />
+              </button>
+            </div>
           ) : (
-            <button className={clsx(styles.buttonsWrapper, styles.blockContact)} onClick={handleLeaveGroup}>
-              {isChannel ? 'Отписаться' : 'Покинуть группу'}
-            </button>
+            <> </>
           )}
         </>
       ) : (
-        <>
+        <div className={styles.wrapper}>
           <button
             className={clsx(styles.buttonsWrapper, styles.addContact, { [styles.blocked]: isInContact })}
             disabled={isInContact}
@@ -87,18 +118,17 @@ export const HeaderTopButtonsBlock = ({
           >
             Заблокировать
           </button>
-        </>
+          <button
+            className={styles.icon}
+            onClick={() => {
+              closeButtonMenu();
+              sendMessage({ content: '@@@' });
+            }}
+          >
+            <CloseIcon />
+          </button>
+        </div>
       )}
-
-      <button
-        className={styles.icon}
-        onClick={() => {
-          closeButtonMenu();
-          sendMessage({ content: '@@@' });
-        }}
-      >
-        <CloseIcon />
-      </button>
-    </div>
+    </>
   );
 };
