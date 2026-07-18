@@ -1,0 +1,23 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($justify: space-between, $gap: 0.4rem);
+  padding: 0.6rem 1.6rem;
+  background-color: var(--surface-section-header);
+}
+
+.actionContainer {
+  @include mixins.flex-box($gap: 0.8rem);
+}
+
+.label {
+  font-size: 1.4rem;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+}
+
+.selected {
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.5;
+}

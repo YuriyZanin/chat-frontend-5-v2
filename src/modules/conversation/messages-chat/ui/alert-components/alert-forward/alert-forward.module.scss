@@ -1,0 +1,136 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $justify: start);
+  width: 36rem;
+  height: 52rem;
+  border-radius: 0.8rem;
+  background-color: var(--surface-base);
+  overflow-y: auto;
+}
+
+.wrapper::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 12rem;
+}
+
+.wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--surface-scroll);
+  border-radius: 0.4rem;
+}
+
+.headerTop {
+  @include mixins.flex-box($gap: 0.4rem);
+  width: 100%;
+  height: 4.4rem;
+  border-top-left-radius: 0.8rem;
+  border-top-right-radius: 0.8rem;
+  border-bottom: 0.1rem solid var(--border-card-contact);
+  padding: 1rem 1.6rem;
+}
+.textHeaderTop {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+.searchWrapper {
+  @include mixins.flex-box($gap: 0.4rem);
+  width: 100%;
+  height: 6rem;
+  border-bottom: 0.1rem solid var(--border-card-contact);
+  padding: 0.8rem 1.6rem;
+}
+.searchContainer {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 100%;
+  height: 4.4rem;
+  border-radius: 0.8rem;
+  border: 0.1rem solid var(--border-layout);
+  padding: 1rem 1.2rem;
+}
+.searchInput {
+  width: 100%;
+  height: 2.1rem;
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--text-primary);
+  overflow: hidden;
+  &::placeholder {
+    font-weight: 400;
+    font-size: 1.6rem;
+    line-height: 1.3;
+    letter-spacing: 0.01rem;
+    color: var(--text-secondary);
+  }
+}
+.icon {
+  @include mixins.flex-box();
+  width: 2.4rem;
+  height: 2.4rem;
+}
+.cardWrapper {
+  @include mixins.flex-box($justify: start, $gap: 1rem);
+  width: 100%;
+  height: 5.6rem;
+  padding: 0rem 1.6rem;
+  border-radius: 0.8rem;
+}
+.cardWrapper:hover {
+  background-color: var(--surface-section-header);
+}
+
+.cardWrapper:active {
+  background-color: var(--brand-dark-60);
+}
+
+.avatar {
+  @include mixins.flex-box();
+  width: 5rem;
+  height: 4rem;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.nameEndStatus {
+  @include mixins.flex-box($direction: column, $gap: 0.2rem);
+  width: 100%;
+  height: 5.6rem;
+  border-bottom: 0.1rem solid var(--border-card-contact);
+  min-width: 0;
+}
+.name {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.2rem;
+  font-weight: 500;
+  font-style: medium;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  letter-spacing: 0.01;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 1.7rem;
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: 0.01;
+  color: var(--text-secondary);
+  overflow: hidden;
+}

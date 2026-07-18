@@ -1,0 +1,51 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.label {
+  display: block;
+  position: absolute;
+  top: -2.2rem;
+  left: 0;
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.phoneInput {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--text-secondary);
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  transition: border 0.2s ease;
+  height: 5.6rem;
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+
+  &:focus {
+    outline: none;
+    border: 2px solid var(--surface-brand);
+  }
+
+  &.error:not(:focus) {
+    border: 2px solid var(--text-state-error);
+  }
+
+  &.error:not(:focus) + .label {
+    color: var(--text-state-error);
+  }
+
+  &:focus + .label {
+    color: var(--text-secondary);
+  }
+}

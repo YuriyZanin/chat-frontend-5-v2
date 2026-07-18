@@ -1,0 +1,4 @@
+@use 'shared/styles/03_mixins' as mixins;
+.searchInputContainer {
+  @include mixins.flex-box(flex, $justify: space-between);
+}

@@ -1,0 +1,58 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $align: center, $justify: start);
+  height: 87rem;
+  max-width: 36rem;
+  background-color: var(--surface-secondary);
+  gap: 8px;
+  border: 0.033rem solid var(--border-layout);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+}
+
+.body {
+  @include mixins.flex-box($direction: column, $align: center, $justify: start);
+  height: 100%;
+  background-color: var(--surface-secondary);
+  gap: 8px;
+  // border: 0.033rem solid var(--border-layout);
+  border-radius: 8px;
+
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
+
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover {
+    scrollbar-color: var(--surface-scroll) transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 0.6rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 0.4rem;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: var(--surface-scroll);
+  }
+}
+
+@media (max-width: 410px) {
+  .wrapper {
+    gap: 0rem;
+  }
+}

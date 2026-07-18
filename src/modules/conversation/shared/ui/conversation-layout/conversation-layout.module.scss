@@ -1,0 +1,48 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $justify: flex-start, $align: stretch);
+  height: 87rem;
+  width: 100%; // временно
+  border: 0.1rem solid var(--border-layout);
+  border-radius: 0.8rem;
+
+  background-color: var(--surface-secondary);
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+  padding: 1.6rem;
+}
+
+.body {
+  @include mixins.flex-box($direction: column, $justify: flex-start, $align: stretch, $gap: 1.6rem);
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+  position: relative;
+}
+
+.body::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 12rem;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: var(--surface-scroll);
+  border-radius: 0.4rem;
+  transition: opacity 0.3s;
+}
+.body:hover {
+  overflow-y: auto;
+}
+
+@media (max-width: 410px) {
+  .wrapper {
+    background-color: transparent;
+    border: none;
+  }
+}

@@ -1,0 +1,49 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 8px);
+  padding: 0 16px 0 16px;
+  min-height: 52px;
+
+  .label {
+    min-width: 268px;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 130%;
+    letter-spacing: 1%;
+    vertical-align: middle;
+  }
+
+  .toggleButton {
+    width: 52px;
+
+    .toggle {
+      position: relative;
+      height: 32px;
+      background-color: var(--brand-primary, #7769e1);
+      border-radius: 100px;
+
+      .circle {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        top: 4px;
+        background-color: var(--surface-base, #ffffff);
+        border-radius: 24px;
+      }
+
+      .circle.enabled {
+        right: 4px;
+      }
+
+      .circle.disabled {
+        left: 4px;
+      }
+    }
+
+    .toggle.disabled {
+      background-color: var(--text-state-disabled);
+    }
+  }
+}

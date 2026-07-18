@@ -1,0 +1,12 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.headerMeta {
+  @include mixins.flex-box($justify: space-between, $gap: 0.1rem);
+  flex-shrink: 0;
+}
+
+.time {
+  font-size: 1.4rem;
+  color: inherit;
+  line-height: 1.2;
+}

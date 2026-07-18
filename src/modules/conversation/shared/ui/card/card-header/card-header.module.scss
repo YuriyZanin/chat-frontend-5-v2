@@ -1,0 +1,33 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.header {
+  @include mixins.flex-box($justify: flex-start, $gap: 0.4rem);
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 500;
+
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  overflow: hidden;
+}
+
+.header > *:not(span:first-of-type) {
+  color: var(--text-secondary);
+}
+
+.header.selected > span:first-of-type,
+.header.selected > *:not(span:first-of-type) {
+  color: var(--text-inverse);
+  fill: var(--text-inverse);
+}
+
+.header > *:not(span:first-of-type) * {
+  color: inherit;
+}

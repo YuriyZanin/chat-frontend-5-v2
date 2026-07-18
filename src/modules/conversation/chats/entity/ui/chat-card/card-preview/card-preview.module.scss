@@ -1,0 +1,36 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.preview {
+  @include mixins.flex-box($justify: flex-start, $align: flex-start, $gap: 0.4rem);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.forwardReplyIcon {
+  flex-shrink: 0;
+  fill: var(--preview-icon);
+}
+
+.previewMedia {
+  @include mixins.flex-box($gap: 0.2rem);
+  flex-shrink: 0;
+}
+
+.previewText {
+  color: var(--preview-text);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+
+  word-break: break-word;
+}
+
+.previewImage {
+  width: 1.6rem;
+  height: 1.6rem;
+}

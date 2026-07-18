@@ -1,0 +1,40 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.info {
+  @include mixins.flex-box($direction: column, $align: flex-start, $gap: 0.2rem);
+  flex: 1;
+  min-width: 0;
+}
+
+.name,
+.status {
+  width: 100%;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.name {
+  font-size: 1.8rem;
+  font-weight: 500;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.nameSelect {
+    color: var(--text-inverse);
+  }
+}
+
+.status {
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+
+  &.online {
+    color: var(--text-brand);
+  }
+
+  &.statusSelect {
+    color: var(--text-inverse-status);
+  }
+}

@@ -1,0 +1,45 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($gap: 0.4rem);
+  width: 100%;
+  height: 4.4rem;
+  padding: 0 1.6rem;
+  border-bottom: 0.033rem solid var(--surface-disabled);
+}
+
+.buttonsWrapper {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 3.2rem;
+  border-radius: 0.4rem;
+  padding: 0.6rem, 1.6rem;
+  line-height: 1.3;
+  letter-spacing: 0rem;
+  align-items: center;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.addContact {
+  color: var(--brand-primary);
+
+  &.blocked {
+    color: var(--brand-violet-white);
+  }
+}
+
+.blockContact {
+  color: var(--text-state-error);
+
+  &.blocked {
+    color: var(--text-state-error-disabled);
+  }
+}
+
+.icon {
+  @include mixins.flex-box();
+  height: 2.4rem;
+  width: 3rem;
+  color: var(--text-secondary);
+}

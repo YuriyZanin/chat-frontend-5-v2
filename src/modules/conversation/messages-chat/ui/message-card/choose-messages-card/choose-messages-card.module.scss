@@ -1,0 +1,60 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($gap: 1.6rem, $justify: end);
+  width: 100%;
+  height: 6rem;
+  border-top: 0.1rem solid var(--border-card-contact);
+  padding: 1.2rem 1.6rem;
+  background-color: var(--surface-secondary);
+}
+.info {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 100%;
+  height: 3.6rem;
+}
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: auto;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.8rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.icon {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 3.6rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.icon:hover {
+  color: var(--text-secondary);
+}
+.iconRed {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 3.6rem;
+  color: var(--text-state-error);
+  cursor: pointer;
+}
+.iconRed:hover {
+  color: var(--text-state-error);
+}
+.icon:active {
+  color: rgba(97, 90, 163, 0.6);
+}
+.iconRed:active {
+  color: rgba(255, 0, 0, 0.6);
+}
+.iconBlock {
+  @include mixins.flex-box();
+  width: 3.6rem;
+  height: 3.6rem;
+  color: rgba(116, 116, 116, 0.5);
+  cursor: default;
+}

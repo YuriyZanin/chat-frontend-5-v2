@@ -1,0 +1,22 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.header {
+  @include mixins.flex-box($justify: space-between);
+
+  width: 100%;
+  max-width: 120rem;
+  height: 6rem;
+
+  padding-inline: 1.6rem;
+
+  border: 0.1rem solid var(--border-layout);
+  border-bottom-left-radius: 0.8rem;
+  border-bottom-right-radius: 0.8rem;
+  border-top: none;
+
+  background-color: var(--surface-secondary);
+}
+
+.storeButtons {
+  @include mixins.flex-box($gap: 0.8rem);
+}

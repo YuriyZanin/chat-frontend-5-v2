@@ -1,0 +1,49 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column);
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  @include mixins.flex-box($direction: column, $gap: 2.4rem);
+  width: 100%;
+  padding-inline: 1.6rem;
+}
+
+.imageWrapper {
+  width: 20rem;
+  height: 20rem;
+}
+
+.textWrapper {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+
+  text-align: center;
+  .text {
+    color: var(--text-secondary);
+    line-height: 1.2;
+  }
+
+  .contactsTitle,
+  .noResultsTitle {
+    font-size: 1.8rem;
+    letter-spacing: 0.01em;
+  }
+
+  .chatsTitle {
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+
+  .chatsText,
+  .noResultsText {
+    font-size: 1.4rem;
+    letter-spacing: 0.01em;
+  }
+}
+
+.link {
+  width: 100%;
+}

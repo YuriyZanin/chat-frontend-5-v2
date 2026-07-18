@@ -1,0 +1,134 @@
+import clsx from 'clsx';
+import type { Chat } from 'modules/conversation/chats/entity';
+import { useAddContactQuery } from 'modules/info/api/info.query';
+import type { Participant } from 'modules/info/entity/info.entity';
+import { useInfoStore } from 'modules/info/model/info.store';
+import { usePathname } from 'next/navigation';
+import { JSX } from 'react';
+import { useWebSocketChatStore } from '../../api/web-socket/use-web-socket-chat-store';
+import type { Msg } from '../../zustand-store/zustand-store';
+import { useHeaderButtonsModalStore } from '../../zustand-store/zustand-store';
+import styles from './header-top-buttons-block.module.scss';
+import CloseIcon from './icon/close.svg';
+export const HeaderTopButtonsBlock = ({
+  currentUid,
+  chatKey,
+  isInContact,
+  isBlocked,
+  participants,
+  chat,
+  messages,
+}: {
+  currentUid: string;
+  chatKey: string;
+  isInContact: boolean;
+  isBlocked: boolean;
+  participants: Participant[] | undefined;
+  chat: Chat | undefined;
+  messages: Msg[];
+}): JSX.Element | null => {
+  const { openBlockModal, openAddModal, openLeaveGroupModal, isButtonMenuOpen, closeButtonMenu } =
+    useHeaderButtonsModalStore();
+  const { isInfoOpen, enterSelectionMode, toggleInfoOpen } = useInfoStore();
+  const { mutate: addToContact } = useAddContactQuery();
+
+  const member = participants?.find((p) => p.uid === currentUid);
+  const isOwner = member?.isOwner ?? false;
+  const pathname = usePathname();
+  const isGroup = pathname.startsWith('/chats/group');
+  const isChannel = pathname.startsWith('/chats/channel');
+
+  const handleAddContact = (): void => {
+    if (!!chatKey) {
+      addToContact({ user_uid: chatKey });
+      openAddModal();
+    }
+  };
+
+  const handleAddMembers = (): void => {
+    if (!isInfoOpen) {
+      toggleInfoOpen();
+    }
+    enterSelectionMode();
+  };
+
+  const handleLeaveGroup = (): void => {
+    openLeaveGroupModal();
+  };
+  const webSocketChatSrore = useWebSocketChatStore((s) => s.webSocketChat);
+  if (webSocketChatSrore === null) return null;
+  const { sendMessage } = webSocketChatSrore;
+  if (!isButtonMenuOpen || (isGroup && !member)) return null;
+
+  return (
+    <>
+      {isGroup || isChannel ? (
+        <>
+          {isOwner ? (
+            messages.length === 0 || (messages.length === 1 && messages[0].content?.startsWith('@@@')) ? (
+              <div className={styles.wrapper}>
+                <button className={clsx(styles.buttonsWrapper, styles.addContact)} onClick={handleAddMembers}>
+                  {isChannel ? 'Пригласить подписчиков' : 'Добавить участников'}
+                </button>
+                <button
+                  className={styles.icon}
+                  onClick={() => {
+                    closeButtonMenu();
+                    sendMessage({ content: '@@@' });
+                  }}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            ) : (
+              <> </>
+            )
+          ) : messages.length !== 0 && messages[0].content?.startsWith('@@@') ? (
+            <div className={styles.wrapper}>
+              <button className={clsx(styles.buttonsWrapper, styles.blockContact)} onClick={handleLeaveGroup}>
+                {isChannel ? 'Отписаться' : 'Покинуть группу'}
+              </button>
+              <button
+                className={styles.icon}
+                onClick={() => {
+                  closeButtonMenu();
+                  sendMessage({ content: '@@@' });
+                }}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          ) : (
+            <> </>
+          )}
+        </>
+      ) : (
+        <div className={styles.wrapper}>
+          <button
+            className={clsx(styles.buttonsWrapper, styles.addContact, { [styles.blocked]: isInContact })}
+            disabled={isInContact}
+            onClick={handleAddContact}
+          >
+            Добавить в контакты
+          </button>
+          <button
+            className={clsx(styles.buttonsWrapper, styles.blockContact, { [styles.blocked]: isBlocked })}
+            disabled={isBlocked}
+            onClick={openBlockModal}
+          >
+            Заблокировать
+          </button>
+          <button
+            className={styles.icon}
+            onClick={() => {
+              closeButtonMenu();
+              sendMessage({ content: '@@@' });
+            }}
+          >
+            <CloseIcon />
+          </button>
+        </div>
+      )}
+    </>
+  );
+};

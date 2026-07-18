@@ -1,0 +1,31 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.inputWrapper {
+  @include mixins.flex-box($align: flex-end);
+  width: 100%;
+  max-height: 44.8rem;
+  height: auto;
+  border-radius: 2rem;
+  padding: 0.75rem 1.2rem;
+  padding-right: 0.4rem;
+  background-color: var(--text-inverse);
+  overflow: hidden;
+}
+
+.form {
+  @include mixins.flex-box();
+  width: 100%;
+  height: auto;
+}
+.icon {
+  @include mixins.flex-box($justify: end);
+  width: 2.4rem;
+  height: 2.2rem;
+  color: inherit; /* Убедитесь, что цвет может наследоваться */
+  cursor: pointer;
+}
+.emodji {
+  @include mixins.flex-box();
+  width: auto;
+  height: auto;
+}

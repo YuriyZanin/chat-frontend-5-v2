@@ -1,0 +1,43 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($direction: column, $gap: 2.4rem);
+  width: 100%;
+  height: 100%;
+  background-color: var(--surface-secondary-50);
+  overflow: hidden;
+  position: relative;
+}
+.image {
+  @include mixins.flex-box();
+  width: 20rem;
+  height: 20rem;
+}
+
+.textWrapper {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: 4.8rem;
+}
+
+.text {
+  color: var(--text-secondary);
+  letter-spacing: 0.01rem;
+  font-weight: 400;
+}
+
+.title {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 2.3rem;
+  line-height: 1.3;
+  font-size: 1.8rem;
+}
+
+.message {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 1.7rem;
+  line-height: 1.2;
+  font-size: 1.4rem;
+}

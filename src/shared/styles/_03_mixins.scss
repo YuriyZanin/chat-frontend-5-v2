@@ -1,0 +1,24 @@
+@mixin flex-box($direction: row, $justify: center, $align: center, $gap: null, $wrap: null) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+
+  @if $gap != null {
+    gap: $gap;
+  }
+
+  @if $wrap != null {
+    flex-wrap: $wrap;
+  }
+}
+
+@mixin hover-highlight {
+  &:hover {
+    background-color: var(--surface-secondary);
+
+    .icon {
+      fill: var(--brand-primary);
+    }
+  }
+}

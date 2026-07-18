@@ -1,0 +1,23 @@
+.button {
+  overflow: hidden;
+
+  width: 100%;
+  height: 0;
+
+  padding: 0 1.6rem;
+  box-sizing: border-box;
+
+  color: var(--text-state-error);
+  font-size: 1.6rem;
+  text-align: center;
+  line-height: 1.5;
+
+  transition:
+    height 0.3s linear,
+    padding 0.3s linear;
+
+  &.active {
+    height: 7.6rem;
+    padding: 1rem 1.6rem 4.2rem;
+  }
+}

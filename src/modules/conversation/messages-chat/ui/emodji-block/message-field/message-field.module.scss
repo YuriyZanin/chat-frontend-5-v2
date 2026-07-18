@@ -1,0 +1,31 @@
+@use 'shared/styles/03_mixins' as mixins;
+.wrapper {
+  @include mixins.flex-box($justify: space-between, $gap: 1.8rem);
+  width: 100%;
+  height: 8.4rem;
+  border-bottom-right-radius: 0.8rem;
+  border-bottom-left-radius: 0.8rem;
+  border-top: 0.1rem solid var(--border-card-contact);
+  padding-top: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 3.2rem;
+  padding-left: 2rem;
+  background-color: var(--surface-base);
+}
+
+.iconContainer {
+  @include mixins.flex-box();
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 0.2rem;
+  color: var(--text-secondary);
+}
+
+.iconContainerActive {
+  @include mixins.flex-box();
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 0.2rem;
+  color: var(--text-secondary);
+  color: var(--brand-secondary);
+}

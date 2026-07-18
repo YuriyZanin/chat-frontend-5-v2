@@ -1,0 +1,73 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($justify: space-between, $gap: 0.8rem);
+  width: 100%;
+  height: 6.12rem;
+  border-bottom-left-radius: 0.8rem;
+  border-bottom-right-radius: 0.8rem;
+  padding: 1.2rem 1.6rem;
+  border-top: 0.1rem solid var(--surface-disabled);
+  background-color: var(--surface-secondary);
+}
+
+.cancel {
+  @include mixins.flex-box();
+  width: 10rem;
+  height: 6rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--brand-primary);
+  overflow: hidden;
+}
+.block {
+  @include mixins.flex-box($gap: 2.4rem);
+  width: auto;
+  height: 6rem;
+}
+.couter {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 100%;
+  height: auto;
+}
+.icon {
+  @include mixins.flex-box();
+  width: 1.4rem;
+  height: 1.4rem;
+}
+.time {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.micIcon {
+  @include mixins.flex-box();
+  height: 5.8rem;
+  width: 5.8rem;
+}
+/* Анимация дрожания mic*/
+@keyframes pulse-ring {
+  0% {
+    stroke-width: 1px;
+  }
+  50% {
+    stroke-width: 7px;
+  }
+  100% {
+    stroke-width: 1px;
+  }
+}
+
+.pulse {
+  animation: pulse-ring 0.3s ease-in-out infinite;
+  animation-delay: 1ms;
+  stroke-width: 7px; /* начальное значение, будет переопределено анимацией */
+}

@@ -1,0 +1,20 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($gap: 1rem);
+  width: 100%;
+  height: 3.7rem;
+  padding: 0.8rem 1.6rem;
+  background-color: #f5f4ff;
+}
+
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-secondary);
+}

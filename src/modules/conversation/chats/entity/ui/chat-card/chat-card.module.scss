@@ -1,0 +1,57 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.imageWrapper {
+  width: 6rem;
+  height: 6rem;
+}
+
+.card {
+  --preview-text: var(--text-secondary);
+  --preview-icon: var(--icon-primary);
+
+  --unread-bg: var(--surface-brand);
+  --unread-text: var(--text-inverse);
+
+  @include mixins.flex-box($direction: column, $justify: flex-start, $align: stretch, $gap: 0.2rem);
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  @include mixins.flex-box($justify: space-between, $gap: 0.1rem);
+}
+
+.headerMeta {
+  color: var(--text-secondary);
+}
+
+.headerMetaSelected {
+  color: var(--text-inverse);
+
+  svg {
+    fill: var(--text-inverse);
+  }
+}
+
+.mutedIcon {
+  flex-shrink: 0;
+  fill: var(--preview-icon);
+}
+.mutedCloseIcon {
+  flex-shrink: 0;
+  fill: var(--preview-icon);
+}
+
+.preview {
+  @include mixins.flex-box($justify: space-between, $align: center, $gap: 0.4rem);
+  overflow: hidden;
+}
+
+.previewSelected {
+  --preview-text: var(--text-inverse);
+  --preview-icon: var(--icon-inverse);
+
+  --unread-bg: var(--surface-base);
+  --unread-text: var(--text-brand);
+}

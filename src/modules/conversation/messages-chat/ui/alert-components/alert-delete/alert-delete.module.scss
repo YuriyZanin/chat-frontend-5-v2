@@ -1,0 +1,162 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapperIncoming {
+  @include mixins.flex-box($direction: column, $gap: 2rem);
+  width: 40rem;
+  height: auto;
+  border-radius: 0.8rem;
+  padding: 2.3rem;
+  background-color: var(--text-inverse);
+}
+.contentIncoming {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: 5.1rem;
+}
+.titleIncoming {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.2rem;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.8rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.textIncoming {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.1rem;
+  line-height: 130%;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.buttonsBlock {
+  @include mixins.flex-box($justify: end, $gap: 0.8rem);
+  width: 100%;
+  height: 3.2rem;
+}
+.buttonCancel {
+  @include mixins.flex-box();
+  width: 9rem;
+  height: 3.2rem;
+  border-radius: 0.4rem;
+  padding: 0.6rem 1.6rem;
+  color: var(--brand-primary);
+}
+
+.buttonDelete {
+  @include mixins.flex-box();
+  width: 9rem;
+  height: 3.2rem;
+  border-radius: 0.4rem;
+  padding: 0.6rem 1.6rem;
+  background-color: var(--brand-primary);
+  color: var(--text-inverse);
+}
+.textButton {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 2.4rem;
+  line-height: 2.4rem;
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.buttonCancel:hover {
+  color: var(--brand-violet-white);
+}
+.buttonCancel:active {
+  color: var(--brand-dark);
+}
+
+.buttonDelete:hover {
+  background-color: var(--brand-violet-white);
+  color: var(--brand-primary);
+}
+.buttonDelete:active {
+  background-color: var(--brand-dark);
+  color: var(--text-inverse);
+}
+.checkBox {
+  @include mixins.flex-box($justify: start, $gap: 0.8rem);
+  width: 100%;
+  height: 2.4rem;
+}
+
+.labelCheck {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.4rem;
+  line-height: 120%;
+  font-size: 1.4rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+$brand-violet: #9587f5;
+$checkbox-size: 2.4rem;
+$checkbox-border: 0.12rem;
+$checkbox-check-size: 2rem; // размер галочки внутри
+
+//Сброс дефолтного вида и базовый стиль
+.check {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: $checkbox-size;
+  height: $checkbox-size;
+  border-radius: 50%;
+  border: $checkbox-border solid $brand-violet;
+  background-color: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 120ms ease;
+  box-sizing: border-box;
+}
+
+//Фокус (доступность)
+.check:focus {
+  outline: none;
+}
+
+//Состояние checked — фиолетовый фон и та же рамка
+.check:checked {
+  background-color: $brand-violet;
+  border-color: $brand-violet;
+}
+
+//Галочка checkbox
+.check::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: $checkbox-check-size;
+  height: $checkbox-check-size;
+  transform: translate(-50%, -50%) scale(0.95);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+  //белая галочка. Закодированная #fff (процент-эндкодинг)
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ffffff' d='M20.3 6.7a1 1 0 0 0-1.4-1.4L9 15.2l-4.9-4.9a1 1 0 1 0-1.4 1.4l6.1 6.1a1 1 0 0 0 1.4 0L20.3 6.7z'/></svg>");
+}
+
+//Показываем галочку, когда чекнут
+.check:checked::after {
+  opacity: 1;
+}

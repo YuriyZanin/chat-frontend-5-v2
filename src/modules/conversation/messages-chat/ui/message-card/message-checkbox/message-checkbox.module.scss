@@ -1,0 +1,70 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.checkBox {
+  @include mixins.flex-box($justify: start, $gap: 0.8rem);
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-left: 1.5rem;
+}
+
+$brand-violet: #9587f5;
+$checkbox-size: 2.4rem;
+$checkbox-border: 0.12rem;
+$checkbox-check-size: 2rem; // размер галочки внутри
+
+//Сброс дефолтного вида и базовый стиль
+.check {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: $checkbox-size;
+  height: $checkbox-size;
+  border-radius: 50%;
+  border: $checkbox-border solid $brand-violet;
+  background-color: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 120ms ease;
+  box-sizing: border-box;
+}
+
+//Фокус (доступность)
+.check:focus {
+  outline: none;
+}
+
+//Состояние checked — фиолетовый фон и та же рамка
+.check:checked {
+  background-color: $brand-violet;
+  border-color: $brand-violet;
+}
+
+//Галочка checkbox
+.check::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: $checkbox-check-size;
+  height: $checkbox-check-size;
+  transform: translate(-50%, -50%) scale(0.95);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+  //белая галочка. Закодированная #fff (процент-эндкодинг)
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ffffff' d='M20.3 6.7a1 1 0 0 0-1.4-1.4L9 15.2l-4.9-4.9a1 1 0 1 0-1.4 1.4l6.1 6.1a1 1 0 0 0 1.4 0L20.3 6.7z'/></svg>");
+}
+
+//Показываем галочку, когда чекнут
+.check:checked::after {
+  opacity: 1;
+}

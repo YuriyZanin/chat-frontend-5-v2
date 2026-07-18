@@ -1,0 +1,17 @@
+@use 'shared/styles/03_mixins' as mixins;
+.headerBottomInputBlock {
+  @include mixins.flex-box($align: flex-end, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+  max-height: 17.2rem;
+  border-radius: 2rem;
+  padding: 0.75rem 1.2rem;
+  background-color: var(--surface-base);
+  overflow: hidden;
+}
+.icon {
+  @include mixins.flex-box();
+  width: 2.4rem;
+  height: 2.4rem;
+  cursor: pointer;
+}

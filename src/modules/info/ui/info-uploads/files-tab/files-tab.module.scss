@@ -1,0 +1,66 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  width: 100%;
+
+  .fileList {
+    @include mixins.flex-box($direction: column, $align: center, $justify: center, $gap: 8px);
+
+    .listItem {
+      width: 100%;
+      padding: 0 16px;
+
+      .fileItem {
+        @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 6px);
+        border-bottom: 0.33px solid #0000004d;
+        padding: 6px 0;
+        cursor: pointer;
+
+        .fileInfo {
+          @include mixins.flex-box($direction: column, $align: start, $justify: center, $gap: 4px);
+
+          .fileName {
+            max-width: 285px;
+            font-family: Roboto;
+            font-weight: 700;
+            font-style: Bold;
+            font-size: 14px;
+            line-height: 130%;
+            letter-spacing: 0px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #1c1c1e;
+          }
+
+          .fileDescription {
+            @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 4px);
+            font-family: Roboto;
+            font-weight: 400;
+            font-style: Regular;
+            font-size: 12px;
+            line-height: 120%;
+            letter-spacing: 1%;
+            color: #747474;
+
+            .dot {
+              width: 12px;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+.deleteFileIcon :global([class$='__white-segment']) {
+  display: block;
+  transform-origin: 24px 24px;
+  animation: rotateSegment 2s linear infinite;
+}
+
+@keyframes rotateSegment {
+  100% {
+    transform: rotate(360deg);
+  }
+}

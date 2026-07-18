@@ -1,0 +1,69 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box($direction: column, $gap: 0.8rem);
+  width: 100%;
+  height: auto;
+}
+
+.wrapper {
+  @include mixins.flex-box($gap: 0.6rem);
+  width: 100%;
+  height: 6rem;
+  padding: 0rem 1.6rem;
+  overflow: hidden;
+}
+.box {
+  @include mixins.flex-box($gap: 0.6rem);
+  width: 100%;
+  height: auto;
+  padding: 0.6rem 0rem;
+  border-bottom: 0.033rem solid #0000004d;
+}
+.icon {
+  @include mixins.flex-box();
+  width: 3.7rem;
+  height: 3.7rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.info {
+  @include mixins.flex-box($direction: column, $align: start, $gap: 0.4rem);
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 1.8rem;
+  font-style: bold;
+  line-height: 1.3;
+  font-size: 1.4rem;
+  letter-spacing: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.durationEndDate {
+  @include mixins.flex-box($gap: 0.4rem);
+  width: auto;
+  height: 1.4rem;
+}
+.duration {
+  @include mixins.flex-box($justify: start);
+  width: auto;
+  height: 1.4rem;
+  line-height: 1.2;
+  font-size: 1.2rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.voiceLine {
+  padding-top: 0.6rem;
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}

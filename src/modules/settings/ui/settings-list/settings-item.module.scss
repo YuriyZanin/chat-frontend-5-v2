@@ -1,0 +1,39 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.settingsItemButton {
+  @include mixins.flex-box(row, space-between, center);
+  width: 32.8rem;
+  height: 5.6rem;
+  gap: 1.2rem;
+  padding-top: 2.4rem;
+  padding-bottom: 2.4rem;
+  padding-left: 1rem;
+  background: var(--text-inverse);
+  &:hover {
+    background-color: var(--surface-secondary);
+  }
+}
+
+.iconAndLabelContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.3rem;
+}
+
+.iconWrapper {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.labelText {
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 2.4rem;
+  color: var(--text-primary);
+}
+
+.arrowIcon {
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-right: 1rem;
+}

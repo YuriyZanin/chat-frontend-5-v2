@@ -1,0 +1,53 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.frame {
+  @include mixins.flex-box($direction: column, $gap: 1rem);
+  width: 27rem;
+  height: 10.8rem;
+  padding: 1rem;
+  position: fixed;
+  z-index: 1000;
+}
+.wrapper {
+  @include mixins.flex-box($direction: column);
+  width: 25rem;
+  height: 8.8rem;
+  box-shadow: 0rem 0.2rem 1.2rem 0rem #00000033;
+}
+
+.cell {
+  @include mixins.flex-box($gap: 0.4rem);
+  width: 100%;
+  height: 4.4rem;
+  border-bottom: 0.1rem solid var(--border-card-contact);
+  padding: 1rem 1.6rem;
+  background-color: var(--surface-base);
+}
+.cell:hover {
+  background-color: #f5f4ff;
+}
+.cellTop {
+  border-top-left-radius: 0.8rem;
+  border-top-right-radius: 0.8rem;
+}
+.cellBottom {
+  border-bottom-left-radius: 0.8rem;
+  border-bottom-right-radius: 0.8rem;
+}
+
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+.icon {
+  @include mixins.flex-box();
+  width: 2.4rem;
+  height: 2.4rem;
+}

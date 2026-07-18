@@ -1,0 +1,57 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box(column, center, center, 0.5rem);
+  width: 100%;
+}
+
+.label {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.inputsWrapper {
+  @include mixins.flex-box(row, center, center, 0.7rem);
+}
+
+.codeInput {
+  width: 5.5rem;
+  height: 5.5rem;
+  border: 1px solid var(--brand-primary);
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  text-align: center;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  outline: none;
+  padding: 1rem;
+
+  &:focus,
+  &.focused {
+    border: 2px solid var(--brand-primary);
+    background-color: var(--surface-muted);
+  }
+
+  &.error {
+    border-color: var(--text-state-error);
+  }
+
+  &.disabled {
+    background-color: var(--surface-disabled);
+    color: var(--text-state-disabled);
+    cursor: not-allowed;
+    border-color: var(--surface-disabled);
+  }
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+.errorMessage {
+  font-size: 1.2rem;
+  color: var(--text-state-error);
+  text-align: center;
+  margin-top: 0.2rem;
+}

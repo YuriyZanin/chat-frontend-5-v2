@@ -1,0 +1,40 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box(column, space-between, center, 0.8rem);
+  width: 36rem;
+  height: 23rem;
+  padding-right: 1.6rem;
+  padding-left: 1.6rem;
+}
+
+.avatar {
+  width: 20rem;
+  height: 20rem;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.selectImage {
+  font-weight: 400;
+  font-size: 1.7rem;
+  line-height: 2.2rem;
+  letter-spacing: -0.43px;
+  color: var(--text-brand);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}

@@ -1,0 +1,7 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  background: var(--brand-primary, #7769e1);
+  position: relative;
+  border: none;
+}

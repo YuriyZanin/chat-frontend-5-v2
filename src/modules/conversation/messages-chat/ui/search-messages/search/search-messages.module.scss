@@ -1,0 +1,41 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapperSearch {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 100%;
+  height: 4.4rem;
+  border-radius: 0.8rem;
+  border-bottom: 0.1rem solid var(--border-layout);
+  padding: 1rem 1rem;
+  background-color: var(--surface-base);
+}
+.iconSearch {
+  @include mixins.flex-box();
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.inputSearch {
+  @include mixins.flex-box();
+  width: 100%;
+  height: 2.1rem;
+  line-height: 1.3;
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--text-primary);
+  overflow: hidden;
+  &::placeholder {
+    font-weight: 400;
+    font-size: 1.6rem;
+    line-height: 1.3;
+    letter-spacing: 0.01rem;
+    color: var(--text-secondary);
+  }
+}
+.navigateButton {
+  @include mixins.flex-box($gap: 1.6rem);
+  width: 7rem;
+  height: 2.4rem;
+  padding-right: 1.6rem;
+}

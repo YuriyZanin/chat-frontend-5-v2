@@ -1,0 +1,32 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.header {
+  @include mixins.flex-box($justify: space-between, $align: center);
+
+  background: var(--surface-secondary, #f5f6f8);
+  border-bottom: 1px solid var(--surface-disabled);
+  border-radius: 8px 8px 0 0;
+  padding: 0 16px;
+  min-height: 56px;
+
+  .label {
+    min-width: 220px;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 120%;
+  }
+}
+
+.info {
+  @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 12px);
+}
+
+.menu {
+  @include mixins.flex-box($align: center, $justify: end, $gap: 12px);
+}
+
+@media (max-width: 410px) {
+  .header {
+    background-color: #d6d2f6;
+  }
+}

@@ -1,0 +1,58 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.label {
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.textInput {
+  width: 100%;
+  height: 5.6rem;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  font-size: 1.7rem;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  outline: none;
+
+  &:focus,
+  &.focused {
+    border: 2px solid #7769e1;
+    background-color: var(--surface-muted);
+  }
+
+  &.error {
+    border-color: var(--text-state-error);
+  }
+
+  &.disabled {
+    background-color: var(--surface-disabled);
+    color: var(--text-state-disabled);
+    cursor: not-allowed;
+    border-color: var(--surface-disabled);
+  }
+
+  &::placeholder {
+    color: var(--text-secondary);
+  }
+}
+
+.errorMessage {
+  font-size: 1.2rem;
+  color: var(--text-state-error);
+  text-align: left;
+  margin-top: 0.2rem;
+}
+
+@media (max-width: 411px) {
+  .textInput {
+    border: 0.1rem solid var(--text-secondary);
+  }
+}

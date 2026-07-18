@@ -1,0 +1,101 @@
+@use '02_tokens' as *;
+
+:root {
+  /* Fonts */
+  --font-roboto: initial;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  height: 100%;
+  font-size: 62.5%; /* 1rem = 10px */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  height: 100%;
+  overflow-x: hidden;
+
+  font-family:
+    var(--font-roboto),
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1;
+
+  background: var(--surface-base);
+  color: var(--text-primary);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* Alert portal scrim и blur */
+.alert-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(149, 135, 245, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-alert-blurred {
+  transition: filter 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  filter: blur(2px);
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-alert-blurred {
+    transition: none;
+  }
+}

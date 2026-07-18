@@ -1,0 +1,23 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  display: flex;
+  align-items: center;
+  padding: 0 16px 0 16px;
+  min-height: 44px;
+  width: 100%;
+}
+
+.button {
+  @include mixins.flex-box($direction: row, $align: center, $justify: start, $gap: 4px);
+
+  .label {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 130%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    color: var(--brand-primary, #7769e1);
+  }
+}

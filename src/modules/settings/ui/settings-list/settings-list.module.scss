@@ -1,0 +1,12 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box(column);
+  width: 32.8rem;
+  height: 22.4rem;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  > *:not(:last-child) {
+    border-bottom: 0.33px solid #0000004d;
+  }
+}

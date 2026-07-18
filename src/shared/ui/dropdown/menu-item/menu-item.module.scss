@@ -1,0 +1,37 @@
+.menuItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px 10px 8px;
+  border-bottom: 1px solid var(--border-card-contact, #e4e4e4);
+
+  .menuItemText {
+    font-family: Roboto;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 130%;
+    vertical-align: middle;
+    text-align: left;
+
+    &.alert {
+      color: var(--text-state-error, #ff0000);
+    }
+    &.general {
+      color: var(--text-primary);
+    }
+  }
+
+  .menuItemIcon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.menuItem:last-child {
+  border: none;
+}
+
+.menuItem:hover {
+  cursor: pointer;
+  background-color: #f5f4ff;
+}

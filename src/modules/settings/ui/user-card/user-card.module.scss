@@ -1,0 +1,38 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box(row, flex-start, center, 1.2rem);
+  width: 32.8rem;
+  height: 10.6rem;
+  gap: 1.2rem;
+  border-radius: 0.8rem;
+  padding: 1.2rem;
+  background-color: var(--text-inverse);
+}
+.avatar {
+  width: 82;
+  height: 82;
+  border-radius: 5rem;
+}
+.content {
+  @include mixins.flex-box(column, space-between, flex-start, 0.4rem);
+}
+.name {
+  font-size: 1.8rem;
+  line-height: 120%;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.secondaryText {
+  font-size: 1.6rem;
+  line-height: 130%;
+  letter-spacing: 0%;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+@media (max-width: 410px) {
+  .container {
+    border: 0.1rem solid var(--border-brand);
+  }
+}

@@ -1,0 +1,35 @@
+@use 'shared/styles/03_mixins' as mixins;
+.title {
+  @include mixins.flex-box($gap: 2rem);
+  width: 100%;
+  height: 5.8rem;
+  padding-top: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 1.6rem;
+  padding-left: 2rem;
+}
+
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 2.2rem;
+  font-style: medium;
+  line-height: 1.2;
+  font-size: 1.8rem;
+  letter-spacing: 0.01;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+.recentEmodji {
+  @include mixins.flex-box($justify: start, $gap: 0.8rem);
+  width: 100%;
+  height: 3.2rem;
+  padding: 0 1.6rem;
+}
+.emodji {
+  @include mixins.flex-box();
+  width: 3.2rem;
+  height: 3.2rem;
+  font-size: 3.2rem;
+}

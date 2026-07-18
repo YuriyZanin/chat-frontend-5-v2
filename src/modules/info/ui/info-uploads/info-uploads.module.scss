@@ -1,0 +1,59 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.container {
+  @include mixins.flex-box($direction: column, $gap: 8px);
+
+  .tabs {
+    max-width: 36rem;
+    padding: 0 16px 0 16px;
+    border-bottom: 0.033rem solid #0000004d;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+
+  .tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    padding: 12px 10px 0 10px;
+
+    .tabButtons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .label {
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 16px;
+        line-height: 130%;
+        letter-spacing: 0%;
+      }
+
+      .border {
+        height: 4px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        background-color: var(--brand-primary, #7769e1);
+        visibility: hidden;
+      }
+
+      .border.active {
+        visibility: visible;
+      }
+    }
+  }
+
+  .active {
+    color: var(--brand-primary, #7769e1);
+  }
+
+  .tabContent {
+    @include mixins.flex-box($direction: column, $align: start, $justify: start);
+    width: 100%;
+    height: 880px;
+  }
+}

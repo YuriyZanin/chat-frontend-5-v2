@@ -1,0 +1,29 @@
+@use 'shared/styles/03_mixins' as mixins;
+
+.wrapper {
+  @include mixins.flex-box($gap: 0.8rem);
+  width: 36rem;
+  height: 4.8rem;
+  border-radius: 0.8rem;
+  padding: 1.2rem 1.6rem;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+.icon {
+  @include mixins.flex-box();
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.text {
+  @include mixins.flex-box($justify: start);
+  width: 100%;
+  height: 1.7rem;
+  max-width: 41.4rem;
+  line-height: 1.2;
+  font-size: 1.4rem;
+  letter-spacing: 0.01;
+  font-weight: 400;
+  color: var(--text-inverse);
+  overflow: hidden;
+}
