@@ -144,7 +144,7 @@ export const EditProfileBlock: React.FC = ({}): JSX.Element => {
             value={info}
             onChange={handleInfoChange}
             error={''}
-            maxLength={100}
+            maxLength={250}
           />
           {errorSave && <div className={styles.error}>{errorSave.message}</div>}
           <ButtonUI
