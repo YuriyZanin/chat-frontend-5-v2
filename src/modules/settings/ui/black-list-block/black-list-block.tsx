@@ -7,15 +7,15 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { JSX, useCallback } from 'react';
 import { BlacklistedUser } from 'shared/api/blacklist.api';
-import { useGetBlacklist } from 'shared/query/blacklist.query';
 import { ContactCard } from '../contact-card';
 import styles from './black-list-block.module.scss';
+import { useBlackListBlock } from './use-black-list-block';
 
 export const BlackListBlock: React.FC = (): JSX.Element => {
   const router = useRouter();
-  const { data: blacklistUsers, isLoading, error } = useGetBlacklist();
+  const { query, setQuery, clearQuery, contacts, isLoading, error } = useBlackListBlock();
 
-  console.log('BlackListBlock рендерится', blacklistUsers);
+  console.log('BlackListBlock рендерится', contacts);
 
   const handleReturnButton = useCallback((): void => {
     router.push('/settings');
@@ -50,12 +50,12 @@ export const BlackListBlock: React.FC = (): JSX.Element => {
         </div>
       </button>
       <ConversationLayout
-        header={<SearchInput query={''} onChange={() => {}} />}
+        header={<SearchInput query={query} onChange={setQuery} onClear={clearQuery} />}
         footer={<DeleteSelectedContactsButton />}
       >
-        {!isLoading && !error && blacklistUsers && blacklistUsers.length > 0 && (
+        {!isLoading && !error && contacts && contacts.length > 0 && (
           <ul>
-            {blacklistUsers.map((apiProfile) => {
+            {contacts.map((apiProfile) => {
               const contact = mapApiProfileToContact(apiProfile);
               return (
                 <ContactCard
@@ -70,7 +70,7 @@ export const BlackListBlock: React.FC = (): JSX.Element => {
           </ul>
         )}
       </ConversationLayout>
-      {!isLoading && !error && (!blacklistUsers || blacklistUsers.length === 0) && <p>Чёрный список пуст.</p>}
+      {!isLoading && !error && (!contacts || contacts.length === 0) && <p>Чёрный список пуст.</p>}
     </div>
   );
 };

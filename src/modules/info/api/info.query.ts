@@ -108,7 +108,7 @@ export const useBlockUserMutation = (id: string): UseMutationResult<BlockProfile
         queryKey: ['chats', 'chat-list'],
       });
 
-      void queryClient.invalidateQueries({
+      void queryClient.refetchQueries({
         queryKey: ['blacklist'],
       });
       void queryClient.invalidateQueries({
