@@ -74,7 +74,7 @@ export const AllSettingsBlock: React.FC<AllSettingsBlockProps> = ({
             leave={handleChangeIsLeaveModalOpen}
           />
         </div>
-        <button type="button" className={styles.removeProfileButton} onClick={handleDeleteAccount}>
+        <button type="button" className={styles.removeProfileButton} onClick={handleChangeIsDeleteProfileModalOpen}>
           <div className={styles.iconAndLabelContainer}>
             <Image src="/images/settings/trashIcon.svg" alt="" width={21} height={21} className={styles.trashIcon} />
             <span className={styles.labelText}>Удалить профиль</span>
